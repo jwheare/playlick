@@ -1,8 +1,8 @@
 /**
- * PLAYLIK
- * Playlik global namespace
+ * PLAYLICK
+ * Playlick global namespace
 **/
-var PLAYLIK = {
+var PLAYLICK = {
     next_playlist_id: 0,
     next_playlist_track_id: 0,
     mmss: function (secs) {
@@ -13,10 +13,10 @@ var PLAYLIK = {
         return Math.floor(secs/60) + ":" + s;
     },
     load_playlist: function (tracks, name, container, callback) {
-        var playlist = new PLAYLIK.Playlist(name, container);
+        var playlist = new PLAYLICK.Playlist(name, container);
         playlist.start_batch();
         $.each(tracks, function (index, item) {
-            new PLAYLIK.PlaylistTrack(playlist, item, callback);
+            new PLAYLICK.PlaylistTrack(playlist, item, callback);
         });
         playlist.stop_batch();
         return playlist;
@@ -24,7 +24,7 @@ var PLAYLIK = {
 };
 (function () {
     /**
-     * class PLAYLIK.Track
+     * class PLAYLICK.Track
      * Track objects have a name, artist and duration
     **/
     var Track = function (name, artist, duration) {
@@ -35,7 +35,7 @@ var PLAYLIK = {
     Track.prototype = {
         get_duration_string: function () {
             if (typeof this.duration != 'undefined') {
-                return PLAYLIK.mmss(this.duration);
+                return PLAYLICK.mmss(this.duration);
             }
             return '';
         },
@@ -60,11 +60,11 @@ var PLAYLIK = {
     };
     
     /**
-     * class PLAYLIK.Playlist
+     * class PLAYLICK.Playlist
      * Playlist objects have a name, array of Tracks and duration
     **/
     var Playlist = function (name, container) {
-        this.id = PLAYLIK.next_playlist_id++;
+        this.id = PLAYLICK.next_playlist_id++;
         this.container = $('#' + container);
         var date = new Date();
         this.name = name || "Playlist: " + date.toLocaleString();
@@ -100,7 +100,7 @@ var PLAYLIK = {
             this.save();
         },
         /**
-         * PLAYLIK.Playlist->_rebuild()
+         * PLAYLICK.Playlist->_rebuild()
          * Update track positions and playlist duration
         **/
         _rebuild: function () {
@@ -128,7 +128,7 @@ var PLAYLIK = {
          * Playlist management
         **/
         get_duration: function () {
-            return PLAYLIK.mmss(this.duration);
+            return PLAYLICK.mmss(this.duration);
         },
         render_title: function () {
             var duration = this.get_duration();
@@ -181,12 +181,12 @@ var PLAYLIK = {
     };
     
     /**
-     * class PLAYLIK.PlaylistTrack
+     * class PLAYLICK.PlaylistTrack
      * PlaylistTrack objects join a Playlist with a Track
      * and have a position and element
     **/
     var PlaylistTrack = function (playlist, track, callback) {
-        this.id = PLAYLIK.next_playlist_track_id++;
+        this.id = PLAYLICK.next_playlist_track_id++;
         this.playlist = playlist;
         this.track = track;
         
@@ -257,7 +257,7 @@ var PLAYLIK = {
         }
     };
     
-    PLAYLIK.Track = Track;
-    PLAYLIK.Playlist = Playlist;
-    PLAYLIK.PlaylistTrack = PlaylistTrack;
+    PLAYLICK.Track = Track;
+    PLAYLICK.Playlist = Playlist;
+    PLAYLICK.PlaylistTrack = PlaylistTrack;
 })();

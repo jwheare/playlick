@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>Playlik</title>
+        <title>Playlick</title>
     </head>
     <body>
         <h1 id="playlist1Title"></h1>
@@ -23,15 +23,15 @@
     </body>
     <script src="jquery.js"></script>
     <script src="jquery-ui.js"></script>
-    <script src="playlik.js"></script>
+    <script src="playlick.js"></script>
     <script src="http://www.playdar.org/static/playdar.js"></script>
     <script src="http://www.playdar.org/static/soundmanager2-nodebug-jsmin.js"></script>
     <script>
         // Playdar
         Playdar.setup({
-            name: "Playlik",
-            website: "http://playlik/",
-            receiverurl: "http://playlik/playdar_auth.html"
+            name: "Playlick",
+            website: "http://playlick/",
+            receiverurl: "http://playlick/playdar_auth.html"
         });
         var playdar_track_handler = function (track) {
             var uuid = Playdar.Util.generate_uuid();
@@ -67,21 +67,21 @@
         
         // Preload playlist
         var tracks = [
-            new PLAYLIK.Track('Dry The Rain', 'The Beta Band', (6*60)+5),
-            new PLAYLIK.Track('Woozy with Cider', 'James Yorkston', (4*60)+6),
-            new PLAYLIK.Track('Yoshimi Battles the Pink Robots Pt. 1', 'The Flaming Lips', (4*60)+46),
-            new PLAYLIK.Track('Stay Loose', 'Belle and Sebastian', (6*60)+42),
-            new PLAYLIK.Track('Such Great Heights', 'The Postal Service', (4*60)+26),
-            new PLAYLIK.Track('Stockholm Syndrome', 'Muse', (4*60)+57),
-            new PLAYLIK.Track('New Slang', 'The Shins', (3*60)+52),
-            new PLAYLIK.Track('Bluebird', 'Devendra Banhart', (1*60)+28),
-            new PLAYLIK.Track('Von', 'Sigur Rós', (8*60)+14),
-            new PLAYLIK.Track('Time Is The Enemy', 'Quantic', (3*60)+42),
-            new PLAYLIK.Track('Get Ready for Love', 'Nick Cave & The Bad Seeds', (5*60)+5),
-            new PLAYLIK.Track('Country House', 'Blur', (3*60)+58),
-            new PLAYLIK.Track('Infinity Milk', 'Dananananaykroyd', (4*60)+20),
-            new PLAYLIK.Track('The Hell Song', 'Sum 41', (3*60)+19),
-            new PLAYLIK.Track('Up In Arms', 'Foo Fighters', (2*60)+16)
+            new PLAYLICK.Track('Dry The Rain', 'The Beta Band', (6*60)+5),
+            new PLAYLICK.Track('Woozy with Cider', 'James Yorkston', (4*60)+6),
+            new PLAYLICK.Track('Yoshimi Battles the Pink Robots Pt. 1', 'The Flaming Lips', (4*60)+46),
+            new PLAYLICK.Track('Stay Loose', 'Belle and Sebastian', (6*60)+42),
+            new PLAYLICK.Track('Such Great Heights', 'The Postal Service', (4*60)+26),
+            new PLAYLICK.Track('Stockholm Syndrome', 'Muse', (4*60)+57),
+            new PLAYLICK.Track('New Slang', 'The Shins', (3*60)+52),
+            new PLAYLICK.Track('Bluebird', 'Devendra Banhart', (1*60)+28),
+            new PLAYLICK.Track('Von', 'Sigur Rós', (8*60)+14),
+            new PLAYLICK.Track('Time Is The Enemy', 'Quantic', (3*60)+42),
+            new PLAYLICK.Track('Get Ready for Love', 'Nick Cave & The Bad Seeds', (5*60)+5),
+            new PLAYLICK.Track('Country House', 'Blur', (3*60)+58),
+            new PLAYLICK.Track('Infinity Milk', 'Dananananaykroyd', (4*60)+20),
+            new PLAYLICK.Track('The Hell Song', 'Sum 41', (3*60)+19),
+            new PLAYLICK.Track('Up In Arms', 'Foo Fighters', (2*60)+16)
         ];
         var add_callback = function () {
             var playlist = this.playlist;
@@ -126,7 +126,7 @@
                 }
             });
         };
-        var playlist1 = PLAYLIK.load_playlist(
+        var playlist1 = PLAYLICK.load_playlist(
             tracks,
             'Test playlist',
             'playlist1',
@@ -138,7 +138,7 @@
         $('#add_to_playlist').bind('submit', function (e) {
             // Create the playlist if we need to
             if (typeof playlist2 == 'undefined') {
-                playlist2 = new PLAYLIK.Playlist('', 'playlist2');
+                playlist2 = new PLAYLICK.Playlist('', 'playlist2');
                 playlist2Title = playlist2.render_title()
                 $('#playlist2').before(playlist2Title);
             }
@@ -147,9 +147,9 @@
             $.each($(this).serializeArray(), function (index, item) {
                 params[item.name] = item.value;
             });
-            new PLAYLIK.PlaylistTrack(
+            new PLAYLICK.PlaylistTrack(
                 playlist2,
-                new PLAYLIK.Track(params.track, params.artist, Math.round(Math.random()*1000)),
+                new PLAYLICK.Track(params.track, params.artist, Math.round(Math.random()*1000)),
                 function () {
                     Playdar.client.autodetect(playdar_track_handler, this.element[0]);
                     add_callback.call(this);
