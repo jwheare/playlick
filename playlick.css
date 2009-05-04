@@ -47,7 +47,7 @@ a {
     font-size: 18px;
 }
 
-#content form {
+#content form#add_to_playlist {
     margin: 0 15px 15px 15px;
 }
 
@@ -71,16 +71,35 @@ ul#playlist_stash {
 ul#playlist_stash li {
     border-bottom: 1px solid #d2f380;
 }
-ul#playlist_stash li a {
+ul#playlist_stash li a.playlist {
     display: block;
     padding: 10px;
     text-decoration: none;
 }
-ul#playlist_stash li a:hover {
+ul#playlist_stash li a.playlist:hover {
     background: #c0e95b;
 }
-ul#playlist_stash li a:active {
+ul#playlist_stash li a.playlist:active {
     background: #a8d840;
+}
+ul#playlist_stash li a.edit_playlist {
+    float: right;
+    padding: 12px;
+    text-decoration: none;
+    font-size: 11px;
+    visibility: hidden;
+}
+ul#playlist_stash li:hover a.edit_playlist {
+    visibility: visible;
+}
+ul#playlist_stash li a.edit_playlist:hover {
+    text-decoration: underline;
+}
+ul#playlist_stash li input {
+    margin: 7px 0 7px 7px;
+}
+ul#playlist_stash li input.playlist_name {
+    width: 180px;
 }
 
 #main {
@@ -133,6 +152,19 @@ ul#playlist_stash li a:active {
     cursor: move;
 }
 .trackList li:hover a.handle {
+    visibility: visible;
+}
+.trackList a.remove {
+    float: right;
+    visibility: hidden;
+    background: #a8d840;
+    padding: 10px;
+    text-decoration: none;
+}
+.trackList a.remove:hover {
+    background: #92c137;
+}
+.trackList li:hover a.remove {
     visibility: visible;
 }
 .trackList li.first {

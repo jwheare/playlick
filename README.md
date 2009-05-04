@@ -10,9 +10,6 @@ TODO
 * Track search autocomplete, using Last.fm and Playdar local library resolution
 * Persistence
 * Sharing
-* Playlist name editing
-* Track removal
-* Better drag drop
 * Playlist deletion
 * Source picker before export
 * XSPF export
