@@ -1,8 +1,8 @@
 // Playdar
 Playdar.setup({
     name: "Playlick",
-    website: "http://playlick/",
-    receiverurl: "http://playlick/playdar_auth.html"
+    website: "http://www.playlick.org/",
+    receiverurl: "http://www.playlick.org/playdar_auth.html"
 });
 var playdar_track_handler = function (track) {
     var uuid = Playdar.Util.generate_uuid();
