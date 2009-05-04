@@ -39,11 +39,20 @@
             </div>
         </div>
     </body>
-    <script src="jquery.js"></script>
-    <script src="jquery-ui.js"></script>
-    <script src="playlick.js"></script>
-    <script src="http://www.playdar.org/static/playdar.js"></script>
-    <script src="main.js"></script>
-    <script src="http://www.playdar.org/static/soundmanager2-nodebug-jsmin.js"></script>
-    <script src="playdar.js"></script>
+    <script>
+    (function () {
+        function load_script(src) {
+            var s = document.createElement('script');
+            s.src = src;
+            document.getElementsByTagName('head')[0].appendChild(s);
+        }
+        load_script('lib/jquery.js');
+        load_script('lib/jquery-ui.js');
+        load_script('playlick.js');
+        load_script('lib/playdar_compressed.js');
+        load_script('main.js');
+        load_script('lib/soundmanager2-nodebug-jsmin.js');
+        load_script('playdar.js');
+    })();
+    </script>
 </html>
