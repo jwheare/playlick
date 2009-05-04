@@ -127,10 +127,12 @@ $('#add_to_playlist').bind('submit', function (e) {
     $.each($(this).serializeArray(), function (index, item) {
         params[item.name] = item.value;
     });
-    var track = new PLAYLICK.Track(params.track, params.artist);
-    var playlist_track = new PLAYLICK.PlaylistTrack(loaded_playlist, track);
-    if (Playdar.client) {
-        Playdar.client.autodetect(playdar_track_handler, playlist_track.element[0]);
+    if (params.track && params.artist) {
+        var track = new PLAYLICK.Track(params.track, params.artist);
+        var playlist_track = new PLAYLICK.PlaylistTrack(loaded_playlist, track);
+        if (Playdar.client) {
+            Playdar.client.autodetect(playdar_track_handler, playlist_track.element[0]);
+        }
     }
     return false;
 });

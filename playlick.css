@@ -211,6 +211,7 @@ tbody.paused td.play span {
 }
 
 #footer {
+    margin-top: 10px;
     padding: 10px;
     clear: both;
     background: #d2f380;
