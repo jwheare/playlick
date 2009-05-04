@@ -29,40 +29,9 @@ a {
     margin: 0 15px;
 }
 
-a#head {
-    float: right;
-    height: 50px;
-    margin-top: -10px;
-    background: #e8f9bb;
-}
-
-ul#tabs {
-    float: left;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-size: 15px;
-}
-ul#tabs li {
-    float: left;
-}
-ul#tabs a {
-    display: block;
-    float: left;
-    padding: 15px;
-    text-decoration: none;
-}
-ul#tabs a:hover {
-    background: #d2f380;
-}
-ul#tabs li.current a {
-    background: #fff;
-    color: #111;
-}
-
 #content {
     clear: both;
-    padding: 15px 0;
+    padding: 15px 0 0 0;
     background: #fff;
 }
 #content p {
@@ -241,18 +210,9 @@ tbody.paused td.play span {
     color: #335507;
 }
 
-#tags a {
-    padding: 7px;
-    display: inline-block;
-    text-decoration: none;
-    line-height: 1;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-}
-#tags a:hover {
-    background: #e8f9bb;
-}
-#tags a:active,
-#tags a.selected {
+#footer {
+    padding: 10px;
+    clear: both;
     background: #d2f380;
+    border-top: 1px solid #c0e95b;
 }
