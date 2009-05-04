@@ -117,47 +117,35 @@
                     dragged_track.move_before(dropped_track);
                     this.style.marginTop = 0;
                     this.style.borderTop = 0;
-                    
-                    $('#playlist1 li').each(function (index) {
-                        if ($(this).text() != playlist1.tracks[index].track.toString()) {
-                            console.warn(index, playlist1.tracks[index].track);
-                        }
-                    });
                 }
             });
         };
-        var playlist1 = PLAYLICK.load_playlist(
+        var playlick1 = PLAYLICK.load_playlist(
             tracks,
             'Test playlist',
             'playlist1',
             add_callback
         );
-        $('#playlist1').before(playlist1.render_title());
+        $('#playlist1Title').html(playlick1.render_title());
         
         // Create a new playlist
         $('#add_to_playlist').bind('submit', function (e) {
             // Create the playlist if we need to
-            if (typeof playlist2 == 'undefined') {
-                playlist2 = new PLAYLICK.Playlist('', 'playlist2');
-                playlist2Title = playlist2.render_title()
-                $('#playlist2').before(playlist2Title);
+            if (typeof playlick2 == 'undefined') {
+                playlick2 = new PLAYLICK.Playlist('', 'playlist2');
             }
             // Parse the form and add tracks
             var params = {};
             $.each($(this).serializeArray(), function (index, item) {
                 params[item.name] = item.value;
             });
-            new PLAYLICK.PlaylistTrack(
-                playlist2,
-                new PLAYLICK.Track(params.track, params.artist, Math.round(Math.random()*1000)),
-                function () {
-                    Playdar.client.autodetect(playdar_track_handler, this.element[0]);
-                    add_callback.call(this);
-                }
-            );
-            playlist2Title.remove();
-            playlist2Title = playlist2.render_title()
-            $('#playlist2').before(playlist2Title);
+            var track = new PLAYLICK.Track(params.track, params.artist, Math.round(Math.random()*1000));
+            var callback = function () {
+                Playdar.client.autodetect(playdar_track_handler, this.element[0]);
+                add_callback.call(this);
+            };
+            new PLAYLICK.PlaylistTrack(playlick2, track, callback);
+            $('#playlist2Title').html(playlick2.render_title());
             return false;
         });
     </script>

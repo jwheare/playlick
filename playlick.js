@@ -135,7 +135,7 @@ var PLAYLICK = {
             if (duration) {
                 duration = ' (' + duration + ')';
             }
-            return $('<h1>' + this.name + duration + '</h1>').data('playlist', this);
+            return this.name + duration;
         },
         /**
          * Track accessors
