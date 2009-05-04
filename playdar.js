@@ -43,7 +43,7 @@ Playdar.client.register_listeners({
         Playdar.client.autodetect(playdar_track_handler);
     }
 });
-soundManager.url = 'http://www.playdar.org/static/soundmanager2_flash9.swf';
+soundManager.url = '/lib/soundmanager2_flash9.swf';
 soundManager.flashVersion = 9;
 soundManager.onload = function () {
     Playdar.setup_player(soundManager);
