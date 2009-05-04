@@ -135,18 +135,18 @@ $('#playlist_stash').bind('click', function (e) {
         target.siblings(':text').select();
         return false;
     }
-});
-$('#playlist_stash form.edit_playlist_form').bind('submit', function (e) {
-    var form = $(this);
-    form.hide();
-    form.siblings('.playlist').show();
-    var stash_row = form.parents('li.p');
-    var playlist = stash_row.data('playlist');
-    var name = form.serializeArray()[0].value;
-    form.siblings('.playlist').html(name);
-    playlist.set_name(name);
-    if (current_playlist == playlist) {
-        $('#playlistTitle').html(playlist.toString());
+    if (target.is('#playlist_stash form.edit_playlist_form input[type=submit]')) {
+        var form = target.parents('form');
+        form.hide();
+        form.siblings('.playlist').show();
+        var stash_row = form.parents('li.p');
+        var playlist = stash_row.data('playlist');
+        var name = form.serializeArray()[0].value;
+        form.siblings('.playlist').html(name);
+        playlist.set_name(name);
+        if (current_playlist == playlist) {
+            $('#playlistTitle').html(playlist.toString());
+        }
+        return false;
     }
-    return false;
 });
