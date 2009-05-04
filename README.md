@@ -4,7 +4,9 @@ There's a UI for creating and loading playlists and an accompanying JS library.
 
 Hooks into [Playdar](http://www.playdar.org) for content resolution.
 
-TODO:
+TODO
+----
+
 * Track search autocomplete
 * Persistence
 * Sharing
