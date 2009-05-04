@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Playlik</title>
+    </head>
+    <body>
+        <h1 id="playlist1Title"></h1>
+        <ol id="playlist1">
+        </ol>
+        
+        <form id="add_to_playlist">
+            <label for="artist_input">Artist:</label>
+            <input type="text" name="artist" />
+            <label for="track_input">Track:</label>
+            <input type="text" name="track" />
+            <input type="submit" value="Add" />
+        </form>
+        <h1 id="playlist2Title"></h1>
+        <ol id="playlist2">
+        </ol>
+    </body>
+    <script src="jquery.js"></script>
+    <script src="jquery-ui.js"></script>
+    <script src="playlik.js"></script>
+    <script src="http://www.playdar.org/static/playdar.js"></script>
+    <script src="http://www.playdar.org/static/soundmanager2-nodebug-jsmin.js"></script>
+    <script>
+        // Playdar
+        Playdar.setup({
+            name: "Playlik",
+            website: "http://playlik/",
+            receiverurl: "http://playlik/playdar_auth.html"
+        });
+        var playdar_track_handler = function (track) {
+            var uuid = Playdar.Util.generate_uuid();
+            Playdar.client.register_results_handler(function (response, final_answer) {
+                if (final_answer) {
+                    if (response.results.length) {
+                        track.element.parentNode.style.background = '#92c137';
+                        var result = response.results[0];
+                        Playdar.player.register_stream(result);
+                        $(track.element).bind('click', function (e) {
+                            Playdar.player.play_stream(result.sid);
+                        });
+                    } else {
+                        track.element.parentNode.style.background = '';
+                    }
+                } else {
+                    track.element.parentNode.style.background = '#e8f9bb';
+                }
+            }, uuid);
+            return uuid;
+        };
+        Playdar.client.register_listeners({
+            onAuth: function () {
+                Playdar.client.autodetect(playdar_track_handler);
+            }
+        });
+        soundManager.url = 'http://www.playdar.org/static/soundmanager2_flash9.swf';
+        soundManager.flashVersion = 9;
+        soundManager.onload = function () {
+            Playdar.setup_player(soundManager);
+            Playdar.client.init();
+        };
+        
+        // Preload playlist
+        var tracks = [
+            new PLAYLIK.Track('Dry The Rain', 'The Beta Band', (6*60)+5),
+            new PLAYLIK.Track('Woozy with Cider', 'James Yorkston', (4*60)+6),
+            new PLAYLIK.Track('Yoshimi Battles the Pink Robots Pt. 1', 'The Flaming Lips', (4*60)+46),
+            new PLAYLIK.Track('Stay Loose', 'Belle and Sebastian', (6*60)+42),
+            new PLAYLIK.Track('Such Great Heights', 'The Postal Service', (4*60)+26),
+            new PLAYLIK.Track('Stockholm Syndrome', 'Muse', (4*60)+57),
+            new PLAYLIK.Track('New Slang', 'The Shins', (3*60)+52),
+            new PLAYLIK.Track('Bluebird', 'Devendra Banhart', (1*60)+28),
+            new PLAYLIK.Track('Von', 'Sigur Rós', (8*60)+14),
+            new PLAYLIK.Track('Time Is The Enemy', 'Quantic', (3*60)+42),
+            new PLAYLIK.Track('Get Ready for Love', 'Nick Cave & The Bad Seeds', (5*60)+5),
+            new PLAYLIK.Track('Country House', 'Blur', (3*60)+58),
+            new PLAYLIK.Track('Infinity Milk', 'Dananananaykroyd', (4*60)+20),
+            new PLAYLIK.Track('The Hell Song', 'Sum 41', (3*60)+19),
+            new PLAYLIK.Track('Up In Arms', 'Foo Fighters', (2*60)+16)
+        ];
+        var add_callback = function () {
+            var playlist = this.playlist;
+            this.element.prepend('<span class="handle">drag</span> ');
+            this.element.draggable({
+                axis: 'y',
+                handle: 'span.handle',
+                revert: true,
+                revertDuration: 0,
+                containment: 'parent',
+                addClasses: false,
+                start: function (e, ui) {
+                    // this.style.position = 'absolute';
+                },
+                stop: function (e, ui) {
+                    // this.style.position = '';
+                }
+            });
+            this.element.droppable({
+                addClasses: false,
+                tolerance: 'pointer',
+                over: function (e, ui) {
+                    this.style.marginTop = '20px';
+                    this.style.borderTop = '2px solid red';
+                },
+                out: function (e, ui) {
+                    this.style.marginTop = 0;
+                    this.style.borderTop = 0;
+                },
+                drop: function (e, ui) {
+                    var dropped_track = $(this).data('playlist_track');
+                    var dragged_track = ui.draggable.data('playlist_track');
+                    dragged_track.move_before(dropped_track);
+                    this.style.marginTop = 0;
+                    this.style.borderTop = 0;
+                    
+                    $('#playlist1 li').each(function (index) {
+                        if ($(this).text() != playlist1.tracks[index].track.toString()) {
+                            console.warn(index, playlist1.tracks[index].track);
+                        }
+                    });
+                }
+            });
+        };
+        var playlist1 = PLAYLIK.load_playlist(
+            tracks,
+            'Test playlist',
+            'playlist1',
+            add_callback
+        );
+        $('#playlist1').before(playlist1.render_title());
+        
+        // Create a new playlist
+        $('#add_to_playlist').bind('submit', function (e) {
+            // Create the playlist if we need to
+            if (typeof playlist2 == 'undefined') {
+                playlist2 = new PLAYLIK.Playlist('', 'playlist2');
+                playlist2Title = playlist2.render_title()
+                $('#playlist2').before(playlist2Title);
+            }
+            // Parse the form and add tracks
+            var params = {};
+            $.each($(this).serializeArray(), function (index, item) {
+                params[item.name] = item.value;
+            });
+            new PLAYLIK.PlaylistTrack(
+                playlist2,
+                new PLAYLIK.Track(params.track, params.artist, Math.round(Math.random()*1000)),
+                function () {
+                    Playdar.client.autodetect(playdar_track_handler, this.element[0]);
+                    add_callback.call(this);
+                }
+            );
+            playlist2Title.remove();
+            playlist2Title = playlist2.render_title()
+            $('#playlist2').before(playlist2Title);
+            return false;
+        });
+    </script>
+</html>
