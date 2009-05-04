@@ -68,28 +68,8 @@ var new_playlist = function () {
 };
 new_playlist();
 
-var playlists = {
-    'test': {
-        name: 'Test Playlist',
-        tracks: [
-            new PLAYLICK.Track('Dry The Rain', 'The Beta Band', (6*60)+5),
-            new PLAYLICK.Track('Woozy with Cider', 'James Yorkston', (4*60)+6),
-            new PLAYLICK.Track('Yoshimi Battles the Pink Robots Pt. 1', 'The Flaming Lips', (4*60)+46),
-            new PLAYLICK.Track('Stay Loose', 'Belle and Sebastian', (6*60)+42),
-            new PLAYLICK.Track('Such Great Heights', 'The Postal Service', (4*60)+26),
-            new PLAYLICK.Track('Stockholm Syndrome', 'Muse', (4*60)+57),
-            new PLAYLICK.Track('New Slang', 'The Shins', (3*60)+52),
-            new PLAYLICK.Track('Bluebird', 'Devendra Banhart', (1*60)+28),
-            new PLAYLICK.Track('Von', 'Sigur Rós', (8*60)+14),
-            new PLAYLICK.Track('Time Is The Enemy', 'Quantic', (3*60)+42),
-            new PLAYLICK.Track('Get Ready for Love', 'Nick Cave & The Bad Seeds', (5*60)+5),
-            new PLAYLICK.Track('Country House', 'Blur', (3*60)+58),
-            new PLAYLICK.Track('Infinity Milk', 'Dananananaykroyd', (4*60)+20),
-            new PLAYLICK.Track('The Hell Song', 'Sum 41', (3*60)+19),
-            new PLAYLICK.Track('Up In Arms', 'Foo Fighters', (2*60)+16)
-        ]
-    }
-};
+$('#loading_playlists').hide();
+
 for (var p in playlists) {
     $('#playlist_stash').append(
         '<li class="stashed_playlist">'

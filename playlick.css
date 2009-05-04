@@ -57,6 +57,12 @@ a {
     margin: 0 15px 15px 15px;
     background: #e8f9bb;
 }
+#sidebar p#loading_playlists {
+    margin: 0;
+    padding: 10px;
+    font-size: 13px;
+    background: #d2f380;
+}
 ul#playlist_stash {
     margin: 0;
     padding: 0;
