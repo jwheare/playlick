@@ -1,0 +1,7 @@
+Playlik lets you create and share playlists with your friends.
+
+There's a basic UI for creating and loading playlists and an accompanying JS library. The UI hooks into Playdar for content resolution.
+
+Track search autocomplete, persistence and sharing are TODO :)
+
+Also needs pretty UI and a snazzy logo.
