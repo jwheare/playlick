@@ -1,55 +1,3 @@
-// Playdar
-Playdar.setup({
-    name: "Playlick",
-    website: "http://www.playlick.org/",
-    receiverurl: "http://www.playlick.org/playdar_auth.html"
-});
-var playdar_track_handler = function (track) {
-    var uuid = Playdar.Util.generate_uuid();
-    Playdar.client.register_results_handler(function (response, final_answer) {
-        var list_item = $(track.element).parents('li.p_t');
-        var playlist_track = list_item.data('playlist_track');
-        if (final_answer) {
-            if (response.results.length) {
-                var result = response.results[0];
-                if (result.score == 1) {
-                    list_item.css('background', '#92c137');
-                    // Update track
-                    playlist_track.track.name = result.track;
-                    playlist_track.track.artist = result.artist;
-                    playlist_track.track.duration = result.duration;
-                    playlist_track.render();
-                    playlist_track.playlist.save();
-                } else {
-                    list_item.css('background', '#c0e95b');
-                }
-                // Register stream
-                Playdar.player.register_stream(result);
-                playlist_track.element.bind('click', function (e) {
-                    Playdar.player.play_stream(result.sid);
-                    return false;
-                });
-            } else {
-                list_item.css('background', '');
-            }
-        } else {
-            list_item.css('background', '#e8f9bb');
-        }
-    }, uuid);
-    return uuid;
-};
-Playdar.client.register_listeners({
-    onAuth: function () {
-        Playdar.client.autodetect(playdar_track_handler);
-    }
-});
-soundManager.url = 'http://www.playdar.org/static/soundmanager2_flash9.swf';
-soundManager.flashVersion = 9;
-soundManager.onload = function () {
-    Playdar.setup_player(soundManager);
-    Playdar.client.init();
-};
-
 // Preload playlist
 PLAYLICK.Track.prototype.toHTML = function () {
     return '<a href="#" class="handle">[+]</a> '
@@ -163,7 +111,9 @@ var stash_playlist = function () {
 };
 
 $('#create_playlist').bind('click', function (e) {
-    Playdar.client.cancel_resolve();
+    if (Playdar.client) {
+        Playdar.client.cancel_resolve();
+    }
     stash_playlist();
     new_playlist();
     $('#playlistTitle').empty();
@@ -179,7 +129,9 @@ $('#add_to_playlist').bind('submit', function (e) {
     });
     var track = new PLAYLICK.Track(params.track, params.artist);
     var playlist_track = new PLAYLICK.PlaylistTrack(loaded_playlist, track);
-    Playdar.client.autodetect(playdar_track_handler, playlist_track.element[0]);
+    if (Playdar.client) {
+        Playdar.client.autodetect(playdar_track_handler, playlist_track.element[0]);
+    }
     return false;
 });
 
@@ -189,16 +141,20 @@ $('#playlist_stash').bind('click', function (e) {
     // Load the clicked playlist
     var target = $(e.target);
     if (target.is('li.stashed_playlist a')) {
+        if (Playdar.client) {
+            Playdar.client.cancel_resolve();
+        }
         var playlist_id = target.attr('id').replace('p_', '');
-        Playdar.client.cancel_resolve();
         loaded_playlist = PLAYLICK.load_playlist(playlists[playlist_id].tracks, 'playlist', {
             id: playlist_id,
             name: playlists[playlist_id].name,
             onAdd: add_callback,
             onSave: save_callback
         });
-        Playdar.client.autodetect(playdar_track_handler);
         $('#playlistTitle').html(loaded_playlist.toString());
+        if (Playdar.client) {
+            Playdar.client.autodetect(playdar_track_handler);
+        }
         return false;
     }
 });
