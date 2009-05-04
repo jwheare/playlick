@@ -4,149 +4,41 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Playlick</title>
+        <link rel="stylesheet" href="playlick.css" type="text/css" media="screen" title="Playlick Styles" charset="utf-8">
     </head>
     <body>
-        <h1 id="playlist1Title"></h1>
-        <ol id="playlist1">
-        </ol>
-        
-        <form id="add_to_playlist">
-            <label for="artist_input">Artist:</label>
-            <input type="text" name="artist" />
-            <label for="track_input">Track:</label>
-            <input type="text" name="track" />
-            <input type="submit" value="Add" />
-        </form>
-        <h1 id="playlist2Title"></h1>
-        <ol id="playlist2">
-        </ol>
+        <div id="viewport">
+            <div id="content">
+                <div id="sidebar">
+                    <div class="stash">
+                        <ul id="playlist_stash">
+                            <li><a href="#" id="create_playlist">+ New Playlist</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h1>Create a new Playlist</h1>
+                <form id="add_to_playlist">
+                    <label for="artist_input">Artist:</label>
+                    <input type="text" name="artist" />
+                    <label for="track_input">Track:</label>
+                    <input type="text" name="track" />
+                    <input type="submit" value="Add" />
+                </form>
+                
+                <div id="main">
+                    <h1 id="playlistTitle"></h1>
+                    <ol class="trackList" id="playlist"></ol>
+                </div>
+                
+                <div style="clear: both;"></div>
+            </div>
+        </div>
     </body>
     <script src="jquery.js"></script>
     <script src="jquery-ui.js"></script>
     <script src="playlick.js"></script>
     <script src="http://www.playdar.org/static/playdar.js"></script>
     <script src="http://www.playdar.org/static/soundmanager2-nodebug-jsmin.js"></script>
-    <script>
-        // Playdar
-        Playdar.setup({
-            name: "Playlick",
-            website: "http://playlick/",
-            receiverurl: "http://playlick/playdar_auth.html"
-        });
-        var playdar_track_handler = function (track) {
-            var uuid = Playdar.Util.generate_uuid();
-            Playdar.client.register_results_handler(function (response, final_answer) {
-                if (final_answer) {
-                    if (response.results.length) {
-                        track.element.parentNode.style.background = '#92c137';
-                        var result = response.results[0];
-                        Playdar.player.register_stream(result);
-                        $(track.element).bind('click', function (e) {
-                            Playdar.player.play_stream(result.sid);
-                        });
-                    } else {
-                        track.element.parentNode.style.background = '';
-                    }
-                } else {
-                    track.element.parentNode.style.background = '#e8f9bb';
-                }
-            }, uuid);
-            return uuid;
-        };
-        Playdar.client.register_listeners({
-            onAuth: function () {
-                Playdar.client.autodetect(playdar_track_handler);
-            }
-        });
-        soundManager.url = 'http://www.playdar.org/static/soundmanager2_flash9.swf';
-        soundManager.flashVersion = 9;
-        soundManager.onload = function () {
-            Playdar.setup_player(soundManager);
-            Playdar.client.init();
-        };
-        
-        // Preload playlist
-        var tracks = [
-            new PLAYLICK.Track('Dry The Rain', 'The Beta Band', (6*60)+5),
-            new PLAYLICK.Track('Woozy with Cider', 'James Yorkston', (4*60)+6),
-            new PLAYLICK.Track('Yoshimi Battles the Pink Robots Pt. 1', 'The Flaming Lips', (4*60)+46),
-            new PLAYLICK.Track('Stay Loose', 'Belle and Sebastian', (6*60)+42),
-            new PLAYLICK.Track('Such Great Heights', 'The Postal Service', (4*60)+26),
-            new PLAYLICK.Track('Stockholm Syndrome', 'Muse', (4*60)+57),
-            new PLAYLICK.Track('New Slang', 'The Shins', (3*60)+52),
-            new PLAYLICK.Track('Bluebird', 'Devendra Banhart', (1*60)+28),
-            new PLAYLICK.Track('Von', 'Sigur Rós', (8*60)+14),
-            new PLAYLICK.Track('Time Is The Enemy', 'Quantic', (3*60)+42),
-            new PLAYLICK.Track('Get Ready for Love', 'Nick Cave & The Bad Seeds', (5*60)+5),
-            new PLAYLICK.Track('Country House', 'Blur', (3*60)+58),
-            new PLAYLICK.Track('Infinity Milk', 'Dananananaykroyd', (4*60)+20),
-            new PLAYLICK.Track('The Hell Song', 'Sum 41', (3*60)+19),
-            new PLAYLICK.Track('Up In Arms', 'Foo Fighters', (2*60)+16)
-        ];
-        var add_callback = function () {
-            var playlist = this.playlist;
-            this.element.prepend('<span class="handle">drag</span> ');
-            this.element.draggable({
-                axis: 'y',
-                handle: 'span.handle',
-                revert: true,
-                revertDuration: 0,
-                containment: 'parent',
-                addClasses: false,
-                start: function (e, ui) {
-                    // this.style.position = 'absolute';
-                },
-                stop: function (e, ui) {
-                    // this.style.position = '';
-                }
-            });
-            this.element.droppable({
-                addClasses: false,
-                tolerance: 'pointer',
-                over: function (e, ui) {
-                    this.style.marginTop = '20px';
-                    this.style.borderTop = '2px solid red';
-                },
-                out: function (e, ui) {
-                    this.style.marginTop = 0;
-                    this.style.borderTop = 0;
-                },
-                drop: function (e, ui) {
-                    var dropped_track = $(this).data('playlist_track');
-                    var dragged_track = ui.draggable.data('playlist_track');
-                    dragged_track.move_before(dropped_track);
-                    this.style.marginTop = 0;
-                    this.style.borderTop = 0;
-                }
-            });
-        };
-        var playlick1 = PLAYLICK.load_playlist(
-            tracks,
-            'Test playlist',
-            'playlist1',
-            add_callback
-        );
-        $('#playlist1Title').html(playlick1.render_title());
-        
-        // Create a new playlist
-        $('#add_to_playlist').bind('submit', function (e) {
-            // Create the playlist if we need to
-            if (typeof playlick2 == 'undefined') {
-                playlick2 = new PLAYLICK.Playlist('', 'playlist2');
-            }
-            // Parse the form and add tracks
-            var params = {};
-            $.each($(this).serializeArray(), function (index, item) {
-                params[item.name] = item.value;
-            });
-            var track = new PLAYLICK.Track(params.track, params.artist, Math.round(Math.random()*1000));
-            var callback = function () {
-                Playdar.client.autodetect(playdar_track_handler, this.element[0]);
-                add_callback.call(this);
-            };
-            new PLAYLICK.PlaylistTrack(playlick2, track, callback);
-            $('#playlist2Title').html(playlick2.render_title());
-            return false;
-        });
-    </script>
+    <script src="main.js"></script>
 </html>

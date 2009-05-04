@@ -12,11 +12,11 @@ var PLAYLICK = {
         }
         return Math.floor(secs/60) + ":" + s;
     },
-    load_playlist: function (tracks, name, container, callback) {
-        var playlist = new PLAYLICK.Playlist(name, container);
+    load_playlist: function (tracks, container, options) {
+        var playlist = new PLAYLICK.Playlist(container, options);
         playlist.start_batch();
         $.each(tracks, function (index, item) {
-            new PLAYLICK.PlaylistTrack(playlist, item, callback);
+            new PLAYLICK.PlaylistTrack(playlist, item);
         });
         playlist.stop_batch();
         return playlist;
@@ -63,14 +63,18 @@ var PLAYLICK = {
      * class PLAYLICK.Playlist
      * Playlist objects have a name, array of Tracks and duration
     **/
-    var Playlist = function (name, container) {
-        this.id = PLAYLICK.next_playlist_id++;
+    var Playlist = function (container, options) {
+        this.options = options || {};
+        
+        this.id = this.options.id || PLAYLICK.next_playlist_id++;
         this.container = $('#' + container);
+        this.container.empty();
         var date = new Date();
-        this.name = name || "Playlist: " + date.toLocaleString();
+        this.name = this.options.name || "Playlist: " + date.toLocaleString();
         this.tracks = [];
         this.duration = 0;
         this.published = false;
+        this.saved = false;
         // console.info("New:", this.name, this.container);
     };
     Playlist.prototype = {
@@ -85,6 +89,10 @@ var PLAYLICK = {
             this.tracks.push(playlist_track);
             // AUTOSAVE
             this.save();
+            
+            if (this.options.onAdd) {
+                this.options.onAdd.call(this, playlist_track);
+            }
         },
         _remove_track: function (playlist_track) {
             this._remove_track_from_array(playlist_track);
@@ -122,6 +130,7 @@ var PLAYLICK = {
         },
         stop_batch: function () {
             this.batch = false;
+            // AUTOSAVE
             this.save();
         },
         /**
@@ -130,12 +139,15 @@ var PLAYLICK = {
         get_duration: function () {
             return PLAYLICK.mmss(this.duration);
         },
-        render_title: function () {
+        toString: function () {
             var duration = this.get_duration();
             if (duration) {
                 duration = ' (' + duration + ')';
             }
             return this.name + duration;
+        },
+        get_dom_id: function () {
+            return "p_" + this.id;
         },
         /**
          * Track accessors
@@ -160,18 +172,29 @@ var PLAYLICK = {
         **/
         save: function () {
             this._rebuild();
-            // TODO
-            // Fire off AJAX request to persist Playlist
+            
+            if (this.options.onSave) {
+                this.options.onSave.call(this);
+            }
+            
             if (!this.batch) {
+                if (!this.saved && this.options.onCreate) {
+                    this.options.onCreate.call(this);
+                }
+                this.saved = true;
+                // TODO
+                // Fire off AJAX request to persist Playlist
                 // console.info('Saved', this);
             }
         },
         publish: function () {
             this.published = true;
+            // AUTOSAVE
             this.save();
         },
         make_private: function () {
             this.published = false;
+            // AUTOSAVE
             this.save();
         },
         share: function (person) {
@@ -185,27 +208,24 @@ var PLAYLICK = {
      * PlaylistTrack objects join a Playlist with a Track
      * and have a position and element
     **/
-    var PlaylistTrack = function (playlist, track, callback) {
+    var PlaylistTrack = function (playlist, track) {
         this.id = PLAYLICK.next_playlist_track_id++;
         this.playlist = playlist;
         this.track = track;
         
+        // Add to DOM
+        this.render();
+        this.element.appendTo(this.playlist.container);
         // Update playlist state
         this.playlist._add_track(this);
-        // Add to DOM
-        this.element = this.render().appendTo(this.playlist.container);
-        
-        if (callback) {
-            callback.call(this);
-        }
         // console.info('Added:', this.position, this);
     };
     PlaylistTrack.prototype = {
         remove: function () {
-            // Update playlist state
-            this.playlist._remove_track(this);
             // Remove from the DOM
             this.destroy();
+            // Update playlist state
+            this.playlist._remove_track(this);
             // console.info('Removed:', this.position, this);
         },
         move_before: function (next_playlist_track) {
@@ -218,10 +238,10 @@ var PLAYLICK = {
             if (new_position == current_position) {
                 return false;
             }
-            // Update playlist state
-            this.playlist._move_track(this, new_position);
             // Move in DOM
             next_playlist_track.element.before(this.element);
+            // Update playlist state
+            this.playlist._move_track(this, new_position);
             // console.info('Moved:', current_position + ' -> ' + this.position, this);
         },
         move_after: function (previous_playlist_track) {
@@ -234,17 +254,24 @@ var PLAYLICK = {
             if (new_position == current_position) {
                 return false;
             }
-            // Update playlist state
-            this.playlist._move_track(this, new_position);
             // Move in DOM
             previous_playlist_track.element.after(this.element);
+            // Update playlist state
+            this.playlist._move_track(this, new_position);
             // console.info('Moved:', current_position + ' -> ' + this.position, this);
         },
-        render: function () {
-            return $('<li class="p_t" id="' + this.get_dom_id() + '">'
-                + this.track.toHTML()
-                + '</li>'
-            ).data('playlist_track', this);
+        /**
+         * Render the PlaylistTrack to a DOMElement
+        **/
+        render: function (element_name) {
+            var element_name = element_name || 'li';
+            if (!this.element) {
+                this.element = $(
+                    '<' + element_name + ' class="p_t" id="' + this.get_dom_id() + '">'
+                  + '</' + element_name + '>'
+                ).data('playlist_track', this);
+            }
+            this.element.html(this.track.toHTML());
         },
         destroy: function () {
             this.element.remove();

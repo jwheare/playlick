@@ -1,0 +1,258 @@
+/* Pallette
+-------
+#335507
+#4c7a0f
+#6ea31e
+#92c137
+#a8d840
+#c0e95b
+#d2f380
+#e8f9bb
+------- */
+body {
+    margin: 0;
+    padding: 10px 10px 10px;
+    font: normal 15px 'Helvetica', sans-serif;
+    color: #111;
+    background: #e8f9bb;
+}
+a img,
+img {
+    border: 0;
+}
+a {
+    color: #335507;
+}
+
+#viewport {
+    width: 900px;
+    margin: 0 15px;
+}
+
+a#head {
+    float: right;
+    height: 50px;
+    margin-top: -10px;
+    background: #e8f9bb;
+}
+
+ul#tabs {
+    float: left;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 15px;
+}
+ul#tabs li {
+    float: left;
+}
+ul#tabs a {
+    display: block;
+    float: left;
+    padding: 15px;
+    text-decoration: none;
+}
+ul#tabs a:hover {
+    background: #d2f380;
+}
+ul#tabs li.current a {
+    background: #fff;
+    color: #111;
+}
+
+#content {
+    clear: both;
+    padding: 15px 0;
+    background: #fff;
+}
+#content p {
+    margin: 10px 0;
+}
+
+#content h1 {
+    margin: 0 15px 15px 15px;
+    font-size: 18px;
+}
+#main h1 {
+    margin: 15px 0;
+    font-size: 18px;
+}
+
+#content form {
+    margin: 0 15px 15px 15px;
+}
+
+#sidebar {
+    float: right;
+    width: 300px;
+    margin: 0 15px 15px 15px;
+    background: #e8f9bb;
+}
+ul#playlist_stash {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+ul#playlist_stash li {
+    border-bottom: 1px solid #d2f380;
+}
+ul#playlist_stash li a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+}
+ul#playlist_stash li a:hover {
+    background: #c0e95b;
+}
+ul#playlist_stash li a:active {
+    background: #a8d840;
+}
+
+#main {
+    width: 540px;
+    margin: 0 15px;
+}
+.trackList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.trackList li {
+    border-top: 1px solid #d2f380;
+    font-size: 15px;
+}
+.trackList > li:first-child {
+    border-top: 0;
+}
+.trackList li.open {
+    border-color: #c0e95b;
+}
+.trackList li.dragover {
+    margin-top: 50px;
+    border-top: 2px solid #335507;
+}
+.trackList a.item {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+}
+.trackList li:hover a.item {
+    background: #d2f380;
+}
+.trackList li.open a.item {
+    background: #c0e95b;
+}
+.trackList a.handle {
+    display: block;
+    float: left;
+    visibility: hidden;
+    width: 19px;
+    background: #a8d840;
+    padding: 10px;
+    margin-right: 10px;
+    text-align: center;
+    text-decoration: none;
+}
+.trackList a.handle:hover {
+    background: #92c137;
+    cursor: move;
+}
+.trackList li:hover a.handle {
+    visibility: visible;
+}
+.trackList li.first {
+    border-top: 0;
+}
+.sources {
+    display: none;
+    background: #e8f9bb;
+    font-size: 13px;
+    line-height: 22px;
+}
+.trackList li.open .sources {
+    display: block;
+}
+#content .sources p.sourcesEmpty {
+    margin: 0;
+    padding: 10px 15px;
+    font-style: italic;
+}
+.sources table {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.sources table tbody.playing,
+.sources table tbody.paused {
+    background: #d2f380 url('/static/track_progress.gif') repeat-y 0 0;
+}
+.sources table tbody.paused {
+    background-color: #e8f9bb;
+}
+.sources table tbody:hover {
+    cursor: pointer;
+    background-color: #d2f380;
+}
+.sources table td {
+    padding: 8px 0 0 8px;
+    border-top: 1px solid #c0e95b;
+    vertical-align: top;
+    color: #4c7a0f;
+}
+.sources table tr.info td,
+.sources table > tr:first-child td {
+    border-top: 0;
+}
+.sources table tr.info td {
+    padding-bottom: 8px;
+    color: #6ea31e;
+}
+tbody td.play span {
+    visibility: hidden;
+}
+tbody.playing td.play span {
+    visibility: visible;
+}
+tbody.paused td.play span {
+    visibility: visible;
+}
+.sources table td.play,
+.sources table tr.info td.score {
+    width: 18px;
+    padding-right: 3px;
+    text-align: right;
+}
+.sources table tr.info td.score {
+    font-size: 11px;
+}
+.sources table td.time,
+.sources table td.size {
+    width: 70px;
+    padding-right: 8px;
+}
+.sources table td.progress,
+.sources table td.time,
+.sources table td.size,
+.sources table td.bitrate {
+    text-align: right;
+}
+.sources table td.progress {
+    color: #335507;
+}
+
+#tags a {
+    padding: 7px;
+    display: inline-block;
+    text-decoration: none;
+    line-height: 1;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+#tags a:hover {
+    background: #e8f9bb;
+}
+#tags a:active,
+#tags a.selected {
+    background: #d2f380;
+}
