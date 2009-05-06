@@ -11,7 +11,7 @@
 ------- */
 body {
     margin: 0;
-    padding: 10px 10px 10px;
+    padding: 15px;
     font: normal 15px 'Helvetica', sans-serif;
     color: #111;
     background: #e8f9bb;
@@ -26,7 +26,7 @@ a {
 
 #viewport {
     width: 900px;
-    margin: 0 15px;
+    margin: 0 auto;
 }
 
 #content {
@@ -41,23 +41,24 @@ a {
 #content h1 {
     margin: 0 15px 15px 15px;
     font-size: 18px;
-}
-#main h1 {
-    margin: 15px 0;
-    font-size: 18px;
+    line-height: 25px;
 }
 
-#content form#add_to_playlist {
-    margin: 0 15px 15px 15px;
-}
-
+/* Sidebar */
 #sidebar {
     float: right;
     width: 300px;
     margin: 0 15px 15px 15px;
+}
+#sidebar h1 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+}
+.stash {
+    margin: 15px 0;
     background: #e8f9bb;
 }
-#sidebar p#loading_playlists {
+.stash p#loading_playlists {
     margin: 0;
     padding: 10px;
     font-size: 13px;
@@ -74,38 +75,63 @@ ul#playlist_stash li {
 ul#playlist_stash li a.playlist {
     display: block;
     padding: 10px;
+    line-height: 16px;
     text-decoration: none;
 }
 ul#playlist_stash li a.playlist:hover {
-    background: #c0e95b;
+    background: #d2f380;
 }
 ul#playlist_stash li a.playlist:active {
     background: #a8d840;
 }
+
+ul#playlist_stash li form {
+    margin: 0;
+    padding: 7px;
+    line-height: 16px;
+}
 ul#playlist_stash li a.edit_playlist {
     float: right;
     padding: 12px;
-    text-decoration: none;
     font-size: 11px;
     visibility: hidden;
+    background: #a8d840;
+    text-decoration: none;
 }
 ul#playlist_stash li:hover a.edit_playlist {
     visibility: visible;
 }
 ul#playlist_stash li a.edit_playlist:hover {
-    text-decoration: underline;
+    background: #92c137;
 }
 ul#playlist_stash li input {
-    margin: 7px 0 7px 7px;
+    margin-right: 5px;
 }
 ul#playlist_stash li input.playlist_name {
     width: 180px;
 }
 
+/* Main */
 #main {
     width: 540px;
     margin: 0 15px;
+    min-height: 200px;
 }
+#main h1 {
+    margin: 15px 0;
+    text-align: center;
+}
+
+/* Add track form */
+form#add_to_playlist {
+    margin: 0 0 15px 0;
+    line-height: 25px;
+}
+form#add_to_playlist input {
+    margin-right: 10px;
+}
+
+/* Track list */
 .trackList {
     margin: 0;
     padding: 0;
@@ -144,6 +170,7 @@ ul#playlist_stash li input.playlist_name {
     background: #a8d840;
     padding: 10px;
     margin-right: 10px;
+    font-size: 16px;
     text-align: center;
     text-decoration: none;
 }
