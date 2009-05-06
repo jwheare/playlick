@@ -25,7 +25,7 @@ a {
 }
 
 #viewport {
-    width: 900px;
+    width: 940px;
     margin: 0 auto;
 }
 
@@ -39,7 +39,6 @@ a {
 }
 
 #content h1 {
-    margin: 0 15px 15px 15px;
     font-size: 18px;
     line-height: 25px;
 }
@@ -51,8 +50,7 @@ a {
     margin: 0 15px 15px 15px;
 }
 #sidebar h1 {
-    margin: 0 0 15px 0;
-    font-size: 16px;
+    margin: 10px 0 15px 0;
 }
 .stash {
     margin: 15px 0;
@@ -113,18 +111,17 @@ ul#playlist_stash li input.playlist_name {
 
 /* Main */
 #main {
-    width: 540px;
+    width: 580px;
     margin: 0 15px;
     min-height: 200px;
 }
 #main h1 {
-    margin: 15px 0;
-    text-align: center;
+    margin: 10px 0 15px 40px;
 }
 
 /* Add track form */
 form#add_to_playlist {
-    margin: 0 0 15px 0;
+    margin: 20px 0 20px 40px;
     line-height: 25px;
 }
 form#add_to_playlist input {
@@ -156,7 +153,8 @@ form#add_to_playlist input {
     padding: 10px;
     text-decoration: none;
 }
-.trackList li:hover a.item {
+.trackList li:hover a.item,
+.trackList li.ui-sortable-helper a.item {
     background: #d2f380;
 }
 .trackList li.open a.item {
@@ -168,7 +166,7 @@ form#add_to_playlist input {
     visibility: hidden;
     width: 19px;
     background: #a8d840;
-    padding: 10px;
+    padding: 10px 5px;
     margin-right: 10px;
     font-size: 16px;
     text-align: center;
@@ -178,7 +176,8 @@ form#add_to_playlist input {
     background: #92c137;
     cursor: move;
 }
-.trackList li:hover a.handle {
+.trackList li:hover a.handle,
+.trackList li.ui-sortable-helper a.handle {
     visibility: visible;
 }
 .trackList a.remove {
@@ -188,10 +187,14 @@ form#add_to_playlist input {
     padding: 10px;
     text-decoration: none;
 }
+.placeholder {
+    border-bottom: 1px solid #335507;
+}
 .trackList a.remove:hover {
     background: #92c137;
 }
-.trackList li:hover a.remove {
+.trackList li:hover a.remove,
+.trackList li.ui-sortable-helper a.remove {
     visibility: visible;
 }
 .trackList li.first {

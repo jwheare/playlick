@@ -22,6 +22,7 @@ MODELS.Playlist.prototype.toHTML = function () {
 var PLAYLICK = {
     current_playlist: null,
     start_button_text: $('#add_track_button').val(),
+    create_playlist_title: $('#playlistTitle').html(),
     add_button_text: 'Add',
     // Create a new empty playlist
     new_playlist: function  () {
@@ -75,7 +76,7 @@ var PLAYLICK = {
                     }
                     // Register stream
                     Playdar.player.register_stream(result);
-                    playlist_track.element.bind('click', function (e) {
+                    playlist_track.element.click(function (e) {
                         Playdar.player.play_stream(result.sid);
                         return false;
                     });
@@ -95,6 +96,9 @@ $('#playlist').sortable({
     axis: 'y',
     cursor: 'move',
     handle: 'a.handle',
+    opacity: 0.5,
+    placeholder: 'placeholder',
+    // helper: 'clone',
     update: function (e, ui) {
         var ids = $('#playlist').sortable('toArray');
         var tracks = [];
@@ -119,18 +123,18 @@ $.each(DATA.playlists, function (key, value) {
 PLAYLICK.new_playlist();
 
 // Setup event handlers
-$('#create_playlist').bind('click', function (e) {
+$('#create_playlist').click(function (e) {
     if (Playdar.client) {
         Playdar.client.cancel_resolve();
     }
     PLAYLICK.stash_current();
     PLAYLICK.new_playlist();
-    $('#playlistTitle').empty();
+    $('#playlistTitle').html(PLAYLICK.create_playlist_title);
     return false;
 });
 
 // Add to loaded playlist
-$('#add_to_playlist').bind('submit', function (e) {
+$('#add_to_playlist').submit(function (e) {
     // Parse the form and add tracks
     var params = {};
     $.each($(this).serializeArray(), function (index, item) {
@@ -151,7 +155,7 @@ $('#add_to_playlist').bind('submit', function (e) {
 });
 
 // Remove from playlist
-$('#playlist').bind('click', function (e) {
+$('#playlist').click(function (e) {
     var target = $(e.target);
     if (target.is('a.remove')) {
         target.parents('li.p_t').data('playlist_track').remove();
@@ -159,7 +163,7 @@ $('#playlist').bind('click', function (e) {
     }
 });
 
-$('#playlist_stash').bind('click', function (e) {
+$('#playlist_stash').click(function (e) {
     // Load the clicked playlist
     var target = $(e.target);
     if (target.is('li.p a.playlist')) {
@@ -179,7 +183,9 @@ $('#playlist_stash').bind('click', function (e) {
         target.blur();
         target.siblings('.playlist').toggle();
         target.siblings('form').toggle();
-        target.siblings('form').find(':text').select();
+        setTimeout(function () {
+            target.siblings('form').find(':text').select();
+        }, 1);
         return false;
     }
     if (target.is('#playlist_stash form.edit_playlist_form input[type=submit]')) {
