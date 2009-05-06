@@ -25,13 +25,13 @@ a {
 }
 
 #viewport {
-    width: 940px;
+    width: 970px;
     margin: 0 auto;
 }
 
 #content {
     clear: both;
-    padding: 15px 0 0 0;
+    padding: 40px 0 0 0;
     background: #fff;
 }
 #content p {
@@ -47,10 +47,10 @@ a {
 #sidebar {
     float: right;
     width: 300px;
-    margin: 0 15px 15px 15px;
+    margin: 0 30px 15px 30px;
 }
 #sidebar h1 {
-    margin: 10px 0 15px 0;
+    margin: 0 0 15px 0;
 }
 .stash {
     margin: 15px 0;
@@ -116,7 +116,7 @@ ul#playlist_stash li input.playlist_name {
     min-height: 200px;
 }
 #main h1 {
-    margin: 10px 0 15px 40px;
+    margin: 0 0 15px 40px;
 }
 
 /* Add track form */
@@ -171,10 +171,10 @@ form#add_to_playlist input {
     font-size: 16px;
     text-align: center;
     text-decoration: none;
+    cursor: move;
 }
 .trackList a.handle:hover {
     background: #92c137;
-    cursor: move;
 }
 .trackList li:hover a.handle,
 .trackList li.ui-sortable-helper a.handle {
