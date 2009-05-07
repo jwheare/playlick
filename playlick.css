@@ -135,11 +135,8 @@ form#add_to_playlist input {
     list-style: none;
 }
 .trackList li {
-    border-top: 1px solid #d2f380;
+    border-bottom: 1px solid #d2f380;
     font-size: 15px;
-}
-.trackList > li:first-child {
-    border-top: 0;
 }
 .trackList li.open {
     border-color: #c0e95b;
@@ -188,7 +185,7 @@ form#add_to_playlist input {
     text-decoration: none;
 }
 .placeholder {
-    border-bottom: 1px solid #335507;
+    border-top: 1px solid #335507;
 }
 .trackList a.remove:hover {
     background: #92c137;
@@ -196,9 +193,6 @@ form#add_to_playlist input {
 .trackList li:hover a.remove,
 .trackList li.ui-sortable-helper a.remove {
     visibility: visible;
-}
-.trackList li.first {
-    border-top: 0;
 }
 .sources {
     display: none;
@@ -279,7 +273,7 @@ tbody.paused td.play span {
 }
 
 #footer {
-    margin-top: 15px;
+    margin-top: 30px;
     padding: 10px;
     clear: both;
     background: #d2f380;
