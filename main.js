@@ -11,7 +11,8 @@ MODELS.Track.prototype.toHTML = function () {
         + '</a>';
 };
 MODELS.Playlist.prototype.toHTML = function () {
-    return '<a href="#" class="edit_playlist">edit</a>'
+    return '<a href="#" class="delete_playlist">╳</a>'
+        + '<a href="#" class="edit_playlist">edit</a>'
         + '<a href="#" class="playlist">' + this.name + '</a>'
         + '<form style="display: none;" class="edit_playlist_form">'
             + '<input type="text" name="name" value="' + this.name + '" class="playlist_name">'
@@ -22,15 +23,14 @@ MODELS.Playlist.prototype.toHTML = function () {
 var PLAYLICK = {
     current_playlist: null,
     start_button_text: $('#add_track_button').val(),
-    create_playlist_title: $('#playlistTitle').html(),
     add_button_text: 'Add',
     // Create a new empty playlist
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
             onCreate: function () {
-                if (!$('#' + this.get_dom_id()).size()) {
+                if (!this.playlist.is_in_dom()) {
                     this.element.appendTo($('#playlist_stash'));
-                    $('#playlistTitle').html(this.toString());
+                    PLAYLICK.update_playlist_title(this.toString());
                     DATA.playlists[this.id] = {
                         name: this.name,
                         tracks: this.tracks
@@ -41,7 +41,11 @@ var PLAYLICK = {
         $('#add_track_button').val(PLAYLICK.start_button_text);
         $('#add_track_input').select();
     },
-    stash_current: function () {
+    create_playlist_title: $('#playlistTitle').html(),
+    update_playlist_title: function (title) {
+        $('#playlistTitle').html(title);
+    },
+    stash_current: function (title) {
         if (Playdar.client) {
             Playdar.client.cancel_resolve();
         }
@@ -53,6 +57,19 @@ var PLAYLICK = {
                     return item.track;
                 })
             };
+        }
+        if (title) {
+            PLAYLICK.update_playlist_title(title);
+        }
+    },
+    delete_playlist: function (playlist) {
+        if (PLAYLICK.current_playlist == playlist) {
+            PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
+        }
+        delete DATA.playlists[playlist.id];
+        playlist.initialise();
+        if (playlist.is_in_dom()) {
+            playlist.element.remove();
         }
     },
     playdar_track_handler: function (track) {
@@ -166,9 +183,8 @@ $('#create_playlist').click(function (e) {
     if (Playdar.client) {
         Playdar.client.cancel_resolve();
     }
-    PLAYLICK.stash_current();
+    PLAYLICK.stash_current(PLAYLICK.create_playlist_title);
     PLAYLICK.new_playlist();
-    $('#playlistTitle').html(PLAYLICK.create_playlist_title);
 });
 
 // Add to loaded playlist
@@ -220,7 +236,7 @@ $('#playlist_stash').click(function (e) {
         PLAYLICK.stash_current();
         PLAYLICK.current_playlist = target.parents('li.p').data('playlist');
         PLAYLICK.current_playlist.load_tracks(DATA.playlists[PLAYLICK.current_playlist.id].tracks);
-        $('#playlistTitle').html(PLAYLICK.current_playlist.toString());
+        PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.toString());
         $('#add_track_button').val(PLAYLICK.add_button_text);
         if (Playdar.client) {
             Playdar.client.autodetect(PLAYLICK.playdar_track_handler);
@@ -236,6 +252,10 @@ $('#playlist_stash').click(function (e) {
             target.siblings('form').find(':text').select();
         }, 1);
     }
+    if (target.is('li.p a.delete_playlist')) {
+        e.preventDefault();
+        PLAYLICK.delete_playlist(target.parents('li.p').data('playlist'));
+    }
     if (target.is('#playlist_stash form.edit_playlist_form input[type=submit]')) {
         e.preventDefault();
         var form = target.parents('form');
@@ -247,7 +267,7 @@ $('#playlist_stash').click(function (e) {
         form.siblings('.playlist').html(name);
         playlist.set_name(name);
         if (PLAYLICK.current_playlist == playlist) {
-            $('#playlistTitle').html(playlist.toString());
+            PLAYLICK.update_playlist_title(playlist.toString());
         }
     }
 });

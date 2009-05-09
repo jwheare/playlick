@@ -68,6 +68,8 @@ ul#playlist_stash {
     list-style-type: none;
 }
 ul#playlist_stash li {
+    margin-right: -24px;
+    border-right: 24px solid #fff;
     border-bottom: 1px solid #d2f380;
 }
 ul#playlist_stash li a.playlist {
@@ -101,6 +103,22 @@ ul#playlist_stash li:hover a.edit_playlist {
 }
 ul#playlist_stash li a.edit_playlist:hover {
     background: #92c137;
+}
+ul#playlist_stash li a.delete_playlist {
+    float: right;
+    width: 24px;
+    margin-right: -24px;
+    padding: 12px 0;
+    text-align: center;
+    font-size: 11px;
+    visibility: hidden;
+    text-decoration: none;
+}
+ul#playlist_stash li:hover a.delete_playlist {
+    visibility: visible;
+}
+ul#playlist_stash li a.delete_playlist:hover {
+    background: #eee;
 }
 ul#playlist_stash li input {
     margin-right: 5px;

@@ -160,6 +160,12 @@ var MODELS = {
         get_dom_id: function () {
             return "p_" + this.id;
         },
+        is_in_dom: function () {
+            if ($("#" + this.get_dom_id()).size()) {
+                return true;
+            }
+            return false;
+        },
         toHTML: function () {
             return this.toString();
         },
