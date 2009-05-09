@@ -63,13 +63,15 @@ var PLAYLICK = {
         }
     },
     delete_playlist: function (playlist) {
-        if (PLAYLICK.current_playlist == playlist) {
-            PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
-        }
-        delete DATA.playlists[playlist.id];
-        playlist.initialise();
-        if (playlist.is_in_dom()) {
-            playlist.element.remove();
+        if (confirm('Are you sure you want to delete this playlist:\n\n' + playlist.name)) {
+            if (PLAYLICK.current_playlist == playlist) {
+                PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
+            }
+            delete DATA.playlists[playlist.id];
+            playlist.initialise();
+            if (playlist.is_in_dom()) {
+                playlist.element.remove();
+            }
         }
     },
     playdar_track_handler: function (track) {
