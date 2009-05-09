@@ -128,6 +128,7 @@ $("#add_track_input").result(function (e, track, formatted) {
     $("#add_track_artist").val(track.artist);
     $('#add_to_playlist').submit();
 });
+$("#add_track_input").focus();
 
 // Setup playlist reordering behaviour
 $('#playlist').sortable({
@@ -200,14 +201,13 @@ $('#playlist').click(function (e) {
     if (target.is('a.remove')) {
         e.preventDefault();
         target.parents('li.p_t').data('playlist_track').remove();
-        return false;
     }
     if (target.is('li.p_t a.item')) {
-        e.preventDefault();
         var sid = target.parent('li.p_t').data('sid');
         if (sid) {
             Playdar.player.play_stream(sid);
         }
+        return false;
     }
 });
 
