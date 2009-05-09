@@ -4,7 +4,8 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Playlick</title>
-        <link rel="stylesheet" href="playlick.css" type="text/css" media="screen" title="Playlick Styles" charset="utf-8">
+        <link rel="stylesheet" type="text/css" media="screen" charset="utf-8" href="/playlick.css">
+        <link rel="stylesheet" type="text/css" media="screen" charset="utf-8" href="/lib/jquery-autocomplete/jquery.autocomplete.css">
     </head>
     <body>
         <div id="viewport">
@@ -23,10 +24,10 @@
                     <h1 id="playlistTitle">Create a new playlist</h1>
                     
                     <form id="add_to_playlist">
-                        <label for="artist_input">Artist:</label>
-                        <input type="text" name="artist" id="add_track_artist" />
-                        <label for="track_input">Track:</label>
-                        <input type="text" name="track" id="add_track_track" />
+                        <label for="add_track_input">Track:</label>
+                        <input type="text" name="track" id="add_track_input" />
+                        <input type="hidden" name="artist_name" id="add_track_artist" />
+                        <input type="hidden" name="track_name" id="add_track_name" />
                         <input type="submit" id="add_track_button" value="Start a Playlist" />
                     </form>
                     
@@ -42,20 +43,23 @@
         </div>
         
         <!-- jQuery -->
-        <script src="lib/jquery.js"></script>
-        <script src="lib/jquery-ui.js"></script>
+        <script src="/lib/jquery.js"></script>
+        <script src="/lib/jquery-ui.js"></script>
+        <script src="/lib/jquery-autocomplete/jquery.autocomplete.js"></script>
         
         <!-- Core -->
-        <script src="util.js"></script>
-        <script src="models.js"></script>
-        
-        <!-- Data/App -->
-        <script src="data.js"></script>
-        <script src="main.js"></script>
+        <script src="/util.js"></script>
+        <script src="/models.js"></script>
         
         <!-- Playdar -->
-        <script src="lib/playdar_compressed.js"></script>
-        <script src="lib/soundmanager2-nodebug-jsmin.js"></script>
+        <script src="/lib/playdar_compressed.js"></script>
+        
+        <!-- Data/App -->
+        <script src="/data.js"></script>
+        <script src="/main.js"></script>
+        
+        <!-- Sound Manager 2 -->
+        <script src="/lib/soundmanager2-nodebug-jsmin.js"></script>
         <script>
             Playdar.setup({
                 name: "Playlick",

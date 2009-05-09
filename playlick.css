@@ -124,8 +124,9 @@ form#add_to_playlist {
     margin: 20px 0 20px 40px;
     line-height: 25px;
 }
-form#add_to_playlist input {
+form#add_to_playlist input#add_track_input {
     margin-right: 10px;
+    width: 300px;
 }
 
 /* Track list */

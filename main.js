@@ -39,7 +39,7 @@ var PLAYLICK = {
             }
         });
         $('#add_track_button').val(PLAYLICK.start_button_text);
-        $('#add_track_track').select();
+        $('#add_track_input').select();
     },
     stash_current: function () {
         if (Playdar.client) {
@@ -76,10 +76,7 @@ var PLAYLICK = {
                     }
                     // Register stream
                     Playdar.player.register_stream(result);
-                    playlist_track.element.click(function (e) {
-                        Playdar.player.play_stream(result.sid);
-                        return false;
-                    });
+                    playlist_track.element.data('sid', result.sid);
                 } else {
                     list_item.css('background', '');
                 }
@@ -91,6 +88,47 @@ var PLAYLICK = {
     }
 };
 
+$("#add_track_input").autocomplete("http://ws.audioscrobbler.com/2.0/?callback=?", {
+    multiple: false,
+    delay: 200,
+    dataType: "jsonp",
+    extraParams: {
+        api_key: "b25b959554ed76058ac220b7b2e0a026",
+        format: "json",
+        method: "track.search",
+        track: function () {
+            return $("#add_track_input").val();
+        }
+    },
+    cacheLength: 1,
+    // mustMatch: true,
+    parse: function (json) {
+        var parsed = [];
+        if (json && json.results.trackmatches.track) {
+            var tracks = json.results.trackmatches.track;
+            if (!$.isArray(tracks)) {
+                tracks = [tracks];
+            }
+            $.each(tracks, function (index, track) {
+                parsed.push({
+                    data: track,
+                    value: track.name,
+                    result: track.artist + " - " + track.name
+                });
+            });
+        }
+        return parsed;
+    },
+    formatItem: function (track, position, length, value) {
+        return track.artist + " - " + track.name;
+    }
+});
+$("#add_track_input").result(function (e, track, formatted) {
+    $("#add_track_name").val(track.name);
+    $("#add_track_artist").val(track.artist);
+    $('#add_to_playlist').submit();
+});
+
 // Setup playlist reordering behaviour
 $('#playlist').sortable({
     axis: 'y',
@@ -98,7 +136,6 @@ $('#playlist').sortable({
     handle: 'a.handle',
     opacity: 0.5,
     placeholder: 'placeholder',
-    // helper: 'clone',
     update: function (e, ui) {
         var ids = $('#playlist').sortable('toArray');
         var tracks = [];
@@ -124,25 +161,29 @@ PLAYLICK.new_playlist();
 
 // Setup event handlers
 $('#create_playlist').click(function (e) {
+    e.preventDefault();
     if (Playdar.client) {
         Playdar.client.cancel_resolve();
     }
     PLAYLICK.stash_current();
     PLAYLICK.new_playlist();
     $('#playlistTitle').html(PLAYLICK.create_playlist_title);
-    return false;
 });
 
 // Add to loaded playlist
 $('#add_to_playlist').submit(function (e) {
+    e.preventDefault();
     // Parse the form and add tracks
     var params = {};
     $.each($(this).serializeArray(), function (index, item) {
         params[item.name] = item.value;
     });
-    if (params.track && params.artist) {
-        $('#add_track_track').select();
-        var track = new MODELS.Track(params.track, params.artist);
+    if (params.track_name && params.artist_name) {
+        $('#add_track_input').val('');
+        $('#add_track_artist').val('');
+        $('#add_track_track').val('');
+        $('#add_track_input').select();
+        var track = new MODELS.Track(params.track_name, params.artist_name);
         var playlist_track = PLAYLICK.current_playlist.add_track(track);
         if (playlist_track.position == 1) {
             $('#add_track_button').val(PLAYLICK.add_button_text);
@@ -151,15 +192,22 @@ $('#add_to_playlist').submit(function (e) {
             Playdar.client.autodetect(PLAYLICK.playdar_track_handler, playlist_track.element[0]);
         }
     }
-    return false;
 });
 
 // Remove from playlist
 $('#playlist').click(function (e) {
     var target = $(e.target);
     if (target.is('a.remove')) {
+        e.preventDefault();
         target.parents('li.p_t').data('playlist_track').remove();
         return false;
+    }
+    if (target.is('li.p_t a.item')) {
+        e.preventDefault();
+        var sid = target.parent('li.p_t').data('sid');
+        if (sid) {
+            Playdar.player.play_stream(sid);
+        }
     }
 });
 
@@ -167,6 +215,7 @@ $('#playlist_stash').click(function (e) {
     // Load the clicked playlist
     var target = $(e.target);
     if (target.is('li.p a.playlist')) {
+        e.preventDefault();
         target.blur();
         PLAYLICK.stash_current();
         PLAYLICK.current_playlist = target.parents('li.p').data('playlist');
@@ -176,19 +225,19 @@ $('#playlist_stash').click(function (e) {
         if (Playdar.client) {
             Playdar.client.autodetect(PLAYLICK.playdar_track_handler);
         }
-        return false;
     }
     // Edit the playlist name
     if (target.is('li.p a.edit_playlist')) {
+        e.preventDefault();
         target.blur();
         target.siblings('.playlist').toggle();
         target.siblings('form').toggle();
         setTimeout(function () {
             target.siblings('form').find(':text').select();
         }, 1);
-        return false;
     }
     if (target.is('#playlist_stash form.edit_playlist_form input[type=submit]')) {
+        e.preventDefault();
         var form = target.parents('form');
         form.hide();
         form.siblings('.playlist').show();
@@ -200,6 +249,5 @@ $('#playlist_stash').click(function (e) {
         if (PLAYLICK.current_playlist == playlist) {
             $('#playlistTitle').html(playlist.toString());
         }
-        return false;
     }
 });
