@@ -60,7 +60,7 @@ a {
     margin: 0;
     padding: 0 10px;
     font-size: 13px;
-    line-height: 16px;
+    line-height: 39px;
     background: #d2f380;
 }
 ul#playlist_stash {
@@ -89,7 +89,7 @@ ul#playlist_stash li a.playlist:active {
 ul#playlist_stash li form {
     margin: 0;
     padding: 0 7px;
-    line-height: 16px;
+    line-height: 39px;
 }
 ul#playlist_stash li a.edit_playlist {
     float: right;
