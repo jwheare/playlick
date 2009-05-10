@@ -58,8 +58,9 @@ a {
 }
 .stash p#loading_playlists {
     margin: 0;
-    padding: 10px;
+    padding: 0 10px;
     font-size: 13px;
+    line-height: 16px;
     background: #d2f380;
 }
 ul#playlist_stash {
@@ -71,11 +72,11 @@ ul#playlist_stash li {
     margin-right: -24px;
     border-right: 24px solid #fff;
     border-bottom: 1px solid #d2f380;
+    line-height: 39px;
 }
 ul#playlist_stash li a.playlist {
     display: block;
-    padding: 10px;
-    line-height: 16px;
+    padding: 0 10px;
     text-decoration: none;
 }
 ul#playlist_stash li a.playlist:hover {
@@ -87,12 +88,12 @@ ul#playlist_stash li a.playlist:active {
 
 ul#playlist_stash li form {
     margin: 0;
-    padding: 7px;
+    padding: 0 7px;
     line-height: 16px;
 }
 ul#playlist_stash li a.edit_playlist {
     float: right;
-    padding: 12px;
+    padding: 0 12px;
     font-size: 11px;
     visibility: hidden;
     background: #a8d840;
@@ -108,7 +109,7 @@ ul#playlist_stash li a.delete_playlist {
     float: right;
     width: 24px;
     margin-right: -24px;
-    padding: 12px 0;
+    padding: 0;
     text-align: center;
     font-size: 11px;
     visibility: hidden;
@@ -156,6 +157,7 @@ form#add_to_playlist input#add_track_input {
 .trackList li {
     border-bottom: 1px solid #d2f380;
     font-size: 15px;
+    line-height: 39px;
 }
 .trackList li.open {
     border-color: #c0e95b;
@@ -166,7 +168,6 @@ form#add_to_playlist input#add_track_input {
 }
 .trackList a.item {
     display: block;
-    padding: 10px;
     text-decoration: none;
 }
 .trackList li:hover a.item,
@@ -182,9 +183,9 @@ form#add_to_playlist input#add_track_input {
     visibility: hidden;
     width: 19px;
     background: #a8d840;
-    padding: 10px 5px;
+    padding: 0 5px;
     margin-right: 10px;
-    font-size: 16px;
+    font-size: 14px;
     text-align: center;
     text-decoration: none;
     cursor: move;
@@ -198,9 +199,9 @@ form#add_to_playlist input#add_track_input {
 }
 .trackList a.remove {
     float: right;
+    padding: 0 10px;
     visibility: hidden;
     background: #a8d840;
-    padding: 10px;
     text-decoration: none;
 }
 .placeholder {
