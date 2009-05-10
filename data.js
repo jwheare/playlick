@@ -3,6 +3,8 @@ var DATA = {
         'test': {
             name: 'A playlist I made earlier',
             tracks: [
+                new MODELS.Track('Infinity Milk', 'Dananananaykroyd', (4*60)+20),
+                new MODELS.Track('The Hell Song', 'Sum 41', (3*60)+19),
                 new MODELS.Track('Dry The Rain', 'The Beta Band', (6*60)+5),
                 new MODELS.Track('Woozy with Cider', 'James Yorkston', (4*60)+6),
                 new MODELS.Track('Yoshimi Battles the Pink Robots Pt. 1', 'The Flaming Lips', (4*60)+46),
@@ -15,8 +17,6 @@ var DATA = {
                 new MODELS.Track('Time Is The Enemy', 'Quantic', (3*60)+42),
                 new MODELS.Track('Get Ready for Love', 'Nick Cave & The Bad Seeds', (5*60)+5),
                 new MODELS.Track('Country House', 'Blur', (3*60)+58),
-                new MODELS.Track('Infinity Milk', 'Dananananaykroyd', (4*60)+20),
-                new MODELS.Track('The Hell Song', 'Sum 41', (3*60)+19),
                 new MODELS.Track('Up In Arms', 'Foo Fighters', (2*60)+16)
             ]
         }

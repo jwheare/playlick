@@ -1,7 +1,6 @@
 // Custom Track and Playlist renderers
 MODELS.Track.prototype.toHTML = function () {
-    return '<a href="#" class="handle">⬍</a> '
-        + '<a href="#" class="remove">╳</a>'
+    return '<a href="#" class="remove">╳</a>'
         + '<a href="#" class="item">'
             + '<span class="haudio">'
                 + '<span class="fn">' + this.name + '</span>'
@@ -87,6 +86,7 @@ var PLAYLICK = {
         
         var trackItem = result.parents('li.p_t');
         trackItem.addClass('playing');
+        trackItem.removeClass('paused');
     },
     setResultPaused: function () {
         var result = $('#sid' + this.sID);
@@ -95,19 +95,20 @@ var PLAYLICK = {
         
         var trackItem = result.parents('li.p_t');
         trackItem.removeClass('playing');
+        trackItem.addClass('paused');
     },
     setResultStopped: function () {
         Playdar.player.stop_all();
         var result = $('#sid' + this.sID);
         result.removeClass('paused');
         result.removeClass('playing');
-        result.css('background-position', '0 0');
         
         var progress = $('#progress' + this.sID);
         progress.html('');
         
         var trackItem = result.parents('li.p_t');
         trackItem.removeClass('playing');
+        trackItem.css('background-position', '0 0');
     },
     updatePlaybackProgress: function () {
         var result = $('#sid' + this.sID);
@@ -122,7 +123,8 @@ var PLAYLICK = {
             duration = this.durationEstimate;
         }
         var portion_played = this.position / duration;
-        result.css('background-position', Math.round(portion_played * 570) + 'px 0');
+        var trackItem = result.parents('li.p_t');
+        trackItem.css('background-position', Math.round(portion_played * 570) + 'px 0');
     },
     
     playdar_track_handler: function (track) {
@@ -149,7 +151,7 @@ var PLAYLICK = {
                     var sources = list_item.children('.sources');
                     sources.html(results);
                     sources.show();
-                    playlist_track.element.data('sid', result.sid);
+                    playlist_track.element.find('a.item').data('sid', result.sid);
                 } else {
                     list_item.addClass('noMatch');
                 }
@@ -249,7 +251,6 @@ $("#add_track_input").focus();
 $('#playlist').sortable({
     axis: 'y',
     cursor: 'move',
-    handle: 'a.handle',
     opacity: 0.5,
     placeholder: 'placeholder',
     update: function (e, ui) {
@@ -309,26 +310,30 @@ $('#add_to_playlist').submit(function (e) {
     }
 });
 
-// Remove from playlist
 $('#playlist').click(function (e) {
     var target = $(e.target);
-    if (target.is('tbody.result *')) {
-        var sid = target.parents('tbody').data('sid');
-        if (sid) {
-            Playdar.player.play_stream(sid);
-        }
-        return false;
-    }
-    if (target.is('a.remove')) {
+    // Clicks to playdar results
+    var tbody = target.closest('tbody.result');
+    if (tbody.size()) {
         e.preventDefault();
-        target.parents('li.p_t').data('playlist_track').remove();
-    }
-    if (target.is('li.p_t a.item')) {
-        var sid = target.parent('li.p_t').data('sid');
+        var sid = tbody.data('sid');
         if (sid) {
             Playdar.player.play_stream(sid);
         }
+    }
+    // Clicks to the remove button
+    if (target.is('a.remove')) {
+        target.parents('li.p_t').data('playlist_track').remove();
         return false;
+    }
+    // Clicks to the main track name
+    var track_item = target.closest('li.p_t a.item');
+    if (track_item.size()) {
+        e.preventDefault();
+        var sid = track_item.data('sid');
+        if (sid) {
+            Playdar.player.play_stream(sid);
+        }
     }
 });
 

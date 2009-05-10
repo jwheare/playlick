@@ -177,34 +177,15 @@ form#add_to_playlist input#add_track_input {
 }
 .trackList a.item {
     display: block;
+    padding-left: 39px;
     text-decoration: none;
-}
-.trackList li:hover a.item,
-.trackList li.ui-sortable-helper a.item {
-    background: #d2f380;
 }
 .trackList li.open a.item {
     background: #c0e95b;
 }
-.trackList a.handle {
-    display: block;
-    float: left;
-    visibility: hidden;
-    width: 19px;
-    background: #a8d840;
-    padding: 0 5px;
-    margin-right: 10px;
-    font-size: 14px;
-    text-align: center;
-    text-decoration: none;
-    cursor: move;
-}
-.trackList a.handle:hover {
-    background: #92c137;
-}
-.trackList li:hover a.handle,
-.trackList li.ui-sortable-helper a.handle {
-    visibility: visible;
+.trackList li.playing,
+.trackList li.paused {
+    background: #d2f380 url('track_progress.gif') repeat-y 0 0;
 }
 .trackList a.remove {
     float: right;
@@ -242,10 +223,6 @@ form#add_to_playlist input#add_track_input {
     margin: 0;
     padding: 0;
     border: 0;
-}
-.sources table tbody.playing,
-.sources table tbody.paused {
-    background: #d2f380 url('/static/track_progress.gif') repeat-y 0 0;
 }
 .sources table tbody.paused {
     background-color: #e8f9bb;
