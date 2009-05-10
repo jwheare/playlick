@@ -28,7 +28,7 @@ var PLAYLICK = {
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
             onCreate: function () {
-                if (!this.playlist.is_in_dom()) {
+                if (!this.is_in_dom()) {
                     this.element.appendTo($('#playlist_stash'));
                     PLAYLICK.update_playlist_title(this.toString());
                     DATA.playlists[this.id] = {
