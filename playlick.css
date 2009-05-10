@@ -159,6 +159,15 @@ form#add_to_playlist input#add_track_input {
     font-size: 15px;
     line-height: 39px;
 }
+.trackList li.loading {
+    background: #e8f9bb;
+}
+.trackList li.match {
+    background: #c0e95b;
+}
+.trackList li.perfectMatch {
+    background: #92c137;
+}
 .trackList li.open {
     border-color: #c0e95b;
 }

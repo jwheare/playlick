@@ -8,7 +8,10 @@ MODELS.Track.prototype.toHTML = function () {
                 + ' - '
                 + '<span class="contributor">' + this.artist + '</span>'
             + '</span>'
-        + '</a>';
+        + '</a>'
+        + '<div class="sources">'
+            + '<p class="sourcesEmpty">Loading results…</p>'
+        + '</div>';
 };
 MODELS.Playlist.prototype.toHTML = function () {
     return '<a href="#" class="delete_playlist">╳</a>'
@@ -49,6 +52,9 @@ var PLAYLICK = {
         if (Playdar.client) {
             Playdar.client.cancel_resolve();
         }
+        if (Playdar.player) {
+            Playdar.player.stop_all();
+        }
         // Stash the current data
         if (PLAYLICK.current_playlist.tracks.length) {
             DATA.playlists[PLAYLICK.current_playlist.id] = {
@@ -74,16 +80,62 @@ var PLAYLICK = {
             }
         }
     },
+    setResultPlaying: function () {
+        var result = $('#sid' + this.sID);
+        result.addClass('playing');
+        result.removeClass('paused');
+        
+        var trackItem = result.parents('li.p_t');
+        trackItem.addClass('playing');
+    },
+    setResultPaused: function () {
+        var result = $('#sid' + this.sID);
+        result.addClass('paused');
+        result.removeClass('playing');
+        
+        var trackItem = result.parents('li.p_t');
+        trackItem.removeClass('playing');
+    },
+    setResultStopped: function () {
+        Playdar.player.stop_all();
+        var result = $('#sid' + this.sID);
+        result.removeClass('paused');
+        result.removeClass('playing');
+        result.css('background-position', '0 0');
+        
+        var progress = $('#progress' + this.sID);
+        progress.html('');
+        
+        var trackItem = result.parents('li.p_t');
+        trackItem.removeClass('playing');
+    },
+    updatePlaybackProgress: function () {
+        var result = $('#sid' + this.sID);
+        var progress = $('#progress' + this.sID);
+        // Update the track progress
+        progress.html(UTIL.mmss(Math.round(this.position/1000)));
+        // Update the playback progress bar
+        var duration;
+        if (this.readyState == 3) { // loaded/success
+            duration = this.duration;
+        } else {
+            duration = this.durationEstimate;
+        }
+        var portion_played = this.position / duration;
+        result.css('background-position', Math.round(portion_played * 570) + 'px 0');
+    },
+    
     playdar_track_handler: function (track) {
         var uuid = Playdar.Util.generate_uuid();
         Playdar.client.register_results_handler(function (response, final_answer) {
             var list_item = $(track.element).parents('li.p_t');
             var playlist_track = list_item.data('playlist_track');
             if (final_answer) {
+                list_item.removeClass('loading');
                 if (response.results.length) {
                     var result = response.results[0];
                     if (result.score == 1) {
-                        list_item.css('background', '#92c137');
+                        list_item.addClass('perfectMatch');
                         // Update track
                         playlist_track.track.name = result.track;
                         playlist_track.track.artist = result.artist;
@@ -91,19 +143,63 @@ var PLAYLICK = {
                         playlist_track.render();
                         playlist_track.playlist.save();
                     } else {
-                        list_item.css('background', '#c0e95b');
+                        list_item.addClass('match');
                     }
-                    // Register stream
-                    Playdar.player.register_stream(result);
+                    var results = PLAYLICK.build_results_table(response);
+                    var sources = list_item.children('.sources');
+                    sources.html(results);
+                    sources.show();
                     playlist_track.element.data('sid', result.sid);
                 } else {
-                    list_item.css('background', '');
+                    list_item.addClass('noMatch');
                 }
             } else {
-                list_item.css('background', '#e8f9bb');
+                list_item.addClass('loading');
             }
         }, uuid);
         return uuid;
+    },
+    build_results_table: function (response) {
+        var score_cell, result;
+        var results = $('<table cellspacing="0"></table>');
+        for (var i = 0; i < response.results.length; i++) {
+            result = response.results[i];
+            var sound = Playdar.player.register_stream(result, {
+                onplay: PLAYLICK.setResultPlaying,
+                onpause: PLAYLICK.setResultPaused,
+                onresume: PLAYLICK.setResultPlaying,
+                onstop: PLAYLICK.setResultStopped,
+                onfinish: PLAYLICK.setResultStopped,
+                whileplaying: PLAYLICK.updatePlaybackProgress
+            });
+            
+            if (result.score < 0) {
+                score_cell = '<td class="score">&nbsp;</td>';
+            } else if (result.score == 1) {
+                score_cell = '<td class="score perfect">★</td>';
+            } else {
+                score_cell = '<td class="score">' + result.score.toFixed(3) + '</td>';
+            }
+            var tbody_html = '<tbody class="result" id="sid' + result.sid + '">'
+                + '<tr class="track">'
+                    + '<td class="play"><span>▸</span></td>'
+                    + '<td class="name">'
+                        + result.artist + ' - ' + result.track
+                    + '</td>'
+                    + '<td class="progress" id="progress' + result.sid + '"></td>'
+                    + '<td class="time">' + UTIL.mmss(result.duration) + '</td>'
+                + '</tr>'
+                + '<tr class="info">'
+                    + score_cell
+                    + '<td class="source">' + result.source + '</td>'
+                    + '<td class="bitrate">' + result.bitrate + ' kbps</td>'
+                    + '<td class="size">' + (result.size/1000000).toFixed(1) + 'MB</td>'
+                + '</tr>'
+            + '</tbody>';
+            var result_tbody = $(tbody_html).data('sid', result.sid);
+            results.append(result_tbody);
+        }
+        return results;
     }
 };
 
@@ -216,6 +312,13 @@ $('#add_to_playlist').submit(function (e) {
 // Remove from playlist
 $('#playlist').click(function (e) {
     var target = $(e.target);
+    if (target.is('tbody.result *')) {
+        var sid = target.parents('tbody').data('sid');
+        if (sid) {
+            Playdar.player.play_stream(sid);
+        }
+        return false;
+    }
     if (target.is('a.remove')) {
         e.preventDefault();
         target.parents('li.p_t').data('playlist_track').remove();

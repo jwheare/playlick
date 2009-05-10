@@ -8,8 +8,8 @@ TODO
 ----
 
 * Persistence/Sessions
-* Sharing
 * Source picker before export
+* Sharing
 * XSPF export
 * Applecript export for iTunes
 * Snazzy logo
