@@ -155,32 +155,33 @@ form#add_to_playlist input#add_track_input {
     list-style: none;
 }
 .trackList li {
-    border-bottom: 1px solid #d2f380;
+    border-bottom: 1px solid #c0e95b;
+    border-right: 24px solid #fff;
     font-size: 15px;
     line-height: 39px;
-}
-.trackList li.loading {
-    background: #e8f9bb;
-}
-.trackList li.match {
-    background: #c0e95b;
-}
-.trackList li.perfectMatch {
-    background: #92c137;
-}
-.trackList li.open {
-    border-color: #c0e95b;
 }
 .trackList li.placeholder {
     border-top: 1px solid #335507;
 }
+.trackList li span.status {
+    display: block;
+    float: left;
+    width: 39px;
+    text-align: center;
+}
+.trackList li span.status span {
+    display: none;
+}
+.trackList li.scanning span.status span.scanning,
+.trackList li.match span.status span.play {
+    display: inline;
+}
 .trackList a.item {
     display: block;
-    padding-left: 39px;
     text-decoration: none;
 }
-.trackList li.open a.item {
-    background: #c0e95b;
+.trackList li.match a.item:hover {
+    background: #a8d840;
 }
 .trackList li.playing,
 .trackList li.paused {
@@ -189,10 +190,12 @@ form#add_to_playlist input#add_track_input {
 .trackList a.remove {
     float: right;
     width: 24px;
+    margin-right: -24px;
     padding: 0;
+    text-align: center;
+    font-size: 11px;
     visibility: hidden;
     text-decoration: none;
-    text-align: center;
 }
 .trackList li:hover a.remove,
 .trackList li.ui-sortable-helper a.remove {
@@ -201,19 +204,31 @@ form#add_to_playlist input#add_track_input {
 .trackList a.remove:hover {
     background: #eee;
 }
+
+.trackList a.show_sources {
+    float: right;
+    padding: 0 6px;
+    font-size: 11px;
+    visibility: hidden;
+    background: #d2f380;
+    text-decoration: none;
+}
+.trackList li.match:hover a.show_sources,
+.trackList li.open a.show_sources {
+    visibility: visible;
+}
+.trackList a.show_sources:hover {
+    background: #c0e95b;
+}
+
 .sources {
     display: none;
-    background: #e8f9bb;
-    font-size: 13px;
+    background: #d2f380;
+    font-size: 12px;
     line-height: 22px;
 }
 .trackList li.open .sources {
     display: block;
-}
-#content .sources p.sourcesEmpty {
-    margin: 0;
-    padding: 10px 15px;
-    font-style: italic;
 }
 .sources table {
     width: 100%;
@@ -221,12 +236,12 @@ form#add_to_playlist input#add_track_input {
     padding: 0;
     border: 0;
 }
-.sources table tbody.paused {
-    background-color: #e8f9bb;
+.sources table tbody.choice {
+    background: #c0e95b;
 }
 .sources table tbody:hover {
     cursor: pointer;
-    background-color: #d2f380;
+    background: #a8d840;
 }
 .sources table td {
     padding: 8px 0 0 8px;
@@ -235,23 +250,14 @@ form#add_to_playlist input#add_track_input {
     color: #4c7a0f;
 }
 .sources table tr.info td,
-.sources table > tr:first-child td {
+.sources tbody > tr:first-child td {
     border-top: 0;
 }
 .sources table tr.info td {
     padding-bottom: 8px;
     color: #6ea31e;
 }
-tbody td.play span {
-    visibility: hidden;
-}
-tbody.playing td.play span {
-    visibility: visible;
-}
-tbody.paused td.play span {
-    visibility: visible;
-}
-.sources table td.play,
+.sources table td.choice,
 .sources table tr.info td.score {
     width: 18px;
     padding-right: 3px;

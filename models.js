@@ -232,6 +232,7 @@ var MODELS = {
         this.id = MODELS.next_playlist_track_id++;
         this.playlist = playlist;
         this.track = track;
+        this.sid = null;
         
         // Add to DOM
         this.render();
