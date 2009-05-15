@@ -109,7 +109,7 @@ var PLAYLICK = {
     },
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
-        var next_track = $('#sid' + this.sID).data('track_item').next('li.match');
+        var next_track = $('#sid' + this.sID).data('track_item').nextAll('li.match');
         var playlist_track = next_track.data('playlist_track');
         PLAYLICK.play_track(playlist_track);
     },
