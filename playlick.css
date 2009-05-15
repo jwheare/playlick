@@ -93,7 +93,7 @@ ul#playlist_stash li form {
 }
 ul#playlist_stash li a.edit_playlist {
     float: right;
-    padding: 0 12px;
+    padding: 0 6px;
     font-size: 11px;
     visibility: hidden;
     background: #a8d840;
@@ -171,9 +171,8 @@ form#add_to_playlist input#add_track_input {
 .trackList li.open {
     border-color: #c0e95b;
 }
-.trackList li.dragover {
-    margin-top: 50px;
-    border-top: 2px solid #335507;
+.trackList li.placeholder {
+    border-top: 1px solid #335507;
 }
 .trackList a.item {
     display: block;
@@ -189,20 +188,18 @@ form#add_to_playlist input#add_track_input {
 }
 .trackList a.remove {
     float: right;
-    padding: 0 10px;
+    width: 24px;
+    padding: 0;
     visibility: hidden;
-    background: #a8d840;
     text-decoration: none;
-}
-.placeholder {
-    border-top: 1px solid #335507;
-}
-.trackList a.remove:hover {
-    background: #92c137;
+    text-align: center;
 }
 .trackList li:hover a.remove,
 .trackList li.ui-sortable-helper a.remove {
     visibility: visible;
+}
+.trackList a.remove:hover {
+    background: #eee;
 }
 .sources {
     display: none;

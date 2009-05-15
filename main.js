@@ -1,6 +1,6 @@
 // Custom Track and Playlist renderers
 MODELS.Track.prototype.toHTML = function () {
-    return '<a href="#" class="remove">╳</a>'
+    return '<a href="#" class="remove" title="Remove from playlist">╳</a>'
         + '<a href="#" class="item">'
             + '<span class="haudio">'
                 + '<span class="fn">' + this.name + '</span>'
@@ -13,8 +13,8 @@ MODELS.Track.prototype.toHTML = function () {
         + '</div>';
 };
 MODELS.Playlist.prototype.toHTML = function () {
-    return '<a href="#" class="delete_playlist">╳</a>'
-        + '<a href="#" class="edit_playlist">edit</a>'
+    return '<a href="#" class="delete_playlist" title="Delete playlist">╳</a>'
+        + '<a href="#" class="edit_playlist">' + PLAYLICK.edit_playlist_text + '</a>'
         + '<a href="#" class="playlist">' + this.name + '</a>'
         + '<form style="display: none;" class="edit_playlist_form">'
             + '<input type="text" name="name" value="' + this.name + '" class="playlist_name">'
@@ -26,6 +26,8 @@ var PLAYLICK = {
     current_playlist: null,
     start_button_text: $('#add_track_button').val(),
     add_button_text: 'Add',
+    edit_playlist_text: 'edit',
+    cancel_edit_playlist_text: 'cancel',
     // Create a new empty playlist
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
@@ -358,6 +360,11 @@ $('#playlist_stash').click(function (e) {
         target.blur();
         target.siblings('.playlist').toggle();
         target.siblings('form').toggle();
+        if (target.html() == PLAYLICK.cancel_edit_playlist_text) {
+            target.html(PLAYLICK.edit_playlist_text);
+        } else {
+            target.html(PLAYLICK.cancel_edit_playlist_text);
+        }
         setTimeout(function () {
             target.siblings('form').find(':text').select();
         }, 1);
