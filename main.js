@@ -190,12 +190,11 @@ var PLAYLICK = {
                 whileplaying: PLAYLICK.updatePlaybackProgress
             });
             
-            var checked = '';
+            var checked = (result.score == 1) ? ' checked="checked"' : '';
             if (result.score < 0) {
                 score_cell = '<td class="score">&nbsp;</td>';
             } else if (result.score == 1) {
                 score_cell = '<td class="score perfect">★</td>';
-                checked = ' checked="checked"';
             } else {
                 score_cell = '<td class="score">' + result.score.toFixed(3) + '</td>';
             }

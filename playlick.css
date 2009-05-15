@@ -180,12 +180,16 @@ form#add_to_playlist input#add_track_input {
     display: block;
     text-decoration: none;
 }
-.trackList li.match a.item:hover {
-    background: #a8d840;
+.trackList li.match:hover {
+    background-color: #a8d840;
 }
 .trackList li.playing,
 .trackList li.paused {
-    background: #d2f380 url('track_progress.gif') repeat-y 0 0;
+    background: #c0e95b url('track_progress.gif') repeat-y 0 0;
+}
+.trackList li.playing:hover,
+.trackList li.paused:hover {
+    background-color: #a8d840;
 }
 .trackList a.remove {
     float: right;
