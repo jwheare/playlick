@@ -2,7 +2,7 @@
 MODELS.Track.prototype.toHTML = function () {
     return '<a href="#" class="remove" title="Remove from playlist">╳</a>'
         + '<a href="#" class="show_sources">sources</a>'
-        + '<span class="elapsed"></span>'
+        + '<span class="elapsed">' + UTIL.mmss(this.duration) + '</span>'
         + '<a href="#" class="item">'
             + '<span class="status">'
                 + '&nbsp;'
@@ -107,7 +107,7 @@ var PLAYLICK = {
         track_item.removeClass('playing');
         track_item.css('background-position', '0 0');
         var progress = track_item.find('span.elapsed');
-        progress.html('<strong>' + UTIL.mmss(0) + '</strong> / ' + UTIL.mmss(playlist_track.track.duration));
+        progress.html(UTIL.mmss(playlist_track.track.duration));
     },
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
@@ -139,6 +139,7 @@ var PLAYLICK = {
             playlist_track.track.duration = result.duration;
             playlist_track.element.find('span.fn').html(result.track);
             playlist_track.element.find('span.contributor').html(result.artist);
+            playlist_track.element.find('span.elapsed').html(UTIL.mmss(result.duration));
         }
         playlist_track.sid = result.sid;
         playlist_track.playlist.save();
@@ -161,10 +162,11 @@ var PLAYLICK = {
                     list_item.removeClass('scanning noMatch perfectMatch');
                     list_item.addClass('match');
                     var result = response.results[0];
-                    if (result.score == 1) {
+                    var perfect = (result.score == 1);
+                    PLAYLICK.update_track(playlist_track, result, perfect);
+                    if (perfect) {
                         list_item.addClass('perfectMatch');
                     }
-                    PLAYLICK.update_track(playlist_track, result);
                     var results = PLAYLICK.build_results_table(response, list_item);
                     var sources = list_item.children('.sources');
                     sources.html(results);

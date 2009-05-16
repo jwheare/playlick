@@ -224,8 +224,7 @@ form#add_to_playlist input#add_track_input {
     color: #335507;
     font-size: 11px;
 }
-.trackList li.playing span.elapsed,
-.trackList li.paused span.elapsed {
+.trackList li.match span.elapsed {
     visibility: visible;
 }
 .trackList li.match:hover a.show_sources,
