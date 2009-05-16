@@ -132,6 +132,13 @@ ul#playlist_stash li input.playlist_name {
     width: 180px;
 }
 
+#playdar {
+    vertical-align: middle;
+}
+#playdar img {
+    margin-right: 3px;
+}
+
 /* Main */
 #main {
     width: 580px;

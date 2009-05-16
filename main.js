@@ -60,6 +60,12 @@ var PLAYLICK = {
     update_playlist_title: function (title) {
         $('#playlistTitle').html(title);
     },
+    update_playdar_status: function (message) {
+        $('#playdar').html(
+            '<img src="http://www.playdar.org/resources/playdar_logo_16x16.png" width="16" height="16"> '
+            + message
+        );
+    },
     stash_current: function () {
         if (Playdar.client) {
             Playdar.client.cancel_resolve();

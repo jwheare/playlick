@@ -18,6 +18,8 @@
                         </ul>
                         <p id="loading_playlists">Loading…</p>
                     </div>
+                    <div id="playdar">
+                    </div>
                 </div>
                 
                 <div id="main">
@@ -66,9 +68,20 @@
                 website: "http://www.playlick.com/",
                 receiverurl: "http://www.playlick.com/playdar_auth.html"
             });
+            Playdar.USE_STATUS_BAR = false;
             Playdar.client.register_listeners({
+                onStat: function (detected) {
+                    if (!detected.authenticated) {
+                        PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
+                    }
+                },
                 onAuth: function () {
+                    PLAYLICK.update_playdar_status(Playdar.client.get_disconnect_link_html('Disconnect from Playdar'));
                     Playdar.client.autodetect(PLAYLICK.playdar_track_handler);
+                },
+                onAuthClear: function () {
+                    Playdar.client.cancel_resolve();
+                    PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
                 }
             });
             
