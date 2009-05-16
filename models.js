@@ -22,6 +22,7 @@ var MODELS = {
         this.duration = duration;
         this.playdar_sid = null;
         this.playdar_response = null;
+        this.playdar_url = null;
     };
     Track.prototype = {
         get_duration_string: function () {
@@ -111,10 +112,10 @@ var MODELS = {
         **/
         _rebuild: function () {
             var duration = 0;
-            $.each(this.tracks, function (index, item) {
-                item.position = index + 1;
-                if (typeof item.track.duration != 'undefined') {
-                    duration += item.track.duration;
+            $.each(this.tracks, function (index, playlist_track) {
+                playlist_track.position = index + 1;
+                if (typeof playlist_track.track.duration != 'undefined') {
+                    duration += playlist_track.track.duration;
                 }
             });
             this.duration = duration;
@@ -171,19 +172,26 @@ var MODELS = {
         toHTML: function () {
             return this.toString();
         },
+        get_urls: function () {
+            var urls = [];
+            $.each(this.tracks, function (index, playlist_track) {
+                if (playlist_track.track.playdar_url) {
+                    urls.push(playlist_track.track.playdar_url);
+                }
+            });
+            return urls;
+        },
         /**
          * Track accessors
         **/
         get_track_by_id: function (playlist_track_id) {
             var that = this;
-            var playlist_track;
-            $.each(this.tracks, function (index, item) {
-                if (item.id == playlist_track_id) {
-                    playlist_track = item;
+            $.each(this.tracks, function (index, playlist_track) {
+                if (playlist_track.id == playlist_track_id) {
                     return false;
                 }
             });
-            return track;
+            return playlist_track;
         },
         get_track_at_position: function (position) {
             var index = position - 1;

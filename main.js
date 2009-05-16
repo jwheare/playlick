@@ -127,7 +127,7 @@ var PLAYLICK = {
         track_item.addClass('playing');
     },
     onResultStop: function () {
-        var track_item = $('#sid' + Playdar.player.nowplayingid).data('track_item');
+        var track_item = $('#sid' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             track_item.removeClass('playing');
@@ -142,7 +142,7 @@ var PLAYLICK = {
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
         // Chain playback to the next perfect match
-        var next_track = $('#sid' + Playdar.player.nowplayingid).data('track_item').nextAll('li.perfectMatch');
+        var next_track = $('#sid' + this.sID).data('track_item').nextAll('li.perfectMatch');
         if (next_track) {
             var playlist_track = next_track.data('playlist_track');
             PLAYLICK.play_track(playlist_track);
@@ -180,6 +180,7 @@ var PLAYLICK = {
         track.duration = result.duration;
         playlist_track.element.find('span.elapsed').html(track.get_duration_string());
         playlist_track.track.playdar_sid = result.sid;
+        playlist_track.track.playdar_url = result.url;
         playlist_track.playlist.save();
     },
     
