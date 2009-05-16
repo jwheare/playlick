@@ -8,7 +8,6 @@ TODO
 ----
 
 * Persistence/Sessions
-* Source picker before export
 * Sharing
 * XSPF export
 * Applecript export for iTunes
