@@ -195,10 +195,11 @@ var PLAYLICK = {
                 playlist_track.track.playdar_response = null;
             }
         }
-        // If the sid has changed, restart wih the new stream
-        if (playlist_track.track.playdar_sid != result.sid) {
-            var stopped = Playdar.player.stop_stream(playlist_track.track.playdar_sid);
-            if (stopped) {
+        // If the sid has changed, restart wih the new stream unless
+        // we're playing a different track
+        if (playlist_track.track.playdar_sid && playlist_track.track.playdar_sid != result.sid) {
+            Playdar.player.stop_stream(playlist_track.track.playdar_sid);
+            if (!Playdar.player.is_now_playing()) {
                 Playdar.player.play_stream(result.sid);
             }
         }
@@ -224,12 +225,12 @@ var PLAYLICK = {
             if (response.results.length) {
                 list_item.addClass('match');
                 var result = response.results[0];
+                var results_table = PLAYLICK.build_results_table(response, list_item);
                 if (result.score == 1) {
                     PLAYLICK.update_track(playlist_track, result, true);
                 }
-                var results = PLAYLICK.build_results_table(response, list_item);
                 var sources = list_item.children('.sources');
-                sources.html(results);
+                sources.html(results_table);
                 if (playlist_track.track.playdar_sid) {
                     list_item.addClass('perfectMatch');
                 }
