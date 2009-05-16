@@ -24,6 +24,11 @@ a {
     color: #335507;
 }
 
+form {
+    margin: 0;
+    padding: 0;
+}
+
 #viewport {
     width: 970px;
     margin: 0 auto;
@@ -87,7 +92,6 @@ ul#playlist_stash li a.playlist:active {
 }
 
 ul#playlist_stash li form {
-    margin: 0;
     padding: 0 7px;
     line-height: 39px;
 }
