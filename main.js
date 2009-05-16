@@ -560,7 +560,7 @@ $('#import_xspf').click(function (e) {
     
     $('#manage').hide();
     $('#import').hide();
-    $('#xspf p.xspf').hide();
+    $('#xspf p.xspf_messages').hide();
     $('#xspf').show();
     
     $('#xspf_input').select();
@@ -583,12 +583,20 @@ $('#xspf_form').submit(function (e) {
         q: 'select * from xml where url="' + params.xspf + '"',
         format: 'json'
     }, function (json) {
-        PLAYLICK.add_from_jspf("xspf_" + params.xspf, json.query.results.lfm.playlist);
-        // Update messages
+        if (json) {
+            var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
+            if (xspf) {
+                PLAYLICK.add_from_jspf("xspf_" + params.xspf, xspf);
+                // Update messages
+                $('#xspf p.xspf_messages').hide();
+                $('#xspf_title').html(xspf.title);
+                $('#xspf_count').html(xspf.trackList.track.length);
+                $('#xspf_done').show();
+                return true;
+            }
+        }
         $('#xspf p.xspf_messages').hide();
-        $('#xspf_title').html(json.query.results.lfm.playlist.title);
-        $('#xspf_count').html(json.query.results.lfm.playlist.trackList.track.length);
-        $('#xspf_done').show();
+        $('#xspf_error').show();
     });
 });
 
