@@ -69,10 +69,14 @@ var PLAYLICK = {
             + message
         );
     },
-    stash_current: function () {
+    cancel_resolve: function () {
         if (Playdar.client) {
             Playdar.client.cancel_resolve();
         }
+        $('#playlist').find('li').removeClass('scanning');
+    },
+    stash_current: function () {
+        PLAYLICK.cancel_resolve();
         // Stash the current data
         if (PLAYLICK.current_playlist.tracks.length) {
             DATA.playlists[PLAYLICK.current_playlist.id] = {
@@ -373,9 +377,7 @@ PLAYLICK.new_playlist();
 $('#create_playlist').click(function (e) {
     e.preventDefault();
     var target = $(e.target);
-    if (Playdar.client) {
-        Playdar.client.cancel_resolve();
-    }
+    PLAYLICK.cancel_resolve();
     PLAYLICK.stash_current();
     PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
     
