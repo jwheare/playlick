@@ -62,7 +62,7 @@ var PLAYLICK = {
     },
     update_playdar_status: function (message) {
         $('#playdar').html(
-            '<img src="http://www.playdar.org/resources/playdar_logo_16x16.png" width="16" height="16"> '
+            '<img src="/playdar_logo_16x16.png" width="16" height="16"> '
             + message
         );
     },
