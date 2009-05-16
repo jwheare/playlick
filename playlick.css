@@ -293,9 +293,14 @@ form#add_to_playlist input#add_track_input {
     width: 18px;
     padding-right: 3px;
     text-align: right;
+    vertical-align: middle;
 }
 .sources table tr.info td.score {
     font-size: 11px;
+}
+.sources table td.name img {
+    float: right;
+    margin: 5px 10px 5px 0;
 }
 .sources table td.time,
 .sources table td.size,

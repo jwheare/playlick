@@ -270,15 +270,25 @@ var PLAYLICK = {
             } else {
                 score_cell = '<td class="score">' + result.score.toFixed(3) + '</td>';
             }
+            var album_art = "http://james.ws.dev.last.fm:8090/2.0/?" + Playdar.Util.toQueryString({
+                artist: result.artist,
+                album: result.album,
+                method: "album.coverredirect",
+                size: "small",
+                api_key: "b25b959554ed76058ac220b7b2e0a026"
+            });
             var tbody_html = '<tbody class="result" id="sid' + result.sid + '">'
                 + '<tr class="track">'
                     + '<td class="choice">'
                         + '<input type="radio" name="choice" value="' + result.sid + '"' + checked + '>'
                     + '</td>'
-                    + '<td class="name" colspan="3">'
-                        + result.track + ' - ' + result.artist + ' (' + result.album + ')'
+                    + '<td class="name" colspan="4">'
+                        + '<img width="34" height="34" src="'
+                            + album_art
+                        + '">'
+                        + result.track
+                        + '<br>' + result.artist + ' - ' + result.album
                     + '</td>'
-                    + '<td class="progress" id="progress' + result.sid + '"></td>'
                 + '</tr>'
                 + '<tr class="info">'
                     + score_cell
