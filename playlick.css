@@ -184,12 +184,15 @@ form#add_to_playlist input#add_track_input {
     display: none;
 }
 .trackList li.scanning span.status span.scanning,
-.trackList li.match span.status span.play {
+.trackList li.perfectMatch span.status span.play {
     display: inline;
 }
 .trackList a.item {
     display: block;
     text-decoration: none;
+}
+.trackList li.match {
+    background-color: #e8f9bb;
 }
 .trackList li.match:hover {
     background-color: #a8d840;
@@ -235,7 +238,7 @@ form#add_to_playlist input#add_track_input {
     color: #335507;
     font-size: 11px;
 }
-.trackList li.match span.elapsed {
+.trackList li.perfectMatch span.elapsed {
     visibility: visible;
 }
 .trackList li.match:hover a.show_sources,

@@ -121,8 +121,8 @@ var PLAYLICK = {
     },
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
-        
-        var next_track = $('#sid' + this.sID).data('track_item').nextAll('li.match');
+        // Chain playback to the next perfect match
+        var next_track = $('#sid' + this.sID).data('track_item').nextAll('li.perfectMatch');
         var playlist_track = next_track.data('playlist_track');
         PLAYLICK.play_track(playlist_track);
     },
@@ -174,10 +174,9 @@ var PLAYLICK = {
                 if (response.results.length) {
                     list_item.addClass('match');
                     var result = response.results[0];
-                    var perfect = (result.score == 1);
-                    PLAYLICK.update_track(playlist_track, result, perfect);
-                    if (perfect) {
+                    if (result.score == 1) {
                         list_item.addClass('perfectMatch');
+                        PLAYLICK.update_track(playlist_track, result, true);
                     }
                     var results = PLAYLICK.build_results_table(response, list_item);
                     var sources = list_item.children('.sources');
@@ -362,12 +361,17 @@ $('#playlist').click(function (e) {
         var tbody = target.closest('tbody.result');
         if (tbody.size()) {
             e.preventDefault();
+            // Check radio button
             var radio = tbody.find('input[name=choice]');
             radio.attr('checked', true);
+            // Highlight result
             tbody.siblings().removeClass('choice');
             tbody.addClass('choice');
+            // Update track with result data
             var result = tbody.data('result');
             PLAYLICK.update_track(playlist_track, result, true);
+            track_item.addClass('perfectMatch');
+            // Play
             PLAYLICK.play_track(playlist_track);
         }
         // Clicks to the remove button
@@ -384,8 +388,10 @@ $('#playlist').click(function (e) {
         var track_link = target.closest('li.p_t a.item');
         if (track_link.size()) {
             e.preventDefault();
-            if (playlist_track.sid) {
+            if (track_item.hasClass('perfectMatch') && playlist_track.sid) {
                 PLAYLICK.play_track(playlist_track);
+            } else if (track_item.hasClass('match')) {
+                track_item.toggleClass('open');
             } else {
                 Playdar.client.autodetect(PLAYLICK.playdar_track_handler, playlist_track.element[0]);
             }
