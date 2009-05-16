@@ -96,27 +96,32 @@ var PLAYLICK = {
         }
     },
     onResultPlay: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
-        track_item.addClass('playing');
-        track_item.removeClass('paused');
+        PLAYLICK.onResultResume.call(this);
     },
     onResultPause: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
         track_item.removeClass('playing');
         track_item.addClass('paused');
     },
+    onResultResume: function () {
+        var track_item = $('#sid' + this.sID).data('track_item');
+        track_item.removeClass('paused');
+        track_item.addClass('playing');
+    },
     onResultStop: function () {
-        Playdar.player.stop_all();
-        
         var track_item = $('#sid' + this.sID).data('track_item');
         var playlist_track = track_item.data('playlist_track');
         track_item.removeClass('playing');
+        track_item.removeClass('paused');
         track_item.css('background-position', '0 0');
         var progress = track_item.find('span.elapsed');
         progress.html(playlist_track.track.get_duration_string());
+        
+        Playdar.player.stop_all();
     },
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
+        
         var next_track = $('#sid' + this.sID).data('track_item').nextAll('li.match');
         var playlist_track = next_track.data('playlist_track');
         PLAYLICK.play_track(playlist_track);
@@ -139,18 +144,18 @@ var PLAYLICK = {
     },
     
     update_track: function (playlist_track, result, copy_details) {
+        var track  = playlist_track.track;
         if (copy_details) {
-            var track  = playlist_track.track;
             track.name = result.track;
             track.artist = result.artist;
-            track.duration = result.duration;
-            playlist_track.playlist.save();
             // Update DOM
             playlist_track.element.find('span.fn').html(track.name);
             playlist_track.element.find('span.contributor').html(track.artist);
-            playlist_track.element.find('span.elapsed').html(track.get_duration_string());
         }
+        track.duration = result.duration;
+        playlist_track.element.find('span.elapsed').html(track.get_duration_string());
         playlist_track.sid = result.sid;
+        playlist_track.playlist.save();
     },
     
     play_track: function (playlist_track) {
@@ -164,10 +169,9 @@ var PLAYLICK = {
         Playdar.client.register_results_handler(function (response, final_answer) {
             var list_item = $(track.element).parents('li.p_t');
             var playlist_track = list_item.data('playlist_track');
+            list_item.removeClass('scanning noMatch match perfectMatch');
             if (final_answer) {
-                list_item.removeClass('scanning');
                 if (response.results.length) {
-                    list_item.removeClass('scanning noMatch perfectMatch');
                     list_item.addClass('match');
                     var result = response.results[0];
                     var perfect = (result.score == 1);
@@ -179,11 +183,9 @@ var PLAYLICK = {
                     var sources = list_item.children('.sources');
                     sources.html(results);
                 } else {
-                    list_item.removeClass('scanning match perfectMatch');
                     list_item.addClass('noMatch');
                 }
             } else {
-                list_item.removeClass('noMatch match perfectMatch');
                 list_item.addClass('scanning');
             }
         }, uuid);
@@ -197,7 +199,7 @@ var PLAYLICK = {
             var sound = Playdar.player.register_stream(result, {
                 onplay: PLAYLICK.onResultPlay,
                 onpause: PLAYLICK.onResultPause,
-                onresume: PLAYLICK.onResultPlay,
+                onresume: PLAYLICK.onResultResume,
                 onstop: PLAYLICK.onResultStop,
                 onfinish: PLAYLICK.onResultFinish,
                 whileplaying: PLAYLICK.updatePlaybackProgress
