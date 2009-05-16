@@ -78,6 +78,10 @@ ul#playlist_stash li {
     border-bottom: 1px solid #d2f380;
     line-height: 39px;
 }
+ul#playlist_stash li img {
+    margin: -2px 3px 0 0;
+    vertical-align: middle;
+}
 ul#playlist_stash li a.playlist {
     display: block;
     padding: 0 10px;
@@ -152,14 +156,30 @@ ul#playlist_stash li input.playlist_name {
     margin: 0 0 15px 40px;
 }
 
+/* Import */
+#import {
+    display: none;
+}
+
 /* Add track form */
-form#add_to_playlist {
+form#add_to_playlist,
+form#import_playlist_form {
     margin: 20px 0 20px 40px;
     line-height: 25px;
 }
-form#add_to_playlist input#add_track_input {
-    margin-right: 10px;
-    width: 300px;
+form#add_to_playlist input#add_track_input,
+form#import_playlist_form input#import_playlist_input {
+    margin: 0 10px;
+    width: 250px;
+}
+
+#import p.import_messages {
+    display: none;
+    margin: 20px 0 20px 40px;
+}
+#import p.import_messages img {
+    margin: -3px 5px 0 0;
+    vertical-align: middle;
 }
 
 /* Track list */

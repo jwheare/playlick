@@ -14,7 +14,11 @@
                     <h1>Your playlists</h1>
                     <div class="stash">
                         <ul id="playlist_stash">
-                            <li><a href="#" id="create_playlist" class="playlist">+ Create</a></li>
+                            <li class="current"><a href="#" id="create_playlist" class="playlist">+ Create</a></li>
+                            <li><a href="#" id="import_playlist" class="playlist">
+                                <img src="http://cdn.last.fm/flatness/favicon.2.png" width="16" height="16">
+                                Import
+                            </a></li>
                         </ul>
                         <p id="loading_playlists">Loading…</p>
                     </div>
@@ -23,17 +27,34 @@
                 </div>
                 
                 <div id="main">
-                    <h1 id="playlistTitle">Create a new playlist</h1>
+                    <div id="manage">
+                        <h1 id="playlistTitle">Create a new playlist</h1>
+                        
+                        <form id="add_to_playlist">
+                            <label for="add_track_input">Add a Track:</label>
+                            <input type="text" name="track" id="add_track_input" />
+                            <input type="hidden" name="artist_name" id="add_track_artist" />
+                            <input type="hidden" name="track_name" id="add_track_name" />
+                            <input type="submit" id="add_track_button" value="Start a Playlist" />
+                        </form>
+                        
+                        <ol class="trackList" id="playlist"></ol>
+                    </div>
                     
-                    <form id="add_to_playlist">
-                        <label for="add_track_input">Track:</label>
-                        <input type="text" name="track" id="add_track_input" />
-                        <input type="hidden" name="artist_name" id="add_track_artist" />
-                        <input type="hidden" name="track_name" id="add_track_name" />
-                        <input type="submit" id="add_track_button" value="Start a Playlist" />
-                    </form>
-                    
-                    <ol class="trackList" id="playlist"></ol>
+                    <div id="import">
+                        <h1>Import a playlist from Last.fm</h1>
+                        
+                        <form id="import_playlist_form">
+                            <label for="import_playlist_input">Username:</label>
+                            <input type="text" name="username" id="import_playlist_input" />
+                            <input type="submit" id="import_playlist_button" value="Get Playlists" />
+                        </form>
+                        
+                        <p class="import_messages" id="import_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
+                        <p class="import_messages" id="import_done">Done! Imported <span id="import_count"></span> playlists</p>
+                        <p class="import_messages" id="import_error_user">Invalid user</p>
+                        <p class="import_messages" id="import_error_no_playlists">No playlists found</p>
+                    </div>
                 </div>
                 
                 <div id="footer">

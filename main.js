@@ -31,6 +31,7 @@ MODELS.Playlist.prototype.toHTML = function () {
 };
 
 var PLAYLICK = {
+    lastfm_api_key: "b25b959554ed76058ac220b7b2e0a026",
     current_playlist: null,
     start_button_text: $('#add_track_button').val(),
     add_button_text: 'Add',
@@ -270,12 +271,12 @@ var PLAYLICK = {
             } else {
                 score_cell = '<td class="score">' + result.score.toFixed(3) + '</td>';
             }
-            var album_art = "http://james.ws.dev.last.fm:8090/2.0/?" + Playdar.Util.toQueryString({
+            var album_art = "http://james.ws.dev.last.fm:8090/2.0/?" + $.param({
                 artist: result.artist,
                 album: result.album,
                 method: "album.coverredirect",
                 size: "small",
-                api_key: "b25b959554ed76058ac220b7b2e0a026"
+                api_key: PLAYLICK.lastfm_api_key
             });
             var tbody_html = '<tbody class="result" id="sid' + result.sid + '">'
                 + '<tr class="track">'
@@ -328,7 +329,7 @@ $("#add_track_input").autocomplete("http://ws.audioscrobbler.com/2.0/?callback=?
     delay: 200,
     dataType: "jsonp",
     extraParams: {
-        api_key: "b25b959554ed76058ac220b7b2e0a026",
+        api_key: PLAYLICK.lastfm_api_key,
         format: "json",
         method: "track.search",
         track: function () {
@@ -407,10 +408,15 @@ $('#create_playlist').click(function (e) {
     PLAYLICK.stash_current();
     PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
     
-    $('#playlist_stash').find('li.p').removeClass('current');
+    $('#playlist_stash').find('li').removeClass('current');
+    target.closest('li').addClass('current');
     PLAYLICK.new_playlist();
+    
+    $('#manage').show();
+    $('#import').hide();
+    
+    $('#add_track_input').select();
 });
-
 // Add to loaded playlist
 $('#add_to_playlist').submit(function (e) {
     e.preventDefault();
@@ -431,6 +437,114 @@ $('#add_to_playlist').submit(function (e) {
         }
         PLAYLICK.resolve_track(playlist_track);
     }
+});
+
+$('#import_playlist').click(function (e) {
+    e.preventDefault();
+    var target = $(e.target);
+    
+    $('#playlist_stash').find('li').removeClass('current');
+    target.closest('li').addClass('current');
+    
+    $('#manage').hide();
+    $('#import p.import_messages').hide();
+    $('#import').show();
+    
+    $('#import_playlist_input').select();
+});
+
+// Add to loaded playlist
+$('#import_playlist_form').submit(function (e) {
+    e.preventDefault();
+    // Show a loading icon
+    $('#import p.import_messages').hide();
+    $('#import_loading').show();
+    // Parse the form
+    var params = {};
+    $.each($(this).serializeArray(), function (index, item) {
+        params[item.name] = item.value;
+    });
+    $('#import_playlist_input').val('');
+    $('#import_playlist_input').select();
+    // Get this user's playlists
+    $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
+        method: "user.getplaylists",
+        user: params.username,
+        api_key: PLAYLICK.lastfm_api_key,
+        format: 'json'
+    }, function (json) {
+        if (json.error) {
+            // Invalid user
+            if (json.error == 6) {
+                $('#import p.import_messages').hide();
+                $('#import_error_user').show();
+            } else {
+                console.warn(json.error, json.message);
+            }
+        } else {
+            var playlists = json.playlists.playlist;
+            if (playlists) {
+                var playlist_done = {};
+                $.each(playlists, function (index, playlist) {
+                    var playlist_id = playlist.id;
+                    playlist_done[playlist_id] = false;
+                    // Get the tracklist for each playlist
+                    $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
+                        method: "playlist.fetch",
+                        playlistURL: "lastfm://playlist/" + playlist_id,
+                        api_key: PLAYLICK.lastfm_api_key,
+                        format: 'json'
+                    }, function (playlist_json) {
+                        if (playlist_json.error) {
+                            console.warn(playlist_json.error, playlist_json.message);
+                        } else {
+                            var track_list = playlist_json.playlist.trackList.track;
+                            var key = 'lastfm_' + playlist_id;
+                            // Store the tracks in our DATA object
+                            DATA.playlists[key] = {
+                                name: playlist_json.playlist.title,
+                                tracks: $.map(track_list, function (track, index) {
+                                    return new MODELS.Track(track.title, track.creator);
+                                })
+                            };
+                            // Create the playlists
+                            var playlist = new MODELS.Playlist('playlist', {
+                                id: key,
+                                name: playlist_json.playlist.title,
+                                onSave: function () {
+                                    if (this == PLAYLICK.current_playlist) {
+                                        PLAYLICK.update_playlist_title(this.toString());
+                                    }
+                                }
+                            });
+                            // Add to the stash list
+                            if (!$('#p_' + key).size()) {
+                                playlist.element.appendTo($('#playlist_stash'));
+                            }
+                            playlist_done[playlist_id] = true;
+                            var done = true;
+                            for (k in playlist_done) {
+                                if (playlist_done[k] === false) {
+                                    still_loading = false;
+                                    break;
+                                }
+                            };
+                            if (done) {
+                                $('#import p.import_messages').hide();
+                                $('#import_count').html(playlists.length);
+                                $('#import_done').show();
+                            }
+                        }
+                    });
+                });
+            } else {
+                // No playlists
+                $('#import p.import_messages').hide();
+                $('#import_error_no_playlists').show();
+            }
+        }
+    });
+
 });
 
 $('#playlist').click(function (e) {
@@ -499,9 +613,12 @@ $('#playlist_stash').click(function (e) {
         PLAYLICK.current_playlist = playlist_item.data('playlist');
         PLAYLICK.current_playlist.load_tracks(DATA.playlists[PLAYLICK.current_playlist.id].tracks);
         $('#add_track_button').val(PLAYLICK.add_button_text);
-        $('#playlist_stash').find('li.p').removeClass('current');
+        $('#playlist_stash').find('li').removeClass('current');
         playlist_item.addClass('current');
         PLAYLICK.resolve_current_playlist();
+        
+        $('#manage').show();
+        $('#import').hide();
     }
     // Edit the playlist name
     if (target.is('li.p a.edit_playlist')) {

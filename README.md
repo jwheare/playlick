@@ -8,9 +8,8 @@ TODO
 ----
 
 * Import from Last.fm API
-* Persistence/Sessions
-* Sharing
 * XSPF export
 * Applecript export for iTunes
-* Snazzy logo
 * Hosted playdar streaming
+* Persistence/Sessions
+* Sharing/URLs
