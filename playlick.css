@@ -287,12 +287,13 @@ form#add_to_playlist input#add_track_input {
 .sources table tr.info td {
     padding-bottom: 8px;
     color: #6ea31e;
+    line-height: 12px;
 }
 .sources table td.choice,
 .sources table tr.info td.score {
     width: 18px;
     padding-right: 3px;
-    text-align: right;
+    text-align: center;
     vertical-align: middle;
 }
 .sources table tr.info td.score {
