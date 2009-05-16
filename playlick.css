@@ -79,7 +79,8 @@ ul#playlist_stash li {
     line-height: 39px;
 }
 ul#playlist_stash li img {
-    margin: -2px 3px 0 0;
+    float: right;
+    margin: 11px 3px 0 3px;
     vertical-align: middle;
 }
 ul#playlist_stash li a.playlist {
