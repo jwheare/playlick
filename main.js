@@ -46,6 +46,7 @@ var PLAYLICK = {
             onCreate: function () {
                 if (!this.is_in_dom()) {
                     this.element.appendTo($('#playlist_stash'));
+                    this.element.addClass('current');
                     PLAYLICK.update_playlist_title(this.toString());
                     DATA.playlists[this.id] = {
                         name: this.name,
@@ -367,11 +368,14 @@ PLAYLICK.new_playlist();
 // Setup event handlers
 $('#create_playlist').click(function (e) {
     e.preventDefault();
+    var target = $(e.target);
     if (Playdar.client) {
         Playdar.client.cancel_resolve();
     }
     PLAYLICK.stash_current();
     PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
+    
+    $('#playlist_stash').find('li.p').removeClass('current');
     PLAYLICK.new_playlist();
 });
 
@@ -455,35 +459,36 @@ $('#playlist_stash').keypress(function (e) {
 $('#playlist_stash').click(function (e) {
     // Load the clicked playlist
     var target = $(e.target);
+    var playlist_item = target.closest('li.p');
     if (target.is('li.p a.playlist')) {
         e.preventDefault();
         target.blur();
         PLAYLICK.stash_current();
-        PLAYLICK.current_playlist = target.parents('li.p').data('playlist');
+        PLAYLICK.current_playlist = playlist_item.data('playlist');
         PLAYLICK.current_playlist.load_tracks(DATA.playlists[PLAYLICK.current_playlist.id].tracks);
         PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.toString());
         $('#add_track_button').val(PLAYLICK.add_button_text);
+        $('#playlist_stash').find('li.p').removeClass('current');
+        playlist_item.addClass('current');
         PLAYLICK.resolve_current_playlist();
     }
     // Edit the playlist name
     if (target.is('li.p a.edit_playlist')) {
         e.preventDefault();
         target.blur();
-        PLAYLICK.toggle_playlist_edit(target.parents('li.p'));
+        PLAYLICK.toggle_playlist_edit(playlist_item);
     }
     if (target.is('li.p a.delete_playlist')) {
         e.preventDefault();
-        PLAYLICK.delete_playlist(target.parents('li.p').data('playlist'));
+        PLAYLICK.delete_playlist(playlist_item.data('playlist'));
     }
-    if (target.is('#playlist_stash form.edit_playlist_form input[type=submit]')) {
+    if (target.is('li.p form.edit_playlist_form input[type=submit]')) {
         e.preventDefault();
         var form = target.parents('form');
         form.hide();
-        form.siblings('.playlist').show();
-        var stash_row = form.parents('li.p');
-        var playlist = stash_row.data('playlist');
+        var playlist = playlist_item.data('playlist');
         var name = form.serializeArray()[0].value;
-        form.siblings('.playlist').html(name);
+        playlist_item.find('a.playlist').html(name).show();
         playlist.set_name(name);
         if (PLAYLICK.current_playlist == playlist) {
             PLAYLICK.update_playlist_title(playlist.toString());

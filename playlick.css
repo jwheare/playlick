@@ -59,7 +59,6 @@ form {
 }
 .stash {
     margin: 15px 0;
-    background: #e8f9bb;
 }
 .stash p#loading_playlists {
     margin: 0;
@@ -83,9 +82,13 @@ ul#playlist_stash li a.playlist {
     display: block;
     padding: 0 10px;
     text-decoration: none;
+    background: #e8f9bb;
+}
+ul#playlist_stash li.current a.playlist {
+    background: #d2f380;
 }
 ul#playlist_stash li a.playlist:hover {
-    background: #d2f380;
+    background: #c0e95b;
 }
 ul#playlist_stash li a.playlist:active {
     background: #a8d840;

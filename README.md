@@ -7,6 +7,7 @@ Hooks into [Playdar](http://www.playdar.org) for content resolution.
 TODO
 ----
 
+* Import from Last.fm API
 * Persistence/Sessions
 * Sharing
 * XSPF export
