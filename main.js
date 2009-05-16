@@ -2,7 +2,7 @@
 MODELS.Track.prototype.toHTML = function () {
     return '<a href="#" class="remove" title="Remove from playlist">╳</a>'
         + '<a href="#" class="show_sources">sources</a>'
-        + '<span class="elapsed">' + UTIL.mmss(this.duration) + '</span>'
+        + '<span class="elapsed">' + this.get_duration_string() + '</span>'
         + '<a href="#" class="item">'
             + '<span class="status">'
                 + '&nbsp;'
@@ -39,6 +39,9 @@ var PLAYLICK = {
     // Create a new empty playlist
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
+            onSave: function () {
+                PLAYLICK.update_playlist_title(this.toString());
+            },
             onCreate: function () {
                 if (!this.is_in_dom()) {
                     this.element.appendTo($('#playlist_stash'));
@@ -57,7 +60,7 @@ var PLAYLICK = {
     update_playlist_title: function (title) {
         $('#playlistTitle').html(title);
     },
-    stash_current: function (title) {
+    stash_current: function () {
         if (Playdar.client) {
             Playdar.client.cancel_resolve();
         }
@@ -72,9 +75,6 @@ var PLAYLICK = {
                     return item.track;
                 })
             };
-        }
-        if (title) {
-            PLAYLICK.update_playlist_title(title);
         }
     },
     delete_playlist: function (playlist) {
@@ -107,7 +107,7 @@ var PLAYLICK = {
         track_item.removeClass('playing');
         track_item.css('background-position', '0 0');
         var progress = track_item.find('span.elapsed');
-        progress.html(UTIL.mmss(playlist_track.track.duration));
+        progress.html(playlist_track.track.get_duration_string());
     },
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
@@ -120,7 +120,7 @@ var PLAYLICK = {
         var playlist_track = track_item.data('playlist_track');
         // Update the track progress
         var progress = track_item.find('span.elapsed');
-        progress.html('<strong>' + UTIL.mmss(Math.round(this.position/1000)) + '</strong> / ' + UTIL.mmss(playlist_track.track.duration));
+        progress.html('<strong>' + UTIL.mmss(Math.round(this.position/1000)) + '</strong> / ' + playlist_track.track.get_duration_string());
         // Update the playback progress bar
         var duration;
         if (this.readyState == 3) { // loaded/success
@@ -134,15 +134,17 @@ var PLAYLICK = {
     
     update_track: function (playlist_track, result, copy_details) {
         if (copy_details) {
-            playlist_track.track.name = result.track;
-            playlist_track.track.artist = result.artist;
-            playlist_track.track.duration = result.duration;
-            playlist_track.element.find('span.fn').html(result.track);
-            playlist_track.element.find('span.contributor').html(result.artist);
-            playlist_track.element.find('span.elapsed').html(UTIL.mmss(result.duration));
+            var track  = playlist_track.track;
+            track.name = result.track;
+            track.artist = result.artist;
+            track.duration = result.duration;
+            playlist_track.playlist.save();
+            // Update DOM
+            playlist_track.element.find('span.fn').html(track.name);
+            playlist_track.element.find('span.contributor').html(track.artist);
+            playlist_track.element.find('span.elapsed').html(track.get_duration_string());
         }
         playlist_track.sid = result.sid;
-        playlist_track.playlist.save();
     },
     
     play_track: function (playlist_track) {
@@ -296,7 +298,10 @@ $('#loading_playlists').hide();
 $.each(DATA.playlists, function (key, value) {
     var playlist = new MODELS.Playlist('playlist', {
         id: key,
-        name: value.name
+        name: value.name,
+        onSave: function () {
+            PLAYLICK.update_playlist_title(this.toString());
+        }
     });
     playlist.element.appendTo($('#playlist_stash'));
 });
@@ -310,7 +315,8 @@ $('#create_playlist').click(function (e) {
     if (Playdar.client) {
         Playdar.client.cancel_resolve();
     }
-    PLAYLICK.stash_current(PLAYLICK.create_playlist_title);
+    PLAYLICK.stash_current();
+    PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
     PLAYLICK.new_playlist();
 });
 
