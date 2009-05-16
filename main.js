@@ -201,7 +201,7 @@ var PLAYLICK = {
     load_track_results: function (playlist_track, response, final_answer) {
         var list_item = playlist_track.element;
         list_item.removeClass('scanning noMatch match perfectMatch');
-        playlist_track.track.playdar_qid = response.qid;
+        // playlist_track.track.playdar_qid = response.qid;
         if (final_answer) {
             playlist_track.track.playdar_response = response;
             if (response.results.length) {
