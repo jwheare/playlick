@@ -217,6 +217,17 @@ form#add_to_playlist input#add_track_input {
     background: #d2f380;
     text-decoration: none;
 }
+.trackList span.elapsed {
+    float: right;
+    visibility: hidden;
+    margin-right: 8px;
+    color: #335507;
+    font-size: 11px;
+}
+.trackList li.playing span.elapsed,
+.trackList li.paused span.elapsed {
+    visibility: visible;
+}
 .trackList li.match:hover a.show_sources,
 .trackList li.open a.show_sources {
     visibility: visible;
@@ -271,18 +282,11 @@ form#add_to_playlist input#add_track_input {
     font-size: 11px;
 }
 .sources table td.time,
-.sources table td.size {
-    width: 70px;
-    padding-right: 8px;
-}
-.sources table td.progress,
-.sources table td.time,
 .sources table td.size,
 .sources table td.bitrate {
+    width: 60px;
+    padding-right: 8px;
     text-align: right;
-}
-.sources table td.progress {
-    color: #335507;
 }
 
 #footer {

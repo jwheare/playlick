@@ -2,6 +2,7 @@
 MODELS.Track.prototype.toHTML = function () {
     return '<a href="#" class="remove" title="Remove from playlist">╳</a>'
         + '<a href="#" class="show_sources">sources</a>'
+        + '<span class="elapsed"></span>'
         + '<a href="#" class="item">'
             + '<span class="status">'
                 + '&nbsp;'
@@ -89,23 +90,24 @@ var PLAYLICK = {
         }
     },
     onResultPlay: function () {
-        var trackItem = $('#sid' + this.sID).data('track_item');
-        trackItem.addClass('playing');
-        trackItem.removeClass('paused');
+        var track_item = $('#sid' + this.sID).data('track_item');
+        track_item.addClass('playing');
+        track_item.removeClass('paused');
     },
     onResultPause: function () {
-        var trackItem = $('#sid' + this.sID).data('track_item');
-        trackItem.removeClass('playing');
-        trackItem.addClass('paused');
+        var track_item = $('#sid' + this.sID).data('track_item');
+        track_item.removeClass('playing');
+        track_item.addClass('paused');
     },
     onResultStop: function () {
         Playdar.player.stop_all();
-        var progress = $('#progress' + this.sID);
-        progress.html('');
         
-        var trackItem = $('#sid' + this.sID).data('track_item');
-        trackItem.removeClass('playing');
-        trackItem.css('background-position', '0 0');
+        var track_item = $('#sid' + this.sID).data('track_item');
+        var playlist_track = track_item.data('playlist_track');
+        track_item.removeClass('playing');
+        track_item.css('background-position', '0 0');
+        var progress = track_item.find('span.elapsed');
+        progress.html('<strong>' + UTIL.mmss(0) + '</strong> / ' + UTIL.mmss(playlist_track.track.duration));
     },
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
@@ -114,9 +116,11 @@ var PLAYLICK = {
         PLAYLICK.play_track(playlist_track);
     },
     updatePlaybackProgress: function () {
-        var progress = $('#progress' + this.sID);
+        var track_item = $('#sid' + this.sID).data('track_item');
+        var playlist_track = track_item.data('playlist_track');
         // Update the track progress
-        progress.html(UTIL.mmss(Math.round(this.position/1000)));
+        var progress = track_item.find('span.elapsed');
+        progress.html('<strong>' + UTIL.mmss(Math.round(this.position/1000)) + '</strong> / ' + UTIL.mmss(playlist_track.track.duration));
         // Update the playback progress bar
         var duration;
         if (this.readyState == 3) { // loaded/success
@@ -125,8 +129,7 @@ var PLAYLICK = {
             duration = this.durationEstimate;
         }
         var portion_played = this.position / duration;
-        var trackItem = $('#sid' + this.sID).data('track_item');
-        trackItem.css('background-position', Math.round(portion_played * 570) + 'px 0');
+        track_item.css('background-position', Math.round(portion_played * 570) + 'px 0');
     },
     
     update_track: function (playlist_track, result, copy_details) {
@@ -211,9 +214,9 @@ var PLAYLICK = {
                 + '<tr class="info">'
                     + score_cell
                     + '<td class="source">' + result.source + '</td>'
-                    + '<td class="bitrate">' + result.bitrate + ' kbps</td>'
-                    + '<td class="size">' + (result.size/1000000).toFixed(1) + 'MB</td>'
                     + '<td class="time">' + UTIL.mmss(result.duration) + '</td>'
+                    + '<td class="size">' + (result.size/1000000).toFixed(1) + 'MB</td>'
+                    + '<td class="bitrate">' + result.bitrate + ' kbps</td>'
                 + '</tr>'
             + '</tbody>';
             var result_tbody = $(tbody_html).data('result', result);
