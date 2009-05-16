@@ -102,7 +102,7 @@ var PLAYLICK = {
     resolve_track: function (playlist_track) {
         if (Playdar.client && Playdar.client.is_authed()) {
             var track = playlist_track.track;
-            if (track.playdar_sid) {
+            if (track.playdar_response) {
                 PLAYLICK.load_track_results(playlist_track, track.playdar_response, true);
             } else {
                 if (track.playdar_qid) {
@@ -126,13 +126,17 @@ var PLAYLICK = {
     },
     onResultPause: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
-        track_item.removeClass('playing');
-        track_item.addClass('paused');
+        if (track_item) {
+            track_item.removeClass('playing');
+            track_item.addClass('paused');
+        }
     },
     onResultResume: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
-        track_item.removeClass('paused');
-        track_item.addClass('playing');
+        if (track_item) {
+            track_item.removeClass('paused');
+            track_item.addClass('playing');
+        }
     },
     onResultStop: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
@@ -179,11 +183,24 @@ var PLAYLICK = {
     update_track: function (playlist_track, result, copy_details) {
         var track  = playlist_track.track;
         if (copy_details) {
-            track.name = result.track;
-            track.artist = result.artist;
-            // Update DOM
-            playlist_track.element.find('span.fn').html(track.name);
-            playlist_track.element.find('span.contributor').html(track.artist);
+            if (track.name   != result.track
+             || track.artist != result.artist) {
+                track.name = result.track;
+                track.artist = result.artist;
+                // Update DOM
+                playlist_track.element.find('span.fn').html(track.name);
+                playlist_track.element.find('span.contributor').html(track.artist);
+                // Clear results
+                playlist_track.track.playdar_qid = null;
+                playlist_track.track.playdar_response = null;
+            }
+        }
+        // If the sid has changed, restart wih the new stream
+        if (playlist_track.track.playdar_sid != result.sid) {
+            var stopped = Playdar.player.stop_stream(playlist_track.track.playdar_sid);
+            if (stopped) {
+                Playdar.player.play_stream(result.sid);
+            }
         }
         track.duration = result.duration;
         playlist_track.element.find('span.elapsed').html(track.get_duration_string());
@@ -421,7 +438,6 @@ $('#playlist').click(function (e) {
         // Clicks to playdar results
         var tbody = target.closest('tbody.result');
         if (tbody.size()) {
-            e.preventDefault();
             // Check radio button
             var radio = tbody.find('input[name=choice]');
             radio.attr('checked', true);
@@ -432,8 +448,6 @@ $('#playlist').click(function (e) {
             var result = tbody.data('result');
             PLAYLICK.update_track(playlist_track, result, true);
             track_item.addClass('perfectMatch');
-            // Play
-            PLAYLICK.play_track(playlist_track);
         }
         // Clicks to the remove button
         if (target.is('a.remove')) {
