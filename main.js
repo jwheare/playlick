@@ -1,9 +1,9 @@
 // Custom Track and Playlist renderers
 MODELS.Track.prototype.toHTML = function () {
     return '<a href="#" class="remove" title="Remove from playlist">╳</a>'
-        + '<a href="#" class="show_sources">sources</a>'
-        + '<span class="elapsed">' + this.get_duration_string() + '</span>'
+        + '<a href="#" class="show_sources" title="Show track sources">sources</a>'
         + '<a href="#" class="item">'
+            + '<span class="elapsed">' + this.get_duration_string() + '</span>'
             + '<span class="status">'
                 + '&nbsp;'
                 + '<span class="play">▸</span>'
@@ -193,6 +193,7 @@ var PLAYLICK = {
     build_results_table: function (response, list_item) {
         var score_cell, result;
         var results = $('<table cellspacing="0"></table>');
+        var perfect = false;
         for (var i = 0; i < response.results.length; i++) {
             result = response.results[i];
             var sound = Playdar.player.register_stream(result, {
@@ -204,11 +205,15 @@ var PLAYLICK = {
                 whileplaying: PLAYLICK.updatePlaybackProgress
             });
             
-            var checked = (result.score == 1) ? ' checked="checked"' : '';
+            var checked = '';
             if (result.score < 0) {
                 score_cell = '<td class="score">&nbsp;</td>';
             } else if (result.score == 1) {
                 score_cell = '<td class="score perfect">★</td>';
+                if (!perfect) {
+                    checked = ' checked="checked"';
+                }
+                perfect = true;
             } else {
                 score_cell = '<td class="score">' + result.score.toFixed(3) + '</td>';
             }
@@ -231,7 +236,7 @@ var PLAYLICK = {
                 + '</tr>'
             + '</tbody>';
             var result_tbody = $(tbody_html).data('result', result);
-            if (result.score == 1) {
+            if (checked) {
                 result_tbody.addClass('choice');
             }
             result_tbody.data('track_item', list_item);
@@ -239,6 +244,19 @@ var PLAYLICK = {
         }
         results = results.wrap('<form></form>').parent();
         return results;
+    },
+    toggle_playlist_edit: function (playlist_item) {
+        playlist_item.find('a.playlist').toggle();
+        playlist_item.find('form.edit_playlist_form').toggle();
+        var button = playlist_item.find('a.edit_playlist');
+        if (button.html() == PLAYLICK.cancel_edit_playlist_text) {
+            button.html(PLAYLICK.edit_playlist_text);
+        } else {
+            button.html(PLAYLICK.cancel_edit_playlist_text);
+        }
+        setTimeout(function () {
+            playlist_item.find('input.playlist_name').select();
+        }, 1);
     }
 };
 
@@ -388,9 +406,9 @@ $('#playlist').click(function (e) {
         var track_link = target.closest('li.p_t a.item');
         if (track_link.size()) {
             e.preventDefault();
-            if (track_item.hasClass('perfectMatch') && playlist_track.sid) {
+            if (track_item.is('li.perfectMatch') && playlist_track.sid) {
                 PLAYLICK.play_track(playlist_track);
-            } else if (track_item.hasClass('match')) {
+            } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
             } else {
                 Playdar.client.autodetect(PLAYLICK.playdar_track_handler, playlist_track.element[0]);
@@ -399,6 +417,13 @@ $('#playlist').click(function (e) {
     }
 });
 
+$('#playlist_stash').keypress(function (e) {
+    var target = $(e.target);
+    // Capture ESC
+    if (target.is('input.playlist_name') && e.which == 0) {
+        PLAYLICK.toggle_playlist_edit(target.parents('li.p'));
+    }
+});
 $('#playlist_stash').click(function (e) {
     // Load the clicked playlist
     var target = $(e.target);
@@ -418,16 +443,7 @@ $('#playlist_stash').click(function (e) {
     if (target.is('li.p a.edit_playlist')) {
         e.preventDefault();
         target.blur();
-        target.siblings('.playlist').toggle();
-        target.siblings('form').toggle();
-        if (target.html() == PLAYLICK.cancel_edit_playlist_text) {
-            target.html(PLAYLICK.edit_playlist_text);
-        } else {
-            target.html(PLAYLICK.cancel_edit_playlist_text);
-        }
-        setTimeout(function () {
-            target.siblings('form').find(':text').select();
-        }, 1);
+        PLAYLICK.toggle_playlist_edit(target.parents('li.p'));
     }
     if (target.is('li.p a.delete_playlist')) {
         e.preventDefault();
