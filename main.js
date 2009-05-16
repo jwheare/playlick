@@ -531,7 +531,7 @@ $(document).keypress(function (e) {
             var next_track = current_track.nextAll('li.perfectMatch');
             PLAYLICK.play_track(next_track.data('playlist_track'));
             break;
-        case 32: // SPACE
+        case 112: // p
             e.preventDefault();
             var current_track = $('#playlist li.playing, #playlist li.paused');
             if (!current_track.size()) {
