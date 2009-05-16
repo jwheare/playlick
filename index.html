@@ -69,6 +69,8 @@
                 receiverurl: "http://www.playlick.com/playdar_auth.html"
             });
             Playdar.USE_STATUS_BAR = false;
+            Playdar.REFRESH_INTERVAL = 10;
+            Playdar.MAX_CONCURRENT_RESOLUTIONS = 10;
             Playdar.client.register_listeners({
                 onStat: function (detected) {
                     if (!detected.authenticated) {

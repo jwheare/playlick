@@ -20,6 +20,8 @@ var MODELS = {
         this.name = name;
         this.artist = artist;
         this.duration = duration;
+        this.playdar_sid = null;
+        this.playdar_response = null;
     };
     Track.prototype = {
         get_duration_string: function () {
@@ -232,7 +234,6 @@ var MODELS = {
         this.id = MODELS.next_playlist_track_id++;
         this.playlist = playlist;
         this.track = track;
-        this.sid = null;
         
         // Add to DOM
         this.render();

@@ -36,6 +36,7 @@ var PLAYLICK = {
     add_button_text: 'Add',
     edit_playlist_text: 'edit',
     cancel_edit_playlist_text: 'cancel',
+    track_width: 556,
     // Create a new empty playlist
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
@@ -70,9 +71,6 @@ var PLAYLICK = {
         if (Playdar.client) {
             Playdar.client.cancel_resolve();
         }
-        if (Playdar.player) {
-            Playdar.player.stop_all();
-        }
         // Stash the current data
         if (PLAYLICK.current_playlist.tracks.length) {
             DATA.playlists[PLAYLICK.current_playlist.id] = {
@@ -95,6 +93,24 @@ var PLAYLICK = {
             }
         }
     },
+    resolve_track: function (playlist_track) {
+        if (Playdar.client) {
+            var track = playlist_track.track;
+            if (track.playdar_sid) {
+                PLAYLICK.load_track_results(playlist_track, track.playdar_response, true);
+            } else {
+                var qid = PLAYLICK.playdar_track_handler(playlist_track);
+                Playdar.client.resolve(track.artist, '', track.name, qid);
+            }
+        }
+    },
+    resolve_current_playlist: function () {
+        if (Playdar.client) {
+            $.each(PLAYLICK.current_playlist.tracks, function (index, playlist_track) {
+                PLAYLICK.resolve_track(playlist_track);
+            });
+        }
+    },
     onResultPlay: function () {
         PLAYLICK.onResultResume.call(this);
     },
@@ -109,38 +125,45 @@ var PLAYLICK = {
         track_item.addClass('playing');
     },
     onResultStop: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
-        var playlist_track = track_item.data('playlist_track');
-        track_item.removeClass('playing');
-        track_item.removeClass('paused');
-        track_item.css('background-position', '0 0');
-        var progress = track_item.find('span.elapsed');
-        progress.html(playlist_track.track.get_duration_string());
+        var track_item = $('#sid' + Playdar.player.nowplayingid).data('track_item');
+        if (track_item) {
+            var playlist_track = track_item.data('playlist_track');
+            track_item.removeClass('playing');
+            track_item.removeClass('paused');
+            track_item.css('background-position', '0 0');
+            var progress = track_item.find('span.elapsed');
+            progress.html(playlist_track.track.get_duration_string());
+        }
         
         Playdar.player.stop_all();
     },
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
         // Chain playback to the next perfect match
-        var next_track = $('#sid' + this.sID).data('track_item').nextAll('li.perfectMatch');
-        var playlist_track = next_track.data('playlist_track');
-        PLAYLICK.play_track(playlist_track);
+        var next_track = $('#sid' + Playdar.player.nowplayingid).data('track_item').nextAll('li.perfectMatch');
+        if (next_track) {
+            var playlist_track = next_track.data('playlist_track');
+            PLAYLICK.play_track(playlist_track);
+        }
     },
     updatePlaybackProgress: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
-        var playlist_track = track_item.data('playlist_track');
-        // Update the track progress
-        var progress = track_item.find('span.elapsed');
-        progress.html('<strong>' + UTIL.mmss(Math.round(this.position/1000)) + '</strong> / ' + playlist_track.track.get_duration_string());
-        // Update the playback progress bar
-        var duration;
-        if (this.readyState == 3) { // loaded/success
-            duration = this.duration;
-        } else {
-            duration = this.durationEstimate;
+        if (track_item) {
+            track_item.addClass('playing');
+            var playlist_track = track_item.data('playlist_track');
+            // Update the track progress
+            var progress = track_item.find('span.elapsed');
+            progress.html('<strong>' + UTIL.mmss(Math.round(this.position/1000)) + '</strong> / ' + playlist_track.track.get_duration_string());
+            // Update the playback progress bar
+            var duration;
+            if (this.readyState == 3) { // loaded/success
+                duration = this.duration;
+            } else {
+                duration = this.durationEstimate;
+            }
+            var portion_played = this.position / duration;
+            track_item.css('background-position', Math.round(portion_played * PLAYLICK.track_width) + 'px 0');
         }
-        var portion_played = this.position / duration;
-        track_item.css('background-position', Math.round(portion_played * 570) + 'px 0');
     },
     
     update_track: function (playlist_track, result, copy_details) {
@@ -154,39 +177,46 @@ var PLAYLICK = {
         }
         track.duration = result.duration;
         playlist_track.element.find('span.elapsed').html(track.get_duration_string());
-        playlist_track.sid = result.sid;
+        playlist_track.track.playdar_sid = result.sid;
         playlist_track.playlist.save();
     },
     
     play_track: function (playlist_track) {
-        if (playlist_track.sid) {
-            Playdar.player.play_stream(playlist_track.sid);
+        if (playlist_track.track.playdar_sid) {
+            Playdar.player.play_stream(playlist_track.track.playdar_sid);
         }
     },
     
-    playdar_track_handler: function (track) {
-        var uuid = Playdar.Util.generate_uuid();
-        Playdar.client.register_results_handler(function (response, final_answer) {
-            var list_item = $(track.element).parents('li.p_t');
-            var playlist_track = list_item.data('playlist_track');
-            list_item.removeClass('scanning noMatch match perfectMatch');
-            if (final_answer) {
-                if (response.results.length) {
-                    list_item.addClass('match');
-                    var result = response.results[0];
-                    if (result.score == 1) {
-                        list_item.addClass('perfectMatch');
-                        PLAYLICK.update_track(playlist_track, result, true);
-                    }
-                    var results = PLAYLICK.build_results_table(response, list_item);
-                    var sources = list_item.children('.sources');
-                    sources.html(results);
-                } else {
-                    list_item.addClass('noMatch');
+    load_track_results: function (playlist_track, response, final_answer) {
+        var list_item = playlist_track.element;
+        list_item.removeClass('scanning noMatch match perfectMatch');
+        if (final_answer) {
+            playlist_track.track.playdar_response = response;
+            if (response.results.length) {
+                list_item.addClass('match');
+                var result = response.results[0];
+                if (result.score == 1) {
+                    PLAYLICK.update_track(playlist_track, result, true);
+                }
+                var results = PLAYLICK.build_results_table(response, list_item);
+                var sources = list_item.children('.sources');
+                sources.html(results);
+                if (playlist_track.track.playdar_sid) {
+                    list_item.addClass('perfectMatch');
                 }
             } else {
-                list_item.addClass('scanning');
+                list_item.addClass('noMatch');
             }
+        } else {
+            list_item.addClass('scanning');
+        }
+    },
+    
+    playdar_track_handler: function (playlist_track) {
+        // Generate a query ID and a results handler
+        var uuid = Playdar.Util.generate_uuid();
+        Playdar.client.register_results_handler(function (response, final_answer) {
+            PLAYLICK.load_track_results(playlist_track, response, final_answer);
         }, uuid);
         return uuid;
     },
@@ -363,9 +393,7 @@ $('#add_to_playlist').submit(function (e) {
         if (playlist_track.position == 1) {
             $('#add_track_button').val(PLAYLICK.add_button_text);
         }
-        if (Playdar.client) {
-            Playdar.client.autodetect(PLAYLICK.playdar_track_handler, playlist_track.element[0]);
-        }
+        PLAYLICK.resolve_track(playlist_track);
     }
 });
 
@@ -406,12 +434,12 @@ $('#playlist').click(function (e) {
         var track_link = target.closest('li.p_t a.item');
         if (track_link.size()) {
             e.preventDefault();
-            if (track_item.is('li.perfectMatch') && playlist_track.sid) {
+            if (track_item.is('li.perfectMatch') && playlist_track.track.playdar_sid) {
                 PLAYLICK.play_track(playlist_track);
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
             } else {
-                Playdar.client.autodetect(PLAYLICK.playdar_track_handler, playlist_track.element[0]);
+                PLAYLICK.resolve_track(playlist_track);
             }
         }
     }
@@ -435,9 +463,7 @@ $('#playlist_stash').click(function (e) {
         PLAYLICK.current_playlist.load_tracks(DATA.playlists[PLAYLICK.current_playlist.id].tracks);
         PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.toString());
         $('#add_track_button').val(PLAYLICK.add_button_text);
-        if (Playdar.client) {
-            Playdar.client.autodetect(PLAYLICK.playdar_track_handler);
-        }
+        PLAYLICK.resolve_current_playlist();
     }
     // Edit the playlist name
     if (target.is('li.p a.edit_playlist')) {
