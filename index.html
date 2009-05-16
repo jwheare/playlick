@@ -14,11 +14,12 @@
                     <h1>Your playlists</h1>
                     <div class="stash">
                         <ul id="playlist_stash">
-                            <li class="current"><a href="#" id="create_playlist" class="playlist">+ Create</a></li>
-                            <li><a href="#" id="import_playlist" class="playlist">
+                            <li class="current"><a href="#new" id="create_playlist" class="playlist">+ Create</a></li>
+                            <li><a href="#import" id="import_playlist" class="playlist">
                                 <img src="http://cdn.last.fm/flatness/favicon.2.png" width="16" height="16">
                                 Import
                             </a></li>
+                            <li><a href="#xspf" id="import_xspf" class="playlist">XSPF</a></li>
                         </ul>
                         <p id="loading_playlists">Loading…</p>
                     </div>
@@ -54,6 +55,20 @@
                         <p class="import_messages" id="import_done">Done! Imported <span id="import_count"></span> playlists</p>
                         <p class="import_messages" id="import_error_user">Invalid user</p>
                         <p class="import_messages" id="import_error_no_playlists">No playlists found</p>
+                    </div>
+                    
+                    <div id="xspf">
+                        <h1>Import a playlist from XSPF</h1>
+                        
+                        <form id="xspf_form">
+                            <label for="xspf_input">XSPF URL:</label>
+                            <input type="text" name="xspf" id="xspf_input" />
+                            <input type="submit" id="xspf_button" value="Load XSPF" />
+                        </form>
+                        
+                        <p class="xspf_messages" id="xspf_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading XSPF…</p>
+                        <p class="xspf_messages" id="xspf_done">Done! Imported <span id="xspf_count"></span> tracks from “<span id="xspf_title"></span>”</p>
+                        <p class="xspf_messages" id="xspf_error">Invalid XSPF</p>
                     </div>
                 </div>
                 

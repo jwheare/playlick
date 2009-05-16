@@ -321,6 +321,31 @@ var PLAYLICK = {
         setTimeout(function () {
             playlist_item.find('input.playlist_name').select();
         }, 1);
+    },
+    add_from_jspf: function (key, xspf) {
+        var title = xspf.title;
+        var track_list = xspf.trackList.track;
+        // Store the tracks in our DATA object
+        DATA.playlists[key] = {
+            name: title,
+            tracks: $.map(track_list, function (track, index) {
+                return new MODELS.Track(track.title, track.creator);
+            })
+        };
+        // Create the playlists
+        var playlist = new MODELS.Playlist('playlist', {
+            id: key,
+            name: title,
+            onSave: function () {
+                if (this == PLAYLICK.current_playlist) {
+                    PLAYLICK.update_playlist_title(this.toString());
+                }
+            }
+        });
+        // Add to the stash list
+        if (!$('#p_' + key).size()) {
+            playlist.element.appendTo($('#playlist_stash'));
+        }
     }
 };
 
@@ -412,8 +437,9 @@ $('#create_playlist').click(function (e) {
     target.closest('li').addClass('current');
     PLAYLICK.new_playlist();
     
-    $('#manage').show();
     $('#import').hide();
+    $('#xspf').hide();
+    $('#manage').show();
     
     $('#add_track_input').select();
 });
@@ -447,13 +473,13 @@ $('#import_playlist').click(function (e) {
     target.closest('li').addClass('current');
     
     $('#manage').hide();
+    $('#xspf').hide();
     $('#import p.import_messages').hide();
     $('#import').show();
     
     $('#import_playlist_input').select();
 });
-
-// Add to loaded playlist
+// Import Last.fm playlist
 $('#import_playlist_form').submit(function (e) {
     e.preventDefault();
     // Show a loading icon
@@ -498,29 +524,7 @@ $('#import_playlist_form').submit(function (e) {
                         if (playlist_json.error) {
                             console.warn(playlist_json.error, playlist_json.message);
                         } else {
-                            var track_list = playlist_json.playlist.trackList.track;
-                            var key = 'lastfm_' + playlist_id;
-                            // Store the tracks in our DATA object
-                            DATA.playlists[key] = {
-                                name: playlist_json.playlist.title,
-                                tracks: $.map(track_list, function (track, index) {
-                                    return new MODELS.Track(track.title, track.creator);
-                                })
-                            };
-                            // Create the playlists
-                            var playlist = new MODELS.Playlist('playlist', {
-                                id: key,
-                                name: playlist_json.playlist.title,
-                                onSave: function () {
-                                    if (this == PLAYLICK.current_playlist) {
-                                        PLAYLICK.update_playlist_title(this.toString());
-                                    }
-                                }
-                            });
-                            // Add to the stash list
-                            if (!$('#p_' + key).size()) {
-                                playlist.element.appendTo($('#playlist_stash'));
-                            }
+                            PLAYLICK.add_from_jspf('lastfm_' + playlist_id, playlist_json.playlist);
                             playlist_done[playlist_id] = true;
                             var done = true;
                             for (k in playlist_done) {
@@ -545,6 +549,47 @@ $('#import_playlist_form').submit(function (e) {
         }
     });
 
+});
+
+$('#import_xspf').click(function (e) {
+    e.preventDefault();
+    var target = $(e.target);
+    
+    $('#playlist_stash').find('li').removeClass('current');
+    target.closest('li').addClass('current');
+    
+    $('#manage').hide();
+    $('#import').hide();
+    $('#xspf p.xspf').hide();
+    $('#xspf').show();
+    
+    $('#xspf_input').select();
+});
+$('#xspf_form').submit(function (e) {
+    e.preventDefault();
+    // Show a loading icon
+    $('#xspf p.xspf_messages').hide();
+    $('#xspf_loading').show();
+    // Parse the form
+    var params = {};
+    $.each($(this).serializeArray(), function (index, item) {
+        params[item.name] = item.value;
+    });
+    $('#xspf_input').val('');
+    $('#xspf_input').select();
+    
+    // Load the XSPF
+    $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
+        q: 'select * from xml where url="' + params.xspf + '"',
+        format: 'json'
+    }, function (json) {
+        PLAYLICK.add_from_jspf("xspf_" + params.xspf, json.query.results.lfm.playlist);
+        // Update messages
+        $('#xspf p.xspf_messages').hide();
+        $('#xspf_title').html(json.query.results.lfm.playlist.title);
+        $('#xspf_count').html(json.query.results.lfm.playlist.trackList.track.length);
+        $('#xspf_done').show();
+    });
 });
 
 $('#playlist').click(function (e) {
@@ -617,8 +662,9 @@ $('#playlist_stash').click(function (e) {
         playlist_item.addClass('current');
         PLAYLICK.resolve_current_playlist();
         
-        $('#manage').show();
         $('#import').hide();
+        $('#xspf').hide();
+        $('#manage').show();
     }
     // Edit the playlist name
     if (target.is('li.p a.edit_playlist')) {

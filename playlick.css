@@ -157,29 +157,33 @@ ul#playlist_stash li input.playlist_name {
 }
 
 /* Import */
-#import {
+#import,
+#xspf {
     display: none;
+}
+#import p.import_messages,
+#xspf p.xspf_messages {
+    display: none;
+    margin: 20px 0 20px 40px;
+}
+#import p.import_messages img,
+#xspf p.xspf_messages img {
+    margin: -3px 5px 0 0;
+    vertical-align: middle;
 }
 
 /* Add track form */
 form#add_to_playlist,
-form#import_playlist_form {
+form#import_playlist_form ,
+form#xspf_form {
     margin: 20px 0 20px 40px;
     line-height: 25px;
 }
 form#add_to_playlist input#add_track_input,
-form#import_playlist_form input#import_playlist_input {
+form#import_playlist_form input#import_playlist_input,
+form#xspf_form input#xspf_input {
     margin: 0 10px;
     width: 250px;
-}
-
-#import p.import_messages {
-    display: none;
-    margin: 20px 0 20px 40px;
-}
-#import p.import_messages img {
-    margin: -3px 5px 0 0;
-    vertical-align: middle;
 }
 
 /* Track list */
