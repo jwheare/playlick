@@ -99,10 +99,10 @@ var PLAYLICK = {
             }
         }
     },
-    resolve_track: function (playlist_track) {
+    resolve_track: function (playlist_track, force) {
         if (Playdar.client && Playdar.client.is_authed()) {
             var track = playlist_track.track;
-            if (track.playdar_response) {
+            if (!force && track.playdar_response) {
                 PLAYLICK.load_track_results(playlist_track, track.playdar_response, true);
             } else {
                 if (track.playdar_qid) {
@@ -183,30 +183,21 @@ var PLAYLICK = {
     update_track: function (playlist_track, result, copy_details) {
         var track  = playlist_track.track;
         if (copy_details) {
-            if (track.name   != result.track
-             || track.artist != result.artist) {
+            if ((track.name.toUpperCase()   != result.track.toUpperCase())
+             || (track.artist.toUpperCase() != result.artist.toUpperCase())) {
                 track.name = result.track;
                 track.artist = result.artist;
                 // Update DOM
                 playlist_track.element.find('span.fn').html(track.name);
                 playlist_track.element.find('span.contributor').html(track.artist);
-                // Clear results
-                playlist_track.track.playdar_qid = null;
-                playlist_track.track.playdar_response = null;
-            }
-        }
-        // If the sid has changed, restart wih the new stream unless
-        // we're playing a different track
-        if (playlist_track.track.playdar_sid) {
-            if (playlist_track.track.playdar_sid != result.sid) {
-                Playdar.player.stop_stream(playlist_track.track.playdar_sid);
-            }
-            if (!Playdar.player.is_now_playing()) {
-                Playdar.player.play_stream(result.sid);
             }
         }
         track.duration = result.duration;
         playlist_track.element.find('span.elapsed').html(track.get_duration_string());
+        // If the sid has changed, stop the stream if it's playing
+        if (playlist_track.track.playdar_sid && playlist_track.track.playdar_sid != result.sid) {
+            Playdar.player.stop_stream(playlist_track.track.playdar_sid);
+        }
         playlist_track.track.playdar_sid = result.sid;
         playlist_track.track.playdar_url = result.url;
         playlist_track.playlist.save();
@@ -223,8 +214,8 @@ var PLAYLICK = {
         list_item.removeClass('scanning noMatch match perfectMatch');
         // playlist_track.track.playdar_qid = response.qid;
         if (final_answer) {
-            playlist_track.track.playdar_response = response;
-            if (response.results.length) {
+            if (response && response.results.length) {
+                playlist_track.track.playdar_response = response;
                 list_item.addClass('match');
                 var result = response.results[0];
                 var results_table = PLAYLICK.build_results_table(response, list_item);
@@ -450,6 +441,9 @@ $('#playlist').click(function (e) {
             // Update track with result data
             var result = tbody.data('result');
             PLAYLICK.update_track(playlist_track, result, true);
+            if (!Playdar.player.is_now_playing()) {
+                Playdar.player.play_stream(result.sid);
+            }
             track_item.addClass('perfectMatch');
         }
         // Clicks to the remove button
@@ -471,7 +465,7 @@ $('#playlist').click(function (e) {
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
             } else {
-                PLAYLICK.resolve_track(playlist_track);
+                PLAYLICK.resolve_track(playlist_track, true);
             }
         }
     }
@@ -524,20 +518,17 @@ $(document).keypress(function (e) {
     var target = $(e.target);
     // Capture ESC
     if (!target.is('input[type=text], textarea, select')) {
-        console.info(e.which);
         switch (e.which) {
         case 91: // [
             // Back a track
             var current_track = $('#playlist li.playing, #playlist li.paused');
             var previous_track = current_track.prevAll('li.perfectMatch');
-            console.log('prev:', previous_track);
             PLAYLICK.play_track(previous_track.data('playlist_track'));
             break;
         case 93: // ]
             // Skip track
             var current_track = $('#playlist li.playing, #playlist li.paused');
             var next_track = current_track.nextAll('li.perfectMatch');
-            console.log('next:', next_track);
             PLAYLICK.play_track(next_track.data('playlist_track'));
             break;
         case 32: // SPACE
@@ -547,7 +538,6 @@ $(document).keypress(function (e) {
                 // Get the first perfect match
                 current_track = $('#playlist li.perfectMatch');
             }
-            console.log('current:', current_track);
             PLAYLICK.play_track(current_track.data('playlist_track'));
             break;
         }
