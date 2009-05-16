@@ -583,7 +583,7 @@ $('#xspf_form').submit(function (e) {
         q: 'select * from xml where url="' + params.xspf + '"',
         format: 'json'
     }, function (json) {
-        if (json) {
+        if (json && json.query.results) {
             var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
             if (xspf) {
                 PLAYLICK.add_from_jspf("xspf_" + params.xspf, xspf);
