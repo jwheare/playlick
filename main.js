@@ -283,7 +283,7 @@ var PLAYLICK = {
                         + '<input type="radio" name="choice" value="' + result.sid + '"' + checked + '>'
                     + '</td>'
                     + '<td class="name" colspan="3">'
-                        + result.track + ' - ' + result.artist
+                        + result.track + ' - ' + result.artist + ' (' + result.album + ')'
                     + '</td>'
                     + '<td class="progress" id="progress' + result.sid + '"></td>'
                 + '</tr>'
