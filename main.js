@@ -41,13 +41,14 @@ var PLAYLICK = {
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
             onSave: function () {
-                PLAYLICK.update_playlist_title(this.toString());
+                if (this == PLAYLICK.current_playlist) {
+                    PLAYLICK.update_playlist_title(this.toString());
+                }
             },
             onCreate: function () {
                 if (!this.is_in_dom()) {
                     this.element.appendTo($('#playlist_stash'));
                     this.element.addClass('current');
-                    PLAYLICK.update_playlist_title(this.toString());
                     DATA.playlists[this.id] = {
                         name: this.name,
                         tracks: this.tracks
@@ -86,9 +87,9 @@ var PLAYLICK = {
         if (confirm('Are you sure you want to delete this playlist:\n\n' + playlist.name)) {
             if (PLAYLICK.current_playlist == playlist) {
                 PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
+                playlist.initialise();
             }
             delete DATA.playlists[playlist.id];
-            playlist.initialise();
             if (playlist.is_in_dom()) {
                 playlist.element.remove();
             }
@@ -356,7 +357,9 @@ $.each(DATA.playlists, function (key, value) {
         id: key,
         name: value.name,
         onSave: function () {
-            PLAYLICK.update_playlist_title(this.toString());
+            if (this == PLAYLICK.current_playlist) {
+                PLAYLICK.update_playlist_title(this.toString());
+            }
         }
     });
     playlist.element.appendTo($('#playlist_stash'));
@@ -466,7 +469,6 @@ $('#playlist_stash').click(function (e) {
         PLAYLICK.stash_current();
         PLAYLICK.current_playlist = playlist_item.data('playlist');
         PLAYLICK.current_playlist.load_tracks(DATA.playlists[PLAYLICK.current_playlist.id].tracks);
-        PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.toString());
         $('#add_track_button').val(PLAYLICK.add_button_text);
         $('#playlist_stash').find('li.p').removeClass('current');
         playlist_item.addClass('current');
@@ -490,8 +492,5 @@ $('#playlist_stash').click(function (e) {
         var name = form.serializeArray()[0].value;
         playlist_item.find('a.playlist').html(name).show();
         playlist.set_name(name);
-        if (PLAYLICK.current_playlist == playlist) {
-            PLAYLICK.update_playlist_title(playlist.toString());
-        }
     }
 });
