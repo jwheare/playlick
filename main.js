@@ -105,8 +105,12 @@ var PLAYLICK = {
             if (track.playdar_sid) {
                 PLAYLICK.load_track_results(playlist_track, track.playdar_response, true);
             } else {
-                var qid = PLAYLICK.playdar_track_handler(playlist_track);
-                Playdar.client.resolve(track.artist, '', track.name, qid);
+                if (track.playdar_qid) {
+                    Playdar.client.recheck_results(track.playdar_qid);
+                } else {
+                    var qid = PLAYLICK.playdar_track_handler(playlist_track);
+                    Playdar.client.resolve(track.artist, '', track.name, qid);
+                }
             }
         }
     },
@@ -197,6 +201,7 @@ var PLAYLICK = {
     load_track_results: function (playlist_track, response, final_answer) {
         var list_item = playlist_track.element;
         list_item.removeClass('scanning noMatch match perfectMatch');
+        playlist_track.track.playdar_qid = response.qid;
         if (final_answer) {
             playlist_track.track.playdar_response = response;
             if (response.results.length) {

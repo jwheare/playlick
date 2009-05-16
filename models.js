@@ -20,6 +20,7 @@ var MODELS = {
         this.name = name;
         this.artist = artist;
         this.duration = duration;
+        this.playdar_qid = null;
         this.playdar_sid = null;
         this.playdar_response = null;
         this.playdar_url = null;
