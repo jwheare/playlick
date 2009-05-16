@@ -96,7 +96,7 @@ var PLAYLICK = {
         }
     },
     resolve_track: function (playlist_track) {
-        if (Playdar.client) {
+        if (Playdar.client && Playdar.client.is_authed()) {
             var track = playlist_track.track;
             if (track.playdar_sid) {
                 PLAYLICK.load_track_results(playlist_track, track.playdar_response, true);
@@ -107,7 +107,7 @@ var PLAYLICK = {
         }
     },
     resolve_current_playlist: function () {
-        if (Playdar.client) {
+        if (Playdar.client && Playdar.client.is_authed()) {
             $.each(PLAYLICK.current_playlist.tracks, function (index, playlist_track) {
                 PLAYLICK.resolve_track(playlist_track);
             });

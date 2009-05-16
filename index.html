@@ -79,10 +79,12 @@
                 },
                 onAuth: function () {
                     PLAYLICK.update_playdar_status(Playdar.client.get_disconnect_link_html('Disconnect from Playdar'));
-                    Playdar.client.autodetect(PLAYLICK.playdar_track_handler);
+                    PLAYLICK.resolve_current_playlist();
                 },
                 onAuthClear: function () {
-                    Playdar.client.cancel_resolve();
+                    if (Playdar.client) {
+                        Playdar.client.cancel_resolve();
+                    }
                     PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
                 }
             });
