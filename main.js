@@ -700,9 +700,9 @@ $('#playlist').click(function (e) {
 });
 
 $('#playlist_stash').keydown(function (e) {
+    // console.dir(e);
     var target = $(e.target);
     // Capture ESC
-    // console.log(e.keyCode);
     if (target.is('input.playlist_name') && e.keyCode == 27) {
         PLAYLICK.toggle_playlist_edit(target.parents('li.p'));
     }
@@ -750,10 +750,11 @@ $('#playlist_stash').click(function (e) {
 $(document).keydown(function (e) {
     // console.dir(e);
     var target = $(e.target);
-    // Capture ESC
+    // Don't capture on keyboardable inputs
     if (target.is('input[type=text], textarea, select')) {
         return true;
     }
+    // Don't capture with any modifiers
     if (e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) {
         return true;
     }
