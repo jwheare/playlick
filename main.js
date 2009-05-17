@@ -474,7 +474,7 @@ $('#import_playlist').click(function (e) {
     
     $('#manage').hide();
     $('#xspf').hide();
-    $('#import p.import_messages').hide();
+    $('#import p.messages').hide();
     $('#import').show();
     
     $('#import_playlist_input').select();
@@ -483,7 +483,7 @@ $('#import_playlist').click(function (e) {
 $('#import_playlist_form').submit(function (e) {
     e.preventDefault();
     // Show a loading icon
-    $('#import p.import_messages').hide();
+    $('#import p.messages').hide();
     $('#import_loading').show();
     // Parse the form
     var params = {};
@@ -500,8 +500,9 @@ $('#import_playlist_form').submit(function (e) {
         api_key: PLAYLICK.lastfm_api_key,
         format: 'json'
     }, function (json) {
+        // console.dir(json);
         if (json.error) {
-            $('#import p.import_messages').hide();
+            $('#import p.messages').hide();
             var escaped_name = $('<b />').text('Username: ' + username);
             var escaped_request = $('<small />').text(this.url);
             var error_message = $('<p />').text('Error ' + json.error + ': ' + json.message);
@@ -529,8 +530,9 @@ $('#import_playlist_form').submit(function (e) {
                         api_key: PLAYLICK.lastfm_api_key,
                         format: 'json'
                     }, function (playlist_json) {
+                        // console.dir(playlist_json);
                         if (playlist_json.error) {
-                            $('#import p.import_messages').hide();
+                            $('#import p.messages').hide();
                             var escaped_playlist = $('<b />').text('Playlist: ' + playlist_url);
                             var escaped_request = $('<small />').text(this.url);
                             var error_message = $('<p />').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
@@ -540,27 +542,38 @@ $('#import_playlist_form').submit(function (e) {
                                          .append(escaped_request);
                             $('#import_error').html(error_message);
                             $('#import_error').show();
-                        } else {
+                        } else if (playlist_json.playlist.trackList.track) {
                             PLAYLICK.add_from_jspf('lastfm_' + playlist_url, playlist_json.playlist);
                             playlist_done[playlist_url] = true;
-                            var done = true;
+                            var done_loading = true;
                             for (k in playlist_done) {
                                 if (playlist_done[k] === false) {
-                                    still_loading = false;
+                                    done_loading = false;
                                     break;
                                 }
                             };
-                            if (done) {
-                                $('#import p.import_messages').hide();
+                            if (done_loading) {
+                                $('#import p.messages').hide();
                                 $('#import_count').text(playlists.length);
                                 $('#import_done').show();
                             }
+                        } else {
+                            $('#import p.messages').hide();
+                            var escaped_playlist = $('<b />').text('Playlist: ' + playlist_url);
+                            var escaped_request = $('<small />').text(this.url);
+                            var error_message = $('<p />').text('No tracks');
+                            error_message.append('<br>')
+                                         .append(escaped_name)
+                                         .append('<br>')
+                                         .append(escaped_request);
+                            $('#import_error').html(error_message);
+                            $('#import_error').show();
                         }
                     });
                 });
             } else {
                 // No playlists
-                $('#import p.import_messages').hide();
+                $('#import p.messages').hide();
                 $('#import_error_no_playlists').show();
             }
         }
@@ -577,7 +590,7 @@ $('#import_xspf').click(function (e) {
     
     $('#manage').hide();
     $('#import').hide();
-    $('#xspf p.xspf_messages').hide();
+    $('#xspf p.messages').hide();
     $('#xspf').show();
     
     $('#xspf_input').select();
@@ -585,7 +598,7 @@ $('#import_xspf').click(function (e) {
 $('#xspf_form').submit(function (e) {
     e.preventDefault();
     // Show a loading icon
-    $('#xspf p.xspf_messages').hide();
+    $('#xspf p.messages').hide();
     $('#xspf_loading').show();
     // Parse the form
     var params = {};
@@ -601,23 +614,28 @@ $('#xspf_form').submit(function (e) {
         q: 'select * from xml where url="' + xspf_url + '"',
         format: 'json'
     }, function (json) {
+        // console.dir(json);
+        var error_text = 'Invalid URL';
         if (json && json.query.results) {
             var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
+            error_text = 'Invalid XSPF';
             if (xspf) {
-                PLAYLICK.add_from_jspf("xspf_" + xspf_url, xspf);
-                // Update messages
-                $('#xspf p.xspf_messages').hide();
-                $('#xspf_title').text(xspf.title);
-                $('#xspf_count').text(xspf.trackList.track.length);
-                $('#xspf_done').show();
-                return true;
+                error_text = 'No tracks';
+                if (xspf.trackList.track) {
+                    PLAYLICK.add_from_jspf("xspf_" + xspf_url, xspf);
+                    // Update messages
+                    $('#xspf p.messages').hide();
+                    $('#xspf_title').text(xspf.title);
+                    $('#xspf_count').text(xspf.trackList.track.length);
+                    $('#xspf_done').show();
+                    return true;
+                }
             }
         }
-        $('#xspf p.xspf_messages').hide();
-        console.dir(json);
+        $('#xspf p.messages').hide();
         var escaped_url = $('<b />').text('URL: ' + xspf_url);
         var escaped_request = $('<small />').text(this.url);
-        var error_message = $('<p />').text('XSPF error');
+        var error_message = $('<p />').text(error_text);
         error_message.append('<br>')
                      .append(escaped_url)
                      .append('<br>')
@@ -675,10 +693,11 @@ $('#playlist').click(function (e) {
     }
 });
 
-$('#playlist_stash').keypress(function (e) {
+$('#playlist_stash').keydown(function (e) {
     var target = $(e.target);
     // Capture ESC
-    if (target.is('input.playlist_name') && e.which == 0) {
+    // console.log(e.keyCode);
+    if (target.is('input.playlist_name') && e.keyCode == 27) {
         PLAYLICK.toggle_playlist_edit(target.parents('li.p'));
     }
 });
@@ -722,24 +741,27 @@ $('#playlist_stash').click(function (e) {
     }
 });
 
-$(document).keypress(function (e) {
+$(document).keydown(function (e) {
     var target = $(e.target);
     // Capture ESC
     if (!target.is('input[type=text], textarea, select')) {
-        switch (e.which) {
-        case 91: // [
+        // console.log(e.keyCode);
+        switch (e.keyCode) {
+        case 219: // [
             // Back a track
+            e.preventDefault();
             var current_track = $('#playlist li.playing, #playlist li.paused');
             var previous_track = current_track.prevAll('li.perfectMatch');
             PLAYLICK.play_track(previous_track.data('playlist_track'));
             break;
-        case 93: // ]
+        case 221: // ]
             // Skip track
+            e.preventDefault();
             var current_track = $('#playlist li.playing, #playlist li.paused');
             var next_track = current_track.nextAll('li.perfectMatch');
             PLAYLICK.play_track(next_track.data('playlist_track'));
             break;
-        case 112: // p
+        case 80: // p
             e.preventDefault();
             var current_track = $('#playlist li.playing, #playlist li.paused');
             if (!current_track.size()) {

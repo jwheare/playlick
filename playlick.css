@@ -162,13 +162,13 @@ ul#playlist_stash li input.playlist_name {
 #xspf {
     display: none;
 }
-#import p.import_messages,
-#xspf p.xspf_messages {
+#import p.messages,
+#xspf p.messages {
     display: none;
     margin: 20px 0 20px 40px;
 }
-#import p.import_messages img,
-#xspf p.xspf_messages img {
+#import p.messages img,
+#xspf p.messages img {
     margin: -3px 5px 0 0;
     vertical-align: middle;
 }
