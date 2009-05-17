@@ -38,6 +38,34 @@ var PLAYLICK = {
     edit_playlist_text: 'edit',
     cancel_edit_playlist_text: 'cancel',
     track_width: 556,
+    update_playdar_status: function (message) {
+        $('#playdar').html(
+            '<img src="/playdar_logo_16x16.png" width="16" height="16"> '
+            + message
+        );
+    },
+    playdar_listeners: {
+        onStat: function (detected) {
+            if (detected) {
+                if (!detected.authenticated) {
+                    var connect_link = Playdar.client.get_auth_link_html('Connect to Playdar');
+                    PLAYLICK.update_playdar_status(connect_link);
+                }
+            } else {
+                PLAYLICK.update_playdar_status('Playdar unavailable');
+            }
+        },
+        onAuth: function () {
+            var disconnect_link = Playdar.client.get_disconnect_link_html('Disconnect from Playdar');
+            PLAYLICK.update_playdar_status(disconnect_link);
+            PLAYLICK.resolve_current_playlist();
+        },
+        onAuthClear: function () {
+            var connect_link = Playdar.client.get_auth_link_html('Connect to Playdar');
+            PLAYLICK.update_playdar_status(connect_link);
+            PLAYLICK.cancel_resolve();
+        }
+    },
     // Create a new empty playlist
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
@@ -63,12 +91,6 @@ var PLAYLICK = {
     create_playlist_title: $('#playlistTitle').html(),
     update_playlist_title: function (title) {
         $('#playlistTitle').html(title);
-    },
-    update_playdar_status: function (message) {
-        $('#playdar').html(
-            '<img src="/playdar_logo_16x16.png" width="16" height="16"> '
-            + message
-        );
     },
     cancel_resolve: function () {
         if (Playdar.client) {
@@ -442,7 +464,9 @@ $('#create_playlist').click(function (e) {
     $('#xspf').hide();
     $('#manage').show();
     
-    $('#add_track_input').select();
+    setTimeout(function () {
+        $('#add_track_input').select();
+    }, 1);
 });
 // Add to loaded playlist
 $('#add_to_playlist').submit(function (e) {
@@ -475,16 +499,18 @@ $('#import_playlist').click(function (e) {
     
     $('#manage').hide();
     $('#xspf').hide();
-    $('#import p.import_messages').hide();
+    $('#import p.messages').hide();
     $('#import').show();
     
-    $('#import_playlist_input').select();
+    setTimeout(function () {
+        $('#import_playlist_input').select();
+    }, 1);
 });
 // Import Last.fm playlist
 $('#import_playlist_form').submit(function (e) {
     e.preventDefault();
     // Show a loading icon
-    $('#import p.import_messages').hide();
+    $('#import p.messages').hide();
     $('#import_loading').show();
     // Parse the form
     var params = {};
@@ -494,57 +520,87 @@ $('#import_playlist_form').submit(function (e) {
     $('#import_playlist_input').val('');
     $('#import_playlist_input').select();
     // Get this user's playlists
+    var username = params.username;
     $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
         method: "user.getplaylists",
-        user: params.username,
+        user: username,
         api_key: PLAYLICK.lastfm_api_key,
         format: 'json'
     }, function (json) {
+        // console.dir(json);
         if (json.error) {
-            // Invalid user
-            if (json.error == 6) {
-                $('#import p.import_messages').hide();
-                $('#import_error_user').show();
-            } else {
-                console.warn(json.error, json.message);
-            }
+            $('#import p.messages').hide();
+            var escaped_name = $('<b />').text('Username: ' + username);
+            var escaped_request = $('<small />').text(this.url);
+            var error_message = $('<p />').text('Error ' + json.error + ': ' + json.message);
+            error_message.append('<br>')
+                         .append(escaped_name)
+                         .append('<br>')
+                         .append(escaped_request);
+            $('#import_error').html(error_message);
+            $('#import_error').show();
         } else {
+            $('#import_error').html('');
             var playlists = json.playlists.playlist;
             if (playlists) {
+                if (!$.isArray(playlists)) {
+                    playlists = [playlists];
+                }
                 var playlist_done = {};
                 $.each(playlists, function (index, playlist) {
-                    var playlist_id = playlist.id;
-                    playlist_done[playlist_id] = false;
+                    var playlist_url = "lastfm://playlist/" + playlist.id;
+                    playlist_done[playlist_url] = false;
                     // Get the tracklist for each playlist
                     $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
                         method: "playlist.fetch",
-                        playlistURL: "lastfm://playlist/" + playlist_id,
+                        playlistURL: playlist_url,
                         api_key: PLAYLICK.lastfm_api_key,
                         format: 'json'
                     }, function (playlist_json) {
+                        // console.dir(playlist_json);
                         if (playlist_json.error) {
-                            console.warn(playlist_json.error, playlist_json.message);
-                        } else {
-                            PLAYLICK.add_from_jspf('lastfm_' + playlist_id, playlist_json.playlist);
-                            playlist_done[playlist_id] = true;
-                            var done = true;
+                            $('#import p.messages').hide();
+                            var escaped_playlist = $('<b />').text('Playlist: ' + playlist_url);
+                            var escaped_request = $('<small />').text(this.url);
+                            var error_message = $('<p />').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
+                            error_message.append('<br>')
+                                         .append(escaped_name)
+                                         .append('<br>')
+                                         .append(escaped_request);
+                            $('#import_error').html(error_message);
+                            $('#import_error').show();
+                        } else if (playlist_json.playlist.trackList.track) {
+                            PLAYLICK.add_from_jspf('lastfm_' + playlist_url, playlist_json.playlist);
+                            playlist_done[playlist_url] = true;
+                            var done_loading = true;
                             for (k in playlist_done) {
                                 if (playlist_done[k] === false) {
-                                    still_loading = false;
+                                    done_loading = false;
                                     break;
                                 }
                             };
-                            if (done) {
-                                $('#import p.import_messages').hide();
-                                $('#import_count').html(playlists.length);
+                            if (done_loading) {
+                                $('#import p.messages').hide();
+                                $('#import_count').text(playlists.length);
                                 $('#import_done').show();
                             }
+                        } else {
+                            $('#import p.messages').hide();
+                            var escaped_playlist = $('<b />').text('Playlist: ' + playlist_url);
+                            var escaped_request = $('<small />').text(this.url);
+                            var error_message = $('<p />').text('No tracks');
+                            error_message.append('<br>')
+                                         .append(escaped_name)
+                                         .append('<br>')
+                                         .append(escaped_request);
+                            $('#import_error').html(error_message);
+                            $('#import_error').show();
                         }
                     });
                 });
             } else {
                 // No playlists
-                $('#import p.import_messages').hide();
+                $('#import p.messages').hide();
                 $('#import_error_no_playlists').show();
             }
         }
@@ -561,15 +617,17 @@ $('#import_xspf').click(function (e) {
     
     $('#manage').hide();
     $('#import').hide();
-    $('#xspf p.xspf_messages').hide();
+    $('#xspf p.messages').hide();
     $('#xspf').show();
     
-    $('#xspf_input').select();
+    setTimeout(function () {
+        $('#xspf_input').select();
+    }, 1);
 });
 $('#xspf_form').submit(function (e) {
     e.preventDefault();
     // Show a loading icon
-    $('#xspf p.xspf_messages').hide();
+    $('#xspf p.messages').hide();
     $('#xspf_loading').show();
     // Parse the form
     var params = {};
@@ -580,23 +638,38 @@ $('#xspf_form').submit(function (e) {
     $('#xspf_input').select();
     
     // Load the XSPF
+    var xspf_url = params.xspf;
     $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
-        q: 'select * from xml where url="' + params.xspf + '"',
+        q: 'select * from xml where url="' + xspf_url + '"',
         format: 'json'
     }, function (json) {
+        // console.dir(json);
+        var error_text = 'Invalid URL';
         if (json && json.query.results) {
             var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
+            error_text = 'Invalid XSPF';
             if (xspf) {
-                PLAYLICK.add_from_jspf("xspf_" + params.xspf, xspf);
-                // Update messages
-                $('#xspf p.xspf_messages').hide();
-                $('#xspf_title').html(xspf.title);
-                $('#xspf_count').html(xspf.trackList.track.length);
-                $('#xspf_done').show();
-                return true;
+                error_text = 'No tracks';
+                if (xspf.trackList.track) {
+                    PLAYLICK.add_from_jspf("xspf_" + xspf_url, xspf);
+                    // Update messages
+                    $('#xspf p.messages').hide();
+                    $('#xspf_title').text(xspf.title);
+                    $('#xspf_count').text(xspf.trackList.track.length);
+                    $('#xspf_done').show();
+                    return true;
+                }
             }
         }
-        $('#xspf p.xspf_messages').hide();
+        $('#xspf p.messages').hide();
+        var escaped_url = $('<b />').text('URL: ' + xspf_url);
+        var escaped_request = $('<small />').text(this.url);
+        var error_message = $('<p />').text(error_text);
+        error_message.append('<br>')
+                     .append(escaped_url)
+                     .append('<br>')
+                     .append(escaped_request);
+        $('#xspf_error').html(error_message);
         $('#xspf_error').show();
     });
 });
@@ -649,10 +722,11 @@ $('#playlist').click(function (e) {
     }
 });
 
-$('#playlist_stash').keypress(function (e) {
+$('#playlist_stash').keydown(function (e) {
+    // console.dir(e);
     var target = $(e.target);
     // Capture ESC
-    if (target.is('input.playlist_name') && e.which == 0) {
+    if (target.is('input.playlist_name') && e.keyCode == 27) {
         PLAYLICK.toggle_playlist_edit(target.parents('li.p'));
     }
 });
@@ -696,32 +770,40 @@ $('#playlist_stash').click(function (e) {
     }
 });
 
-$(document).keypress(function (e) {
+$(document).keydown(function (e) {
+    // console.dir(e);
     var target = $(e.target);
-    // Capture ESC
-    if (!target.is('input[type=text], textarea, select')) {
-        switch (e.which) {
-        case 91: // [
-            // Back a track
-            var current_track = $('#playlist li.playing, #playlist li.paused');
-            var previous_track = current_track.prevAll('li.perfectMatch');
-            PLAYLICK.play_track(previous_track.data('playlist_track'));
-            break;
-        case 93: // ]
-            // Skip track
-            var current_track = $('#playlist li.playing, #playlist li.paused');
-            var next_track = current_track.nextAll('li.perfectMatch');
-            PLAYLICK.play_track(next_track.data('playlist_track'));
-            break;
-        case 112: // p
-            e.preventDefault();
-            var current_track = $('#playlist li.playing, #playlist li.paused');
-            if (!current_track.size()) {
-                // Get the first perfect match
-                current_track = $('#playlist li.perfectMatch');
-            }
-            PLAYLICK.play_track(current_track.data('playlist_track'));
-            break;
+    // Don't capture on keyboardable inputs
+    if (target.is('input[type=text], textarea, select')) {
+        return true;
+    }
+    // Don't capture with any modifiers
+    if (e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) {
+        return true;
+    }
+    switch (e.keyCode) {
+    case 219: // [
+        // Back a track
+        e.preventDefault();
+        var current_track = $('#playlist li.playing, #playlist li.paused');
+        var previous_track = current_track.prevAll('li.perfectMatch');
+        PLAYLICK.play_track(previous_track.data('playlist_track'));
+        break;
+    case 221: // ]
+        // Skip track
+        e.preventDefault();
+        var current_track = $('#playlist li.playing, #playlist li.paused');
+        var next_track = current_track.nextAll('li.perfectMatch');
+        PLAYLICK.play_track(next_track.data('playlist_track'));
+        break;
+    case 80: // p
+        e.preventDefault();
+        var current_track = $('#playlist li.playing, #playlist li.paused');
+        if (!current_track.size()) {
+            // Get the first perfect match
+            current_track = $('#playlist li.perfectMatch');
         }
+        PLAYLICK.play_track(current_track.data('playlist_track'));
+        break;
     }
 });

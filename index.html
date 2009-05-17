@@ -23,8 +23,7 @@
                         </ul>
                         <p id="loading_playlists">Loading…</p>
                     </div>
-                    <div id="playdar">
-                    </div>
+                    <div id="playdar">Checking for Playdar…</div>
                 </div>
                 
                 <div id="main">
@@ -51,10 +50,10 @@
                             <input type="submit" id="import_playlist_button" value="Get Playlists" />
                         </form>
                         
-                        <p class="import_messages" id="import_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
-                        <p class="import_messages" id="import_done">Done! Imported <span id="import_count"></span> playlists</p>
-                        <p class="import_messages" id="import_error_user">Invalid user</p>
-                        <p class="import_messages" id="import_error_no_playlists">No playlists found</p>
+                        <p class="messages" id="import_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
+                        <p class="messages" id="import_done">Done! Playlists imported: <span id="import_count"></span></p>
+                        <p class="messages" id="import_error_no_playlists">No playlists found</p>
+                        <p class="messages" id="import_error"></p>
                     </div>
                     
                     <div id="xspf">
@@ -66,9 +65,9 @@
                             <input type="submit" id="xspf_button" value="Load XSPF" />
                         </form>
                         
-                        <p class="xspf_messages" id="xspf_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading XSPF…</p>
-                        <p class="xspf_messages" id="xspf_done">Done! Imported <span id="xspf_count"></span> tracks from “<span id="xspf_title"></span>”</p>
-                        <p class="xspf_messages" id="xspf_error">Invalid XSPF</p>
+                        <p class="messages" id="xspf_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading XSPF…</p>
+                        <p class="messages" id="xspf_done">Done! Imported “<span id="xspf_title"></span>” (<span id="xspf_count"></span>)</p>
+                        <p class="messages" id="xspf_error"></p>
                     </div>
                 </div>
                 
@@ -109,23 +108,9 @@
                 receiverurl: "http://www.playlick.com/playdar_auth.html"
             });
             Playdar.USE_STATUS_BAR = false;
-            Playdar.REFRESH_INTERVAL = 200;
+            Playdar.REFRESH_INTERVAL = 500;
             Playdar.MAX_CONCURRENT_RESOLUTIONS = 20;
-            Playdar.client.register_listeners({
-                onStat: function (detected) {
-                    if (!detected.authenticated) {
-                        PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
-                    }
-                },
-                onAuth: function () {
-                    PLAYLICK.update_playdar_status(Playdar.client.get_disconnect_link_html('Disconnect from Playdar'));
-                    PLAYLICK.resolve_current_playlist();
-                },
-                onAuthClear: function () {
-                    PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
-                    PLAYLICK.cancel_resolve();
-                }
-            });
+            Playdar.client.register_listeners(PLAYLICK.playdar_listeners);
             
             soundManager.url = '/lib/soundmanager2_flash9.swf';
             soundManager.flashVersion = 9;
