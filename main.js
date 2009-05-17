@@ -38,6 +38,34 @@ var PLAYLICK = {
     edit_playlist_text: 'edit',
     cancel_edit_playlist_text: 'cancel',
     track_width: 556,
+    update_playdar_status: function (message) {
+        $('#playdar').html(
+            '<img src="/playdar_logo_16x16.png" width="16" height="16"> '
+            + message
+        );
+    },
+    playdar_listeners: {
+        onStat: function (detected) {
+            if (detected) {
+                if (!detected.authenticated) {
+                    var connect_link = Playdar.client.get_auth_link_html('Connect to Playdar');
+                    PLAYLICK.update_playdar_status(connect_link);
+                }
+            } else {
+                PLAYLICK.update_playdar_status('Playdar unavailable');
+            }
+        },
+        onAuth: function () {
+            var disconnect_link = Playdar.client.get_disconnect_link_html('Disconnect from Playdar');
+            PLAYLICK.update_playdar_status(disconnect_link);
+            PLAYLICK.resolve_current_playlist();
+        },
+        onAuthClear: function () {
+            var connect_link = Playdar.client.get_auth_link_html('Connect to Playdar');
+            PLAYLICK.update_playdar_status(connect_link);
+            PLAYLICK.cancel_resolve();
+        }
+    },
     // Create a new empty playlist
     new_playlist: function  () {
         PLAYLICK.current_playlist = new MODELS.Playlist('playlist', {
@@ -63,12 +91,6 @@ var PLAYLICK = {
     create_playlist_title: $('#playlistTitle').html(),
     update_playlist_title: function (title) {
         $('#playlistTitle').html(title);
-    },
-    update_playdar_status: function (message) {
-        $('#playdar').html(
-            '<img src="/playdar_logo_16x16.png" width="16" height="16"> '
-            + message
-        );
     },
     cancel_resolve: function () {
         if (Playdar.client) {

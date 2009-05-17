@@ -106,25 +106,7 @@
             Playdar.USE_STATUS_BAR = false;
             Playdar.REFRESH_INTERVAL = 500;
             Playdar.MAX_CONCURRENT_RESOLUTIONS = 20;
-            Playdar.client.register_listeners({
-                onStat: function (detected) {
-                    if (detected) {
-                        if (!detected.authenticated) {
-                            PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
-                        }
-                    } else {
-                        PLAYLICK.update_playdar_status('Playdar unavailable');
-                    }
-                },
-                onAuth: function () {
-                    PLAYLICK.update_playdar_status(Playdar.client.get_disconnect_link_html('Disconnect from Playdar'));
-                    PLAYLICK.resolve_current_playlist();
-                },
-                onAuthClear: function () {
-                    PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
-                    PLAYLICK.cancel_resolve();
-                }
-            });
+            Playdar.client.register_listeners(PLAYLICK.playdar_listeners);
             
             soundManager.url = '/lib/soundmanager2_flash9.swf';
             soundManager.flashVersion = 9;
