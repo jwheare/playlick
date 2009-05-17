@@ -94,10 +94,11 @@ var PLAYLICK = {
                 PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
                 playlist.initialise();
             }
-            delete DATA.playlists[playlist.id];
             if (playlist.is_in_dom()) {
                 playlist.element.remove();
             }
+            delete DATA.playlists[playlist.id];
+            playlist.remove();
         }
     },
     resolve_track: function (playlist_track, force) {

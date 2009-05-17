@@ -3,6 +3,7 @@
  * Model namespace
 **/
 var MODELS = {
+    couch: new CouchDB('playlick'),
     next_playlist_id: 0,
     next_playlist_track_id: 0,
     load_playlist: function (tracks, container, options) {
@@ -49,6 +50,14 @@ var MODELS = {
                 + ' - '
                 + '<span class="contributor">' + this.artist + '</span>'
                 + duration;
+        },
+        get_doc: function () {
+            var doc = {
+                name: this.name,
+                artist: this.artist,
+                duration: this.duration
+            };
+            return doc;
         }
     };
     
@@ -213,9 +222,37 @@ var MODELS = {
                     this.options.onCreate.call(this);
                 }
                 this.saved = true;
-                // TODO
-                // Fire off AJAX request to persist Playlist
-                // console.info('Saved', this);
+                // Persist in CouchDB
+                
+                try {
+                    var result = MODELS.couch.save(this.get_doc());
+                    // console.dir(result);
+                    if (result.ok) {
+                        this.set_doc_ref(result);
+                        console.info('[save] ' + result.id + ' [' + result.rev + ']');
+                    }
+                } catch (result) {
+                    var message = "couchdb unavailable";
+                    if (result.error && result.error != 'unknown') {
+                        message = result.error + ': ' + result.reason;
+                    }
+                    console.warn('[save] ' + message);
+                }
+            }
+        },
+        remove: function () {
+            try {
+                var result = MODELS.couch.deleteDoc(this.get_doc_ref());
+                console.dir(result);
+                if (result.ok) {
+                    console.info('[delete] ' + result.id + ' [' + result.rev + ']');
+                }
+            } catch (result) {
+                var message = "couchdb unavailable";
+                if (result.error && result.error != 'unknown') {
+                    message = result.error + ': ' + result.reason;
+                }
+                console.warn('[delete] ' + message);
             }
         },
         publish: function () {
@@ -231,6 +268,29 @@ var MODELS = {
         share: function (person) {
             // TODO
             // Fire off AJAX request to share Playlist with email address or user
+        },
+        set_doc_ref: function (doc_ref) {
+            this._id = doc_ref.id;
+            this._rev = doc_ref.rev;
+        },
+        get_doc_ref: function () {
+            var doc_ref = {
+                _id: this._id,
+                _rev: this._rev
+            };
+            return doc_ref;
+        },
+        get_doc: function () {
+            var doc = $.extend(this.get_doc_ref(), {
+                id: this.id,
+                name: this.name,
+                duration: this.duration,
+                published: this.published,
+                tracks: $.map(this.tracks, function (playlist_track, index) {
+                    return playlist_track.get_doc();
+                })
+            });
+            return doc;
         }
     };
     
@@ -276,6 +336,13 @@ var MODELS = {
         },
         get_position: function () {
             return $.inArray(this, this.playlist.tracks) + 1;
+        },
+        get_doc: function () {
+            var doc = {
+                position: this.position,
+                track: this.track.get_doc()
+            };
+            return doc;
         }
     };
     
