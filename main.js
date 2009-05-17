@@ -493,39 +493,56 @@ $('#import_playlist_form').submit(function (e) {
     $('#import_playlist_input').val('');
     $('#import_playlist_input').select();
     // Get this user's playlists
+    var username = params.username;
     $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
         method: "user.getplaylists",
-        user: params.username,
+        user: username,
         api_key: PLAYLICK.lastfm_api_key,
         format: 'json'
     }, function (json) {
         if (json.error) {
-            // Invalid user
-            if (json.error == 6) {
-                $('#import p.import_messages').hide();
-                $('#import_error_user').show();
-            } else {
-                console.warn(json.error, json.message);
-            }
+            $('#import p.import_messages').hide();
+            var escaped_name = $('<b />').text('Username: ' + username);
+            var escaped_request = $('<small />').text(this.url);
+            var error_message = $('<p />').text('Error ' + json.error + ': ' + json.message);
+            error_message.append('<br>')
+                         .append(escaped_name)
+                         .append('<br>')
+                         .append(escaped_request);
+            $('#import_error').html(error_message);
+            $('#import_error').show();
         } else {
+            $('#import_error').html('');
             var playlists = json.playlists.playlist;
             if (playlists) {
+                if (!$.isArray(playlists)) {
+                    playlists = [playlists];
+                }
                 var playlist_done = {};
                 $.each(playlists, function (index, playlist) {
-                    var playlist_id = playlist.id;
-                    playlist_done[playlist_id] = false;
+                    var playlist_url = "lastfm://playlist/" + playlist.id;
+                    playlist_done[playlist_url] = false;
                     // Get the tracklist for each playlist
                     $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
                         method: "playlist.fetch",
-                        playlistURL: "lastfm://playlist/" + playlist_id,
+                        playlistURL: playlist_url,
                         api_key: PLAYLICK.lastfm_api_key,
                         format: 'json'
                     }, function (playlist_json) {
                         if (playlist_json.error) {
-                            console.warn(playlist_json.error, playlist_json.message);
+                            $('#import p.import_messages').hide();
+                            var escaped_playlist = $('<b />').text('Playlist: ' + playlist_url);
+                            var escaped_request = $('<small />').text(this.url);
+                            var error_message = $('<p />').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
+                            error_message.append('<br>')
+                                         .append(escaped_name)
+                                         .append('<br>')
+                                         .append(escaped_request);
+                            $('#import_error').html(error_message);
+                            $('#import_error').show();
                         } else {
-                            PLAYLICK.add_from_jspf('lastfm_' + playlist_id, playlist_json.playlist);
-                            playlist_done[playlist_id] = true;
+                            PLAYLICK.add_from_jspf('lastfm_' + playlist_url, playlist_json.playlist);
+                            playlist_done[playlist_url] = true;
                             var done = true;
                             for (k in playlist_done) {
                                 if (playlist_done[k] === false) {
@@ -535,7 +552,7 @@ $('#import_playlist_form').submit(function (e) {
                             };
                             if (done) {
                                 $('#import p.import_messages').hide();
-                                $('#import_count').html(playlists.length);
+                                $('#import_count').text(playlists.length);
                                 $('#import_done').show();
                             }
                         }
@@ -579,23 +596,33 @@ $('#xspf_form').submit(function (e) {
     $('#xspf_input').select();
     
     // Load the XSPF
+    var xspf_url = params.xspf;
     $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
-        q: 'select * from xml where url="' + params.xspf + '"',
+        q: 'select * from xml where url="' + xspf_url + '"',
         format: 'json'
     }, function (json) {
         if (json && json.query.results) {
             var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
             if (xspf) {
-                PLAYLICK.add_from_jspf("xspf_" + params.xspf, xspf);
+                PLAYLICK.add_from_jspf("xspf_" + xspf_url, xspf);
                 // Update messages
                 $('#xspf p.xspf_messages').hide();
-                $('#xspf_title').html(xspf.title);
-                $('#xspf_count').html(xspf.trackList.track.length);
+                $('#xspf_title').text(xspf.title);
+                $('#xspf_count').text(xspf.trackList.track.length);
                 $('#xspf_done').show();
                 return true;
             }
         }
         $('#xspf p.xspf_messages').hide();
+        console.dir(json);
+        var escaped_url = $('<b />').text('URL: ' + xspf_url);
+        var escaped_request = $('<small />').text(this.url);
+        var error_message = $('<p />').text('XSPF error');
+        error_message.append('<br>')
+                     .append(escaped_url)
+                     .append('<br>')
+                     .append(escaped_request);
+        $('#xspf_error').html(error_message);
         $('#xspf_error').show();
     });
 });
