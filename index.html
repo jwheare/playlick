@@ -23,8 +23,7 @@
                         </ul>
                         <p id="loading_playlists">Loading…</p>
                     </div>
-                    <div id="playdar">
-                    </div>
+                    <div id="playdar">Checking for Playdar…</div>
                 </div>
                 
                 <div id="main">
@@ -109,8 +108,12 @@
             Playdar.MAX_CONCURRENT_RESOLUTIONS = 20;
             Playdar.client.register_listeners({
                 onStat: function (detected) {
-                    if (!detected.authenticated) {
-                        PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
+                    if (detected) {
+                        if (!detected.authenticated) {
+                            PLAYLICK.update_playdar_status(Playdar.client.get_auth_link_html('Connect to Playdar'));
+                        }
+                    } else {
+                        PLAYLICK.update_playdar_status('Playdar unavailable');
                     }
                 },
                 onAuth: function () {

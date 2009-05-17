@@ -441,7 +441,9 @@ $('#create_playlist').click(function (e) {
     $('#xspf').hide();
     $('#manage').show();
     
-    $('#add_track_input').select();
+    setTimeout(function () {
+        $('#add_track_input').select();
+    }, 1);
 });
 // Add to loaded playlist
 $('#add_to_playlist').submit(function (e) {
@@ -477,7 +479,9 @@ $('#import_playlist').click(function (e) {
     $('#import p.messages').hide();
     $('#import').show();
     
-    $('#import_playlist_input').select();
+    setTimeout(function () {
+        $('#import_playlist_input').select();
+    }, 1);
 });
 // Import Last.fm playlist
 $('#import_playlist_form').submit(function (e) {
@@ -593,7 +597,9 @@ $('#import_xspf').click(function (e) {
     $('#xspf p.messages').hide();
     $('#xspf').show();
     
-    $('#xspf_input').select();
+    setTimeout(function () {
+        $('#xspf_input').select();
+    }, 1);
 });
 $('#xspf_form').submit(function (e) {
     e.preventDefault();
@@ -742,34 +748,38 @@ $('#playlist_stash').click(function (e) {
 });
 
 $(document).keydown(function (e) {
+    // console.dir(e);
     var target = $(e.target);
     // Capture ESC
-    if (!target.is('input[type=text], textarea, select')) {
-        // console.log(e.keyCode);
-        switch (e.keyCode) {
-        case 219: // [
-            // Back a track
-            e.preventDefault();
-            var current_track = $('#playlist li.playing, #playlist li.paused');
-            var previous_track = current_track.prevAll('li.perfectMatch');
-            PLAYLICK.play_track(previous_track.data('playlist_track'));
-            break;
-        case 221: // ]
-            // Skip track
-            e.preventDefault();
-            var current_track = $('#playlist li.playing, #playlist li.paused');
-            var next_track = current_track.nextAll('li.perfectMatch');
-            PLAYLICK.play_track(next_track.data('playlist_track'));
-            break;
-        case 80: // p
-            e.preventDefault();
-            var current_track = $('#playlist li.playing, #playlist li.paused');
-            if (!current_track.size()) {
-                // Get the first perfect match
-                current_track = $('#playlist li.perfectMatch');
-            }
-            PLAYLICK.play_track(current_track.data('playlist_track'));
-            break;
+    if (target.is('input[type=text], textarea, select')) {
+        return true;
+    }
+    if (e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) {
+        return true;
+    }
+    switch (e.keyCode) {
+    case 219: // [
+        // Back a track
+        e.preventDefault();
+        var current_track = $('#playlist li.playing, #playlist li.paused');
+        var previous_track = current_track.prevAll('li.perfectMatch');
+        PLAYLICK.play_track(previous_track.data('playlist_track'));
+        break;
+    case 221: // ]
+        // Skip track
+        e.preventDefault();
+        var current_track = $('#playlist li.playing, #playlist li.paused');
+        var next_track = current_track.nextAll('li.perfectMatch');
+        PLAYLICK.play_track(next_track.data('playlist_track'));
+        break;
+    case 80: // p
+        e.preventDefault();
+        var current_track = $('#playlist li.playing, #playlist li.paused');
+        if (!current_track.size()) {
+            // Get the first perfect match
+            current_track = $('#playlist li.perfectMatch');
         }
+        PLAYLICK.play_track(current_track.data('playlist_track'));
+        break;
     }
 });
