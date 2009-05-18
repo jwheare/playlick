@@ -4,7 +4,17 @@
 **/
 var MODELS = {
     couch: new CouchDB('playlick'),
-    next_playlist_track_id: 0
+    couch_up: true,
+    next_playlist_id: 0,
+    next_playlist_track_id: 0,
+    couch_down_handler: function (action, result) {
+        MODELS.couch_up = false;
+        var message = "couchdb unavailable";
+        if (result.error && result.error != 'unknown') {
+            message = result.error+': '+result.reason;
+        }
+        console.warn('['+action+'] '+message);
+    }
 };
 (function () {
     /**
@@ -61,6 +71,7 @@ var MODELS = {
     **/
     var Playlist = function (options) {
         this.saved = false;
+        this.persisted = false;
         this.published = false;
         this.tracks = [];
         this.duration = 0;
@@ -71,7 +82,16 @@ var MODELS = {
             this.set_doc_ref(this.options.doc_ref);
         } else {
             // Get a new UUID
-            this.set_id(CouchDB.newUuids(1)[0]);
+            if (MODELS.couch_up) {
+                try {
+                    this.set_id(CouchDB.newUuids(1)[0]);
+                } catch (result) {
+                    MODELS.couch_down_handler('uuid', result);
+                }
+            }
+            if (!MODELS.couch_up) {
+                this.set_id(MODELS.next_playlist_id++);
+            }
         }
         this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
         
@@ -177,53 +197,63 @@ var MODELS = {
         /**
          * Persistance
         **/
+        onSave: function (callback) {
+            if (!this.saved && this.options.onCreate) {
+                this.options.onCreate.call(this);
+            }
+            if (callback) {
+                callback.call(this);
+            }
+            if (this.options.onSave) {
+                this.options.onSave.call(this);
+            }
+            this.saved = true;
+        },
         save: function (callback) {
             this._rebuild();
             
             // Persist in CouchDB
-            try {
-                var result = MODELS.couch.save(this.get_doc());
-                // console.dir(result);
-                if (result.ok) {
-                    if (!this.saved && this.options.onCreate) {
-                        this.options.onCreate.call(this);
+            if (MODELS.couch_up) {
+                try {
+                    var result = MODELS.couch.save(this.get_doc());
+                    // console.dir(result);
+                    if (result.ok) {
+                        this.set_doc_ref(result);
+                        this.onSave(callback);
+                        console.info('[save] ' + result.id + ' [' + result.rev + ']');
                     }
-                    this.set_doc_ref(result);
-                    if (callback) {
-                        callback.call(this);
-                    }
-                    if (this.options.onSave) {
-                        this.options.onSave.call(this);
-                    }
-                    console.info('[save] ' + result.id + ' [' + result.rev + ']');
+                } catch (result) {
+                    MODELS.couch_down_handler('save', result);
                 }
-            } catch (result) {
-                var message = "couchdb unavailable";
-                if (result.error && result.error != 'unknown') {
-                    message = result.error + ': ' + result.reason;
-                }
-                console.warn('[save] ' + message);
+            }
+            if (!MODELS.couch_up && !this.persisted) {
+                this.onSave(callback);
+            }
+            this.saved = true;
+        },
+        onRemove: function () {
+            // Remove from the DOM
+            this.element.remove();
+            // onDelete Callback
+            if (this.options.onDelete) {
+                this.options.onDelete.call(this);
             }
         },
         remove: function () {
-            try {
-                var result = MODELS.couch.deleteDoc(this.get_doc_ref());
-                // console.dir(result);
-                if (result.ok) {
-                    // Remove from the DOM
-                    this.element.remove();
-                    // onDelete Callback
-                    if (this.options.onDelete) {
-                        this.options.onDelete.call(this);
+            if (MODELS.couch_up) {
+                try {
+                    var result = MODELS.couch.deleteDoc(this.get_doc_ref());
+                    // console.dir(result);
+                    if (result.ok) {
+                        this.onRemove();
+                        console.info('[delete] ' + result.id + ' [' + result.rev + ']');
                     }
-                    console.info('[delete] ' + result.id + ' [' + result.rev + ']');
+                } catch (result) {
+                    MODELS.couch_down_handler('delete', result);
                 }
-            } catch (result) {
-                var message = "couchdb unavailable";
-                if (result.error && result.error != 'unknown') {
-                    message = result.error + ': ' + result.reason;
-                }
-                console.warn('[delete] ' + message);
+            }
+            if (!MODELS.couch_up && !this.persisted) {
+                this.onRemove();
             }
         },
         publish: function (onSave) {
@@ -258,7 +288,7 @@ var MODELS = {
         set_doc_ref: function (doc_ref) {
             this.set_id(doc_ref.id);
             this.set_rev(doc_ref.rev);
-            this.saved = true;
+            this.persisted = true;
         },
         get_doc_ref: function () {
             var doc_ref = {

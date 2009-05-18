@@ -79,8 +79,7 @@ var PLAYLICK = {
         // Cancel Playdar
         PLAYLICK.cancel_resolve();
         // Update current sidebar item
-        $('#playlists').find('li').removeClass('current');
-        $('#create_playlist').parent('li').addClass('current');
+        PLAYLICK.set_current_playlist($('#create_playlist').parent('li'));
         // Reset the playlist view
         $('#playlist').empty();
         PLAYLICK.update_playlist_title(PLAYLICK.create_playlist_title);
@@ -96,6 +95,10 @@ var PLAYLICK = {
         // Create the playlist object
         PLAYLICK.current_playlist = PLAYLICK.add_playlist();
     },
+    set_current_playlist: function (playlist_item) {
+        $('#playlists').find('li').removeClass('current');
+        playlist_item.addClass('current');
+    },
     add_playlist: function (name, doc_ref) {
         var playlist = new MODELS.Playlist({
             doc_ref: doc_ref,
@@ -107,7 +110,6 @@ var PLAYLICK = {
             },
             onCreate: function () {
                 // Add to sidebar
-                this.element.addClass('current');
                 $('#playlists').append(this.element);
             },
             onDelete: function () {
@@ -122,8 +124,7 @@ var PLAYLICK = {
         // Cancel Playdar
         PLAYLICK.cancel_resolve();
         // Update current sidebar item
-        $('#playlists').find('li').removeClass('current');
-        playlist_item.addClass('current');
+        PLAYLICK.set_current_playlist(playlist_item);
         // Reset the playlist view
         var playlist = playlist_item.data('playlist');
         $('#playlist').empty();
@@ -395,28 +396,35 @@ var PLAYLICK = {
         });
         playlist.save();
         // Add to sidebar
-        if (!playlist.is_in_dom()) {
-            $('#playlists').append(playlist.element);
-        }
+        $('#playlists').append(playlist.element);
     },
     load_playlists: function () {
-        var response = MODELS.couch.view("playlist/all");
-        $.each(response.rows, function (i, row) {
-            // console.log(row);
-            var value = row.value;
-            // Create the playlist object
-            var playlist = PLAYLICK.add_playlist(value.name, {
-                id: value._id,
-                rev: value._rev
-            });
-            // Load tracks
-            $.each(value.tracks, function (i, track) {
-                playlist.add_track(new MODELS.Track(track.track.name, track.track.artist));
-            });
-            // Add to the sidebar
-            $('#playlists').append(playlist.element);
-        });
-        $('#loading_playlists').hide();
+        if (MODELS.couch_up) {
+            try {
+                var response = MODELS.couch.view("playlist/all");
+                $.each(response.rows, function (i, row) {
+                    // console.log(row);
+                    var value = row.value;
+                    // Create the playlist object
+                    var playlist = PLAYLICK.add_playlist(value.name, {
+                        id: value._id,
+                        rev: value._rev
+                    });
+                    // Load tracks
+                    $.each(value.tracks, function (i, track) {
+                        playlist.add_track(new MODELS.Track(track.track.name, track.track.artist));
+                    });
+                    // Add to the sidebar
+                    $('#playlists').append(playlist.element);
+                });
+                $('#loading_playlists').hide();
+            } catch (result) {
+                MODELS.couch_down_handler('view playlists', result);
+            }
+        }
+        if (!MODELS.couch_up) {
+            $('#loading_playlists').text('Playlists unavailable');
+        }
     }
 };
 
@@ -518,8 +526,7 @@ $('#import_playlist').click(function (e) {
     e.preventDefault();
     var target = $(e.target);
     // Update current sidebar item
-    $('#playlists').find('li').removeClass('current');
-    target.closest('li').addClass('current');
+    PLAYLICK.set_current_playlist($('#import_playlist').parent('li'));
     // Show Import screen
     $('#manage').hide();
     $('#xspf').hide();
@@ -635,8 +642,7 @@ $('#import_xspf').click(function (e) {
     e.preventDefault();
     var target = $(e.target);
     // Update current sidebar item
-    $('#playlists').find('li').removeClass('current');
-    target.closest('li').addClass('current');
+    PLAYLICK.set_current_playlist($('#import_xspf').parent('li'));
     // Show XSPF screen
     $('#manage').hide();
     $('#import').hide();

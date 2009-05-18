@@ -4,15 +4,18 @@ There's a UI for creating, importing, and editing playlists and an accompanying 
 
 Hooks into [Playdar](http://www.playdar.org) for content resolution.
 
+Persists in a CouchDB database.
+
 TODO
 ----
 
+* Setup CouchDB on playlick.com
 * Album import from Last.fm
 * Tag playlist import from Last.fm
 * XSPF export
 * Applecript export for iTunes
 * Hosted playdar streaming
-* Persistence/Sessions/URLs
+* Sessions/URLs
 * Stream tokens
 
 DESIGN NOTES
