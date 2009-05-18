@@ -226,7 +226,7 @@ var PLAYLICK = {
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
             var progress = track_item.find('span.elapsed');
-            progress.html('<strong>' + UTIL.mmss(Math.round(this.position/1000)) + '</strong> / ' + playlist_track.track.get_duration_string());
+            progress.html('<strong>' + Playdar.Util.mmss(Math.round(this.position/1000)) + '</strong> / ' + playlist_track.track.get_duration_string());
             // Update the playback progress bar
             var duration;
             if (this.readyState == 3) { // loaded/success
@@ -352,7 +352,7 @@ var PLAYLICK = {
                 + '<tr class="info">'
                     + score_cell
                     + '<td class="source">' + result.source + '</td>'
-                    + '<td class="time">' + UTIL.mmss(result.duration) + '</td>'
+                    + '<td class="time">' + Playdar.Util.mmss(result.duration) + '</td>'
                     + '<td class="size">' + (result.size/1000000).toFixed(1) + 'MB</td>'
                     + '<td class="bitrate">' + result.bitrate + ' kbps</td>'
                 + '</tr>'

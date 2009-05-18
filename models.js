@@ -33,7 +33,7 @@ var MODELS = {
     Track.prototype = {
         get_duration_string: function () {
             if (typeof this.duration != 'undefined') {
-                return UTIL.mmss(this.duration);
+                return Playdar.Util.mmss(this.duration);
             }
             return '';
         },
@@ -144,7 +144,7 @@ var MODELS = {
             this.save(onSave);
         },
         get_duration: function () {
-            return UTIL.mmss(this.duration);
+            return Playdar.Util.mmss(this.duration);
         },
         toString: function () {
             var duration = this.get_duration();
