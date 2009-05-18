@@ -423,7 +423,11 @@ var PLAYLICK = {
             }
         }
         if (!MODELS.couch_up) {
-            $('#loading_playlists').text('Playlists unavailable');
+            $('#loading_playlists').addClass('unavailable');
+            $('#loading_playlists').html(
+                '<b>Database unavailable.</b>'
+                + '<br>Your changes will not be saved.'
+            );
         }
     }
 };
