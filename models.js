@@ -13,7 +13,7 @@ var MODELS = {
         if (result.error && result.error != 'unknown') {
             message = result.error+': '+result.reason;
         }
-        console.warn('['+action+'] '+message);
+        // console.warn('['+action+'] '+message);
     }
 };
 (function () {
@@ -220,7 +220,7 @@ var MODELS = {
                     if (result.ok) {
                         this.set_doc_ref(result);
                         this.onSave(callback);
-                        console.info('[save] ' + result.id + ' [' + result.rev + ']');
+                        // console.info('[save] ' + result.id + ' [' + result.rev + ']');
                     }
                 } catch (result) {
                     MODELS.couch_down_handler('save', result);
@@ -246,7 +246,7 @@ var MODELS = {
                     // console.dir(result);
                     if (result.ok) {
                         this.onRemove();
-                        console.info('[delete] ' + result.id + ' [' + result.rev + ']');
+                        // console.info('[delete] ' + result.id + ' [' + result.rev + ']');
                     }
                 } catch (result) {
                     MODELS.couch_down_handler('delete', result);
