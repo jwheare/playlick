@@ -4,13 +4,7 @@
 **/
 var MODELS = {
     couch: new CouchDB('playlick'),
-    next_playlist_id: 0,
-    next_playlist_track_id: 0,
-    load_playlist: function (tracks, container, options) {
-        var playlist = new MODELS.Playlist(container, options);
-        playlist.load_tracks(tracks);
-        return playlist;
-    }
+    next_playlist_track_id: 0
 };
 (function () {
     /**
@@ -65,56 +59,47 @@ var MODELS = {
      * class MODELS.Playlist
      * Playlist objects have a name, array of Tracks and duration
     **/
-    var Playlist = function (container, options) {
-        this.options = options || {};
-        
-        this.id = this.options.id || MODELS.next_playlist_id++;
-        this.container = $('#' + container);
-        var date = new Date();
-        this.name = this.options.name || "Playlist: " + date.toLocaleString();
-        this.published = false;
+    var Playlist = function (options) {
         this.saved = false;
+        this.published = false;
+        this.tracks = [];
+        this.duration = 0;
         
-        this.initialise();
+        this.options = options || {};
+        if (this.options.doc_ref) {
+            // Update the ref values
+            this.set_doc_ref(this.options.doc_ref);
+        } else {
+            // Get a new UUID
+            this.set_id(CouchDB.newUuids(1)[0]);
+        }
+        this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
         
-        this.render();
+        // Create the DOM element
+        this.set_element(this.options.dom_element);
     };
     Playlist.prototype = {
         /**
          * State management
         **/
-        initialise: function () {
-            this.tracks = [];
-            this.container.empty();
-            this.duration = 0;
-        },
-        add_track: function (track) {
-            var playlist_track = new PlaylistTrack(this, track);
+        add_track: function (track, options) {
+            var playlist_track = new PlaylistTrack(this, track, options);
             this.tracks.push(playlist_track);
-            // AUTOSAVE
-            this.save();
             return playlist_track;
         },
-        remove_track: function (playlist_track) {
-            var index = $.inArray(playlist_track, this.tracks);
-            this.tracks.splice(index, 1);
+        remove_track: function (playlist_track, onSave) {
+            var i = $.inArray(playlist_track, this.tracks);
+            this.tracks.splice(i, 1);
             // AUTOSAVE
-            this.save();
-        },
-        load_tracks: function (tracks) {
-            this.initialise();
-            
-            this.start_batch();
-            var playlist = this;
-            $.each(tracks, function (index, item) {
-                playlist.add_track(item);
+            this.save(function () {
+                // Remove from the DOM
+                playlist_track.element.remove();
             });
-            this.stop_batch();
         },
-        reset_tracks: function (playlist_tracks) {
+        reset_tracks: function (playlist_tracks, onSave) {
             this.tracks = playlist_tracks;
             // AUTOSAVE
-            this.save();
+            this.save(onSave);
         },
         /**
          * MODELS.Playlist->_rebuild()
@@ -122,8 +107,8 @@ var MODELS = {
         **/
         _rebuild: function () {
             var duration = 0;
-            $.each(this.tracks, function (index, playlist_track) {
-                playlist_track.position = index + 1;
+            $.each(this.tracks, function (i, playlist_track) {
+                playlist_track.position = i + 1;
                 if (typeof playlist_track.track.duration != 'undefined') {
                     duration += playlist_track.track.duration;
                 }
@@ -131,24 +116,12 @@ var MODELS = {
             this.duration = duration;
         },
         /**
-         * Batch operations
-        **/
-        batch: false,
-        start_batch: function () {
-            this.batch = true;
-        },
-        stop_batch: function () {
-            this.batch = false;
-            // AUTOSAVE
-            this.save();
-        },
-        /**
          * Playlist management
         **/
-        set_name: function (name) {
+        set_name: function (name, onSave) {
             this.name = name;
             // AUTOSAVE
-            this.save();
+            this.save(onSave);
         },
         get_duration: function () {
             return UTIL.mmss(this.duration);
@@ -160,31 +133,25 @@ var MODELS = {
             }
             return this.name + duration;
         },
-        render: function (element_name) {
+        /**
+         * Build a DOMElement for the Playlist
+        **/
+        set_element: function (element_name) {
             var element_name = element_name || 'li';
-            if (!this.element) {
-                this.element = $(
-                    '<' + element_name + ' class="p" id="' + this.get_dom_id() + '">'
-                  + '</' + element_name + '>'
-                ).data('playlist', this);
-            }
-            this.element.html(this.toHTML());
+            this.element = $(
+                '<' + element_name + ' class="p" id="' + this.get_dom_id() + '">'
+              + '</' + element_name + '>'
+            ).data('playlist', this).html(this.toHTML());
         },
         get_dom_id: function () {
-            return "p_" + this.id;
-        },
-        is_in_dom: function () {
-            if ($("#" + this.get_dom_id()).size()) {
-                return true;
-            }
-            return false;
+            return "p_" + this.get_id();
         },
         toHTML: function () {
             return this.toString();
         },
         get_urls: function () {
             var urls = [];
-            $.each(this.tracks, function (index, playlist_track) {
+            $.each(this.tracks, function (i, playlist_track) {
                 if (playlist_track.track.playdar_url) {
                     urls.push(playlist_track.track.playdar_url);
                 }
@@ -196,7 +163,7 @@ var MODELS = {
         **/
         get_track_by_id: function (playlist_track_id) {
             var that = this;
-            $.each(this.tracks, function (index, playlist_track) {
+            $.each(this.tracks, function (i, playlist_track) {
                 if (playlist_track.id == playlist_track_id) {
                     return false;
                 }
@@ -204,47 +171,51 @@ var MODELS = {
             return playlist_track;
         },
         get_track_at_position: function (position) {
-            var index = position - 1;
-            return this.tracks[index];
+            var i = position - 1;
+            return this.tracks[i];
         },
         /**
          * Persistance
         **/
-        save: function () {
+        save: function (callback) {
             this._rebuild();
             
-            if (this.options.onSave) {
-                this.options.onSave.call(this);
-            }
-            
-            if (!this.batch) {
-                if (!this.saved && this.options.onCreate) {
-                    this.options.onCreate.call(this);
-                }
-                this.saved = true;
-                // Persist in CouchDB
-                
-                try {
-                    var result = MODELS.couch.save(this.get_doc());
-                    // console.dir(result);
-                    if (result.ok) {
-                        this.set_doc_ref(result);
-                        console.info('[save] ' + result.id + ' [' + result.rev + ']');
+            // Persist in CouchDB
+            try {
+                var result = MODELS.couch.save(this.get_doc());
+                // console.dir(result);
+                if (result.ok) {
+                    if (!this.saved && this.options.onCreate) {
+                        this.options.onCreate.call(this);
                     }
-                } catch (result) {
-                    var message = "couchdb unavailable";
-                    if (result.error && result.error != 'unknown') {
-                        message = result.error + ': ' + result.reason;
+                    this.set_doc_ref(result);
+                    if (callback) {
+                        callback.call(this);
                     }
-                    console.warn('[save] ' + message);
+                    if (this.options.onSave) {
+                        this.options.onSave.call(this);
+                    }
+                    console.info('[save] ' + result.id + ' [' + result.rev + ']');
                 }
+            } catch (result) {
+                var message = "couchdb unavailable";
+                if (result.error && result.error != 'unknown') {
+                    message = result.error + ': ' + result.reason;
+                }
+                console.warn('[save] ' + message);
             }
         },
         remove: function () {
             try {
                 var result = MODELS.couch.deleteDoc(this.get_doc_ref());
-                console.dir(result);
+                // console.dir(result);
                 if (result.ok) {
+                    // Remove from the DOM
+                    this.element.remove();
+                    // onDelete Callback
+                    if (this.options.onDelete) {
+                        this.options.onDelete.call(this);
+                    }
                     console.info('[delete] ' + result.id + ' [' + result.rev + ']');
                 }
             } catch (result) {
@@ -255,38 +226,53 @@ var MODELS = {
                 console.warn('[delete] ' + message);
             }
         },
-        publish: function () {
+        publish: function (onSave) {
             this.published = true;
             // AUTOSAVE
-            this.save();
+            this.save(onSave);
         },
-        make_private: function () {
+        make_private: function (onSave) {
             this.published = false;
             // AUTOSAVE
-            this.save();
+            this.save(onSave);
         },
         share: function (person) {
             // TODO
             // Fire off AJAX request to share Playlist with email address or user
         },
+        /**
+         * CouchDB Representation
+        **/
+        set_id: function (id) {
+            this._id = id;
+        },
+        get_id: function () {
+            return this._id;
+        },
+        set_rev: function (rev) {
+            this._rev = rev;
+        },
+        get_rev: function () {
+            return this._rev;
+        },
         set_doc_ref: function (doc_ref) {
-            this._id = doc_ref.id;
-            this._rev = doc_ref.rev;
+            this.set_id(doc_ref.id);
+            this.set_rev(doc_ref.rev);
+            this.saved = true;
         },
         get_doc_ref: function () {
             var doc_ref = {
-                _id: this._id,
-                _rev: this._rev
+                _id: this.get_id(),
+                _rev: this.get_rev()
             };
             return doc_ref;
         },
         get_doc: function () {
             var doc = $.extend(this.get_doc_ref(), {
-                id: this.id,
                 name: this.name,
                 duration: this.duration,
                 published: this.published,
-                tracks: $.map(this.tracks, function (playlist_track, index) {
+                tracks: $.map(this.tracks, function (playlist_track, i) {
                     return playlist_track.get_doc();
                 })
             });
@@ -299,40 +285,33 @@ var MODELS = {
      * PlaylistTrack objects join a Playlist with a Track
      * and have a position and element
     **/
-    var PlaylistTrack = function (playlist, track) {
+    var PlaylistTrack = function (playlist, track, options) {
         this.id = MODELS.next_playlist_track_id++;
         this.playlist = playlist;
         this.track = track;
         
-        // Add to DOM
-        this.render();
-        this.element.appendTo(this.playlist.container);
+        this.options = options || {};
+        
+        // Create the dom element
+        this.set_element(this.options.dom_element);
     };
     PlaylistTrack.prototype = {
         remove: function () {
-            // Remove from the DOM
-            this.destroy();
             // Update playlist state
             this.playlist.remove_track(this);
         },
         /**
-         * Render the PlaylistTrack to a DOMElement
+         * Build a DOMElement for the PlaylistTrack
         **/
-        render: function (element_name) {
+        set_element: function (element_name) {
             var element_name = element_name || 'li';
-            if (!this.element) {
-                this.element = $(
-                    '<' + element_name + ' class="p_t" id="' + this.get_dom_id() + '">'
-                  + '</' + element_name + '>'
-                ).data('playlist_track', this);
-            }
-            this.element.html(this.track.toHTML());
-        },
-        destroy: function () {
-            this.element.remove();
+            this.element = $(
+                '<' + element_name + ' class="p_t" id="' + this.get_dom_id() + '">'
+              + '</' + element_name + '>'
+            ).data('playlist_track', this).html(this.track.toHTML());
         },
         get_dom_id: function () {
-            return "p_t_" + this.playlist.id + '_' + this.id;
+            return "p_t_" + this.playlist.get_id() + '_' + this.id;
         },
         get_position: function () {
             return $.inArray(this, this.playlist.tracks) + 1;

@@ -67,43 +67,43 @@ form {
     line-height: 39px;
     background: #d2f380;
 }
-ul#playlist_stash {
+ul#playlists {
     margin: 0;
     padding: 0;
     list-style-type: none;
 }
-ul#playlist_stash li {
+ul#playlists li {
     margin-right: -24px;
     border-right: 24px solid #fff;
     border-bottom: 1px solid #d2f380;
     line-height: 39px;
 }
-ul#playlist_stash li img {
+ul#playlists li img {
     float: right;
     margin: 11px 3px 0 3px;
     vertical-align: middle;
 }
-ul#playlist_stash li a.playlist {
+ul#playlists li a.playlist {
     display: block;
     padding: 0 10px;
     text-decoration: none;
     background: #e8f9bb;
 }
-ul#playlist_stash li.current a.playlist {
+ul#playlists li.current a.playlist {
     background: #d2f380;
 }
-ul#playlist_stash li a.playlist:hover {
+ul#playlists li a.playlist:hover {
     background: #c0e95b;
 }
-ul#playlist_stash li a.playlist:active {
+ul#playlists li a.playlist:active {
     background: #a8d840;
 }
 
-ul#playlist_stash li form {
+ul#playlists li form {
     padding: 0 7px;
     line-height: 39px;
 }
-ul#playlist_stash li a.edit_playlist {
+ul#playlists li a.edit_playlist {
     float: right;
     padding: 0 6px;
     font-size: 11px;
@@ -111,13 +111,13 @@ ul#playlist_stash li a.edit_playlist {
     background: #a8d840;
     text-decoration: none;
 }
-ul#playlist_stash li:hover a.edit_playlist {
+ul#playlists li:hover a.edit_playlist {
     visibility: visible;
 }
-ul#playlist_stash li a.edit_playlist:hover {
+ul#playlists li a.edit_playlist:hover {
     background: #92c137;
 }
-ul#playlist_stash li a.delete_playlist {
+ul#playlists li a.delete_playlist {
     float: right;
     width: 24px;
     margin-right: -24px;
@@ -127,16 +127,16 @@ ul#playlist_stash li a.delete_playlist {
     visibility: hidden;
     text-decoration: none;
 }
-ul#playlist_stash li:hover a.delete_playlist {
+ul#playlists li:hover a.delete_playlist {
     visibility: visible;
 }
-ul#playlist_stash li a.delete_playlist:hover {
+ul#playlists li a.delete_playlist:hover {
     background: #eee;
 }
-ul#playlist_stash li input {
+ul#playlists li input {
     margin-right: 5px;
 }
-ul#playlist_stash li input.playlist_name {
+ul#playlists li input.playlist_name {
     width: 180px;
 }
 
