@@ -79,11 +79,11 @@ ul#playlists li {
     margin-right: -24px;
     border-right: 24px solid #fff;
     border-bottom: 1px solid #d2f380;
-    line-height: 39px;
+    line-height: 32px;
 }
 ul#playlists li img {
     float: right;
-    margin: 11px 3px 0 3px;
+    margin: 6px 3px 0 3px;
     vertical-align: middle;
 }
 ul#playlists li a.playlist {
