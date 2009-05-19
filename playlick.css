@@ -83,7 +83,7 @@ ul#playlists li {
 }
 ul#playlists li img {
     float: right;
-    margin: 6px 3px 0 3px;
+    margin: 7px 0 0 3px;
     vertical-align: middle;
 }
 ul#playlists li a.playlist {
