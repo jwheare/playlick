@@ -219,7 +219,7 @@ var MODELS = {
                     if (result.ok) {
                         this.set_doc_ref(result);
                         this.onSave(callback);
-                        console.info('[saved] ' + result.id + ' [' + result.rev + ']');
+                        // console.info('[saved] ' + result.id + ' [' + result.rev + ']');
                     }
                 } catch (result) {
                     MODELS.couch_down_handler('save', result);
