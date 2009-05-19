@@ -58,8 +58,7 @@ var MODELS = {
         get_doc: function () {
             var doc = {
                 name: this.name,
-                artist: this.artist,
-                duration: this.duration
+                artist: this.artist
             };
             return doc;
         }
@@ -198,7 +197,7 @@ var MODELS = {
          * Persistance
         **/
         onSave: function (callback) {
-            if (!this.saved && this.options.onCreate) {
+            if (!this.persisted && this.options.onCreate) {
                 this.options.onCreate.call(this);
             }
             if (callback) {
@@ -220,7 +219,7 @@ var MODELS = {
                     if (result.ok) {
                         this.set_doc_ref(result);
                         this.onSave(callback);
-                        // console.info('[save] ' + result.id + ' [' + result.rev + ']');
+                        console.info('[saved] ' + result.id + ' [' + result.rev + ']');
                     }
                 } catch (result) {
                     MODELS.couch_down_handler('save', result);
@@ -229,7 +228,6 @@ var MODELS = {
             if (!MODELS.couch_up && !this.persisted) {
                 this.onSave(callback);
             }
-            this.saved = true;
         },
         onRemove: function () {
             // Remove from the DOM

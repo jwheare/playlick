@@ -175,6 +175,7 @@ var PLAYLICK = {
     },
     resolve_current_playlist: function () {
         if (Playdar.client && Playdar.client.is_authed()) {
+            // TODO - Playdar JS needs an onResolveComplete listener. This batching doesn't work.
             $.each(PLAYLICK.current_playlist.tracks, function (i, playlist_track) {
                 PLAYLICK.resolve_track(playlist_track);
             });
@@ -239,17 +240,16 @@ var PLAYLICK = {
         }
     },
     
-    update_track: function (playlist_track, result, copy_details) {
+    update_track: function (playlist_track, result) {
         var track  = playlist_track.track;
-        if (copy_details) {
-            if ((track.name.toUpperCase()   != result.track.toUpperCase())
-             || (track.artist.toUpperCase() != result.artist.toUpperCase())) {
-                track.name = result.track;
-                track.artist = result.artist;
-                // Update DOM
-                playlist_track.element.find('span.fn').html(track.name);
-                playlist_track.element.find('span.contributor').html(track.artist);
-            }
+        if ((track.name.toUpperCase()   != result.track.toUpperCase())
+         || (track.artist.toUpperCase() != result.artist.toUpperCase())) {
+            track.name = result.track;
+            track.artist = result.artist;
+            // Update DOM
+            playlist_track.element.find('span.fn').html(track.name);
+            playlist_track.element.find('span.contributor').html(track.artist);
+            playlist_track.playlist.save();
         }
         track.duration = result.duration;
         playlist_track.element.find('span.elapsed').html(track.get_duration_string());
@@ -259,7 +259,6 @@ var PLAYLICK = {
         }
         playlist_track.track.playdar_sid = result.sid;
         playlist_track.track.playdar_url = result.url;
-        playlist_track.playlist.save();
     },
     
     play_track: function (playlist_track) {
@@ -429,6 +428,96 @@ var PLAYLICK = {
                 + '<br>Your changes will not be saved.'
             );
         }
+    },
+    load_xspf: function (xspf_url) {
+        $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
+            q: 'select * from xml where url="' + xspf_url + '"',
+            format: 'json'
+        }, function (json) {
+            // console.dir(json);
+            var error_text = 'Invalid URL';
+            if (json && json.query.results) {
+                var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
+                error_text = 'Invalid XSPF';
+                if (xspf) {
+                    error_text = 'No tracks';
+                    if (xspf.trackList.track) {
+                        PLAYLICK.add_from_jspf(xspf);
+                        // Update messages
+                        $('#xspf p.messages').hide();
+                        $('#xspf_title').text(xspf.title);
+                        $('#xspf_count').text(xspf.trackList.track.length);
+                        $('#xspf_done').show();
+                        return true;
+                    }
+                }
+            }
+            $('#xspf p.messages').hide();
+            var escaped_url = $('<b>').text('URL: ' + xspf_url);
+            var escaped_request = $('<small>').text(this.url);
+            var error_message = $('<p>').text(error_text);
+            error_message.append('<br>')
+                         .append(escaped_url)
+                         .append('<br>')
+                         .append(escaped_request);
+            $('#xspf_error').html(error_message);
+            $('#xspf_error').show();
+        });
+    },
+    load_lastfm_playlist: function (playlist_url, query) {
+        if (PLAYLICK.playlist_done) {
+            PLAYLICK.playlist_done[playlist_url] = false;
+        }
+        // Get the tracklist for each playlist
+        $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
+            method: "playlist.fetch",
+            playlistURL: playlist_url,
+            api_key: PLAYLICK.lastfm_api_key,
+            format: 'json'
+        }, function (playlist_json) {
+            // console.dir(playlist_json);
+            if (playlist_json.error) {
+                $('#import p.messages').hide();
+                var escaped_playlist = $('<b>').text('Playlist: ' + playlist_url);
+                var escaped_request = $('<small>').text(this.url);
+                var error_message = $('<p>').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
+                error_message.append('<br>')
+                             .append(query)
+                             .append('<br>')
+                             .append(escaped_request);
+                $('#import_error').html(error_message);
+                $('#import_error').show();
+            } else if (playlist_json.playlist.trackList.track) {
+                PLAYLICK.add_from_jspf(playlist_json.playlist);
+                if (PLAYLICK.playlist_done) {
+                    PLAYLICK.playlist_done[playlist_url] = true;
+                    var done_loading = true;
+                    for (k in PLAYLICK.playlist_done) {
+                        if (PLAYLICK.playlist_done[k] === false) {
+                            done_loading = false;
+                            break;
+                        }
+                    };
+                    if (done_loading) {
+                        PLAYLICK.playlist_done = null;
+                        $('#import p.messages').hide();
+                        $('#import_count').text(playlists.length);
+                        $('#import_done').show();
+                    }
+                }
+            } else {
+                $('#import p.messages').hide();
+                var escaped_playlist = $('<b>').text('Playlist: ' + playlist_url);
+                var escaped_request = $('<small>').text(this.url);
+                var error_message = $('<p>').text('No tracks');
+                error_message.append('<br>')
+                             .append(query)
+                             .append('<br>')
+                             .append(escaped_request);
+                $('#import_error').html(error_message);
+                $('#import_error').show();
+            }
+        });
     }
 };
 
@@ -437,12 +526,12 @@ $("#add_track_input").autocomplete("http://ws.audioscrobbler.com/2.0/?callback=?
     delay: 200,
     dataType: "jsonp",
     extraParams: {
-        api_key: PLAYLICK.lastfm_api_key,
-        format: "json",
         method: "track.search",
         track: function () {
             return $("#add_track_input").val();
-        }
+        },
+        api_key: PLAYLICK.lastfm_api_key,
+        format: "json"
     },
     cacheLength: 1,
     parse: function (json) {
@@ -480,10 +569,8 @@ $('#playlist').sortable({
     opacity: 0.5,
     placeholder: 'placeholder',
     update: function (e, ui) {
-        var ids = $('#playlist').sortable('toArray');
-        var tracks = [];
-        $.each(ids, function (i, id) {
-            tracks.push($('#' + id).data('playlist_track'));
+        var tracks = $.map($('#playlist li'), function (playlist_item, i) {
+            return $(playlist_item).data('playlist_track');
         });
         PLAYLICK.current_playlist.reset_tracks(tracks);
     }
@@ -581,57 +668,10 @@ $('#import_playlist_form').submit(function (e) {
                 if (!$.isArray(playlists)) {
                     playlists = [playlists];
                 }
-                var playlist_done = {};
+                PLAYLICK.playlist_done = {};
                 $.each(playlists, function (i, playlist) {
                     var playlist_url = "lastfm://playlist/" + playlist.id;
-                    playlist_done[playlist_url] = false;
-                    // Get the tracklist for each playlist
-                    $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
-                        method: "playlist.fetch",
-                        playlistURL: playlist_url,
-                        api_key: PLAYLICK.lastfm_api_key,
-                        format: 'json'
-                    }, function (playlist_json) {
-                        // console.dir(playlist_json);
-                        if (playlist_json.error) {
-                            $('#import p.messages').hide();
-                            var escaped_playlist = $('<b>').text('Playlist: ' + playlist_url);
-                            var escaped_request = $('<small>').text(this.url);
-                            var error_message = $('<p>').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
-                            error_message.append('<br>')
-                                         .append(escaped_name)
-                                         .append('<br>')
-                                         .append(escaped_request);
-                            $('#import_error').html(error_message);
-                            $('#import_error').show();
-                        } else if (playlist_json.playlist.trackList.track) {
-                            PLAYLICK.add_from_jspf(playlist_json.playlist);
-                            playlist_done[playlist_url] = true;
-                            var done_loading = true;
-                            for (k in playlist_done) {
-                                if (playlist_done[k] === false) {
-                                    done_loading = false;
-                                    break;
-                                }
-                            };
-                            if (done_loading) {
-                                $('#import p.messages').hide();
-                                $('#import_count').text(playlists.length);
-                                $('#import_done').show();
-                            }
-                        } else {
-                            $('#import p.messages').hide();
-                            var escaped_playlist = $('<b>').text('Playlist: ' + playlist_url);
-                            var escaped_request = $('<small>').text(this.url);
-                            var error_message = $('<p>').text('No tracks');
-                            error_message.append('<br>')
-                                         .append(escaped_name)
-                                         .append('<br>')
-                                         .append(escaped_request);
-                            $('#import_error').html(error_message);
-                            $('#import_error').show();
-                        }
-                    });
+                    PLAYLICK.load_lastfm_playlist(playlist_url, escaped_name);
                 });
             } else {
                 // No playlists
@@ -659,9 +699,6 @@ $('#import_xspf').click(function (e) {
 });
 $('#xspf_form').submit(function (e) {
     e.preventDefault();
-    // Show a loading icon
-    $('#xspf p.messages').hide();
-    $('#xspf_loading').show();
     // Parse the form
     var params = {};
     $.each($(this).serializeArray(), function (i, item) {
@@ -669,41 +706,41 @@ $('#xspf_form').submit(function (e) {
     });
     $('#xspf_input').val('');
     $('#xspf_input').select();
-    
+    // Show a loading icon
+    $('#xspf p.messages').hide();
+    $('#xspf_loading').show();
     // Load the XSPF
     var xspf_url = params.xspf;
-    $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
-        q: 'select * from xml where url="' + xspf_url + '"',
-        format: 'json'
-    }, function (json) {
-        // console.dir(json);
-        var error_text = 'Invalid URL';
-        if (json && json.query.results) {
-            var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
-            error_text = 'Invalid XSPF';
-            if (xspf) {
-                error_text = 'No tracks';
-                if (xspf.trackList.track) {
-                    PLAYLICK.add_from_jspf(xspf);
-                    // Update messages
-                    $('#xspf p.messages').hide();
-                    $('#xspf_title').text(xspf.title);
-                    $('#xspf_count').text(xspf.trackList.track.length);
-                    $('#xspf_done').show();
-                    return true;
-                }
-            }
-        }
-        $('#xspf p.messages').hide();
-        var escaped_url = $('<b>').text('URL: ' + xspf_url);
-        var escaped_request = $('<small>').text(this.url);
-        var error_message = $('<p>').text(error_text);
-        error_message.append('<br>')
-                     .append(escaped_url)
-                     .append('<br>')
-                     .append(escaped_request);
-        $('#xspf_error').html(error_message);
-        $('#xspf_error').show();
+    PLAYLICK.load_xspf(xspf_url);
+});
+$('#album_form').submit(function (e) {
+    e.preventDefault();
+    // Parse the form
+    var params = {};
+    $.each($(this).serializeArray(), function (i, item) {
+        params[item.name] = item.value;
+    });
+    // Show a loading icon
+    $('#xspf p.messages').hide();
+    $('#xspf_loading').show();
+    // Load the XSPF
+    var album_url = "http://ws.audioscrobbler.com/2.0/?" + $.param({
+        method: "album.getinfo",
+        artist: params.artist,
+        album: params.album,
+        api_key: PLAYLICK.lastfm_api_key,
+        format: "json"
+    });
+    var escaped_album = $('<b>').text('Artist: '+params.artist+' Album: '+params.album);
+    $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
+        method: "album.getinfo",
+        artist: params.artist,
+        album: params.album,
+        api_key: PLAYLICK.lastfm_api_key,
+        format: "json"
+    }, function (album_json) {
+        var playlist_url = "lastfm://playlist/album/" + album_json.album.id;
+        PLAYLICK.load_lastfm_playlist(playlist_url, escaped_album);
     });
 });
 
@@ -724,7 +761,7 @@ $('#playlist').click(function (e) {
             tbody.addClass('choice');
             // Update track with result data
             var result = tbody.data('result');
-            PLAYLICK.update_track(playlist_track, result, true);
+            PLAYLICK.update_track(playlist_track, result);
             if (!Playdar.player.is_now_playing()) {
                 Playdar.player.play_stream(result.sid);
             }

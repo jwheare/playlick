@@ -178,8 +178,9 @@ ul#playlists li input.playlist_name {
 
 /* Add track form */
 form#add_to_playlist,
-form#import_playlist_form ,
-form#xspf_form {
+form#import_playlist_form,
+form#xspf_form,
+form#album_form {
     margin: 20px 0 20px 40px;
     line-height: 25px;
 }
@@ -188,6 +189,10 @@ form#import_playlist_form input#import_playlist_input,
 form#xspf_form input#xspf_input {
     margin: 0 10px;
     width: 250px;
+}
+form#album_form input#album_artist_input,
+form#album_form input#album_album_input {
+    margin: 0 10px;
 }
 
 /* Track list */
