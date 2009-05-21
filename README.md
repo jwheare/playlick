@@ -10,7 +10,6 @@ TODO
 ----
 
 * Setup CouchDB on playlick.com
-* Album import from Last.fm
 * Tag playlist import from Last.fm
 * XSPF export
 * Applecript export for iTunes
