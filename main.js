@@ -328,7 +328,7 @@ var PLAYLICK = {
             } else {
                 score_cell = '<td class="score">' + result.score.toFixed(3) + '</td>';
             }
-            var album_art = "http://james.ws.dev.last.fm:8090/2.0/?" + $.param({
+            var album_art = "http://ws.audioscrobbler.com/2.0/?" + $.param({
                 artist: result.artist,
                 album: result.album,
                 method: "album.coverredirect",
@@ -389,6 +389,9 @@ var PLAYLICK = {
         var track_list = jspf.trackList.track;
         // Create the playlist
         var playlist = PLAYLICK.add_playlist(title);
+        if (!$.isArray(track_list)) {
+            track_list = [track_list];
+        }
         // Load tracks
         $.each(track_list, function (i, track) {
             playlist.add_track(new MODELS.Track(track.title, track.creator));
