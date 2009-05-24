@@ -14,6 +14,7 @@ var MODELS = {
             message = result.error+': '+result.reason;
         }
         // console.warn('['+action+'] '+message);
+        // console.warn(result);
     }
 };
 (function () {
@@ -151,6 +152,20 @@ var MODELS = {
                 duration = ' (' + duration + ')';
             }
             return this.name + duration;
+        },
+        /**
+         * Load and unload PlaylistTracks from the DOM
+        **/
+        load: function () {
+            var elements = $.map(this.tracks, function (playlist_track, i) {
+                return playlist_track.load().get();
+            });
+            return elements;
+        },
+        unload: function () {
+            $.each(this.tracks, function (i, playlist_track) {
+                playlist_track.unload();
+            });
         },
         /**
          * Build a DOMElement for the Playlist
@@ -297,6 +312,7 @@ var MODELS = {
         },
         get_doc: function () {
             var doc = $.extend(this.get_doc_ref(), {
+                type: 'playlist',
                 name: this.name,
                 duration: this.duration,
                 published: this.published,
@@ -320,10 +336,17 @@ var MODELS = {
         
         this.options = options || {};
         
-        // Create the dom element
-        this.set_element(this.options.dom_element);
+        this.load();
     };
     PlaylistTrack.prototype = {
+        load: function () {
+            // Create the dom element
+            return this.set_element(this.options.dom_element);
+        },
+        unload: function () {
+            // Create the dom element
+            this.element.remove();
+        },
         remove: function () {
             // Update playlist state
             this.playlist.remove_track(this);
@@ -337,6 +360,7 @@ var MODELS = {
                 .attr('id', this.get_dom_id())
                 .data('playlist_track', this)
                 .html(this.track.toHTML());
+            return this.element;
         },
         get_dom_id: function () {
             return "p_t_" + this.playlist.get_id() + '_' + this.id;

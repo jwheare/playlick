@@ -54,6 +54,13 @@ var PLAYLICK = {
     disconnect_from_playdar_text: 'Disconnect from Playdar',
     cancel_edit_playlist_text: 'cancel',
     track_width: 556,
+    couch_down: function () {
+        $('#loading_playlists').addClass('unavailable');
+        $('#loading_playlists').html(
+            '<b>Database unavailable.</b>'
+            + '<br>Your changes will not be saved.'
+        );
+    },
     truncate_string: function (name, length, truncation) {
         length = length || 30;
         truncation = (typeof truncation == 'undefined') ? '…' : truncation;
@@ -150,19 +157,32 @@ var PLAYLICK = {
         PLAYLICK.cancel_resolve();
         // Update current sidebar item
         PLAYLICK.set_current_playlist(playlist_item);
-        // Reset the playlist view
-        var playlist = playlist_item.data('playlist');
-        $('#playlist').empty();
-        $('#add_track_button').val(PLAYLICK.add_button_text);
-        PLAYLICK.update_playlist_title(playlist.toString());
+        // Unload the current playlist
+        PLAYLICK.current_playlist.unload();
         // Update the current playlist object
-        PLAYLICK.current_playlist = playlist;
-        // Load tracks into the DOM
-        $.each(PLAYLICK.current_playlist.tracks, function (i, playlist_track) {
-            $('#playlist').append(playlist_track.element);
-        });
-        // Resolve
-        PLAYLICK.resolve_current_playlist();
+        PLAYLICK.current_playlist = playlist_item.data('playlist');
+        // Update the title
+        PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.toString());
+        // Switch the add track button text
+        $('#add_track_button').val(PLAYLICK.add_button_text);
+        // Load tracks
+        var elements;
+        if (!PLAYLICK.current_playlist.tracks.length) {
+            // Fetch from Couch
+            elements = PLAYLICK.fetch_playlist_tracks(PLAYLICK.current_playlist);
+        } else {
+            // Already fetched, just build DOM elements
+            elements = PLAYLICK.current_playlist.load();
+        }
+        if (elements.length) {
+            // Add to the DOM
+            $('#playlist').append(elements);
+            // Resolve tracks with Playdar
+            PLAYLICK.resolve_current_playlist();
+        } else {
+            // TODO error message for no tracks
+            console.error("Couldn't load tracks");
+        }
         // Show manage screen
         $('#import').hide();
         $('#manage').show();
@@ -442,11 +462,11 @@ var PLAYLICK = {
         // Add to sidebar
         $('#playlists').append(playlist.element);
     },
-    load_playlists: function () {
+    fetch_playlists: function () {
         if (MODELS.couch_up) {
             try {
                 var response = MODELS.couch.view("playlist/all");
-                $.each(response.rows, function (i, row) {
+                var elements = $.map(response.rows, function (row, i) {
                     // console.log(row);
                     var value = row.value;
                     // Create the playlist object
@@ -454,24 +474,44 @@ var PLAYLICK = {
                         id: value._id,
                         rev: value._rev
                     });
-                    // Load tracks
-                    $.each(value.tracks, function (i, track) {
-                        playlist.add_track(new MODELS.Track(track.track.name, track.track.artist));
-                    });
                     // Add to the sidebar
-                    $('#playlists').append(playlist.element);
+                    return playlist.element.get();
                 });
+                $('#playlists').append(elements);
                 $('#loading_playlists').hide();
             } catch (result) {
                 MODELS.couch_down_handler('view playlists', result);
             }
         }
         if (!MODELS.couch_up) {
-            $('#loading_playlists').addClass('unavailable');
-            $('#loading_playlists').html(
-                '<b>Database unavailable.</b>'
-                + '<br>Your changes will not be saved.'
-            );
+            PLAYLICK.couch_down();
+        }
+    },
+    fetch_playlist_tracks: function (playlist) {
+        // TODO loading spinner
+        if (MODELS.couch_up) {
+            try {
+                var response = MODELS.couch.view("playlist/all", {
+                    "key": playlist._id
+                });
+                var row = response.rows[0];
+                var value = row.value;
+                // Load tracks
+                var elements = $.map(value.tracks, function (track, i) {
+                    var playlist_track = playlist.add_track(new MODELS.Track(track.track.name, track.track.artist));
+                    // Build DOM element
+                    return playlist_track.load().get();
+                });
+                // TODO hide loading spinner
+                return elements;
+            } catch (result) {
+                MODELS.couch_down_handler('load tracks', result);
+            }
+        }
+        if (!MODELS.couch_up) {
+            // TODO hide loading spinner
+            // TODO error message
+            PLAYLICK.couch_down();
         }
     },
     load_xspf: function (xspf_url) {
@@ -611,7 +651,7 @@ $('#playlist').sortable({
 PLAYLICK.blank_playlist();
 
 // Load playlists
-PLAYLICK.load_playlists();
+PLAYLICK.fetch_playlists();
 
 /* Event handlers */
 
@@ -846,9 +886,9 @@ $('#playlist').click(function (e) {
     if (track_item.size()) {
         var playlist_track = track_item.data('playlist_track');
         if (!playlist_track) {
-            console.warn('no playlist track');
-            console.log(track_item);
-            console.log(target);
+            // console.warn('no playlist track');
+            // console.log(track_item);
+            // console.log(target);
         }
         
         // Clicks to playdar results
