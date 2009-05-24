@@ -15,11 +15,7 @@
                     <div class="sidebar_list">
                         <ul id="playlists">
                             <li class="current"><a href="#new" id="create_playlist" class="playlist">+ Create</a></li>
-                            <li><a href="#xspf" id="import_xspf" class="playlist">+ Import XSPF</a></li>
-                            <li><a href="#import" id="import_playlist" class="playlist">
-                                <img src="http://cdn.last.fm/flatness/favicon.2.png" width="16" height="16">
-                                + Import from Last.fm
-                            </a></li>
+                            <li><a href="#import" id="import_playlist" class="playlist">+ Import</a></li>
                         </ul>
                         <p id="loading_playlists">Loading playlists…</p>
                     </div>
@@ -50,6 +46,13 @@
                             <input type="submit" id="import_playlist_button" value="Get Playlists" />
                         </form>
                         
+                        <p class="messages" id="import_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
+                        <p class="messages" id="import_done">Done! Playlists imported: <span id="import_count"></span></p>
+                        <p class="messages" id="import_error_no_playlists">No playlists found</p>
+                        <p class="messages" id="import_error"></p>
+                        
+                        <h1>Import an album from Last.fm</h1>
+                        
                         <form id="album_form">
                             <label for="album_artist_input">Artist:</label>
                             <input type="text" name="artist" id="album_artist_input" />
@@ -58,13 +61,10 @@
                             <input type="submit" id="album_button" value="Load Album" />
                         </form>
                         
-                        <p class="messages" id="import_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
-                        <p class="messages" id="import_done">Done! Playlists imported: <span id="import_count"></span></p>
-                        <p class="messages" id="import_error_no_playlists">No playlists found</p>
-                        <p class="messages" id="import_error"></p>
-                    </div>
-                    
-                    <div id="xspf">
+                        <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
+                        <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
+                        <p class="messages" id="album_error"></p>
+                        
                         <h1>Import a playlist from XSPF</h1>
                         
                         <form id="xspf_form">
@@ -114,6 +114,7 @@
                 receiverurl: "http://www.playlick.com/playdar_auth.html"
             });
             Playdar.USE_STATUS_BAR = false;
+            Playdar.USE_SCROBBLER = false;
             Playdar.REFRESH_INTERVAL = 500;
             Playdar.MAX_CONCURRENT_RESOLUTIONS = 20;
             Playdar.client.register_listeners(PLAYLICK.playdar_listeners);

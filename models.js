@@ -157,10 +157,10 @@ var MODELS = {
         **/
         set_element: function (element_name) {
             var element_name = element_name || 'li';
-            this.element = $(
-                '<' + element_name + ' class="p" id="' + this.get_dom_id() + '">'
-              + '</' + element_name + '>'
-            ).data('playlist', this).html(this.toHTML());
+            this.element = $('<' + element_name + ' class="p">')
+                .attr('id', this.get_dom_id())
+                .data('playlist', this)
+                .html(this.toHTML());
         },
         get_dom_id: function () {
             return "p_" + this.get_id();
@@ -333,10 +333,10 @@ var MODELS = {
         **/
         set_element: function (element_name) {
             var element_name = element_name || 'li';
-            this.element = $(
-                '<' + element_name + ' class="p_t" id="' + this.get_dom_id() + '">'
-              + '</' + element_name + '>'
-            ).data('playlist_track', this).html(this.track.toHTML());
+            this.element = $('<' + element_name + ' class="p_t">')
+                .attr('id', this.get_dom_id())
+                .data('playlist_track', this)
+                .html(this.track.toHTML());
         },
         get_dom_id: function () {
             return "p_t_" + this.playlist.get_id() + '_' + this.id;

@@ -96,6 +96,9 @@ ul#playlists li a.playlist {
 ul#playlists li.current a.playlist {
     background: #d2f380;
 }
+ul#playlists li.playing a.playlist {
+    background: #92c137;
+}
 ul#playlists li a.playlist:hover {
     background: #c0e95b;
 }
@@ -162,17 +165,14 @@ ul#playlists li input.playlist_name {
 }
 
 /* Import */
-#import,
-#xspf {
+#import {
     display: none;
 }
-#import p.messages,
-#xspf p.messages {
+#import p.messages {
     display: none;
     margin: 20px 0 20px 40px;
 }
-#import p.messages img,
-#xspf p.messages img {
+#import p.messages img {
     margin: -3px 5px 0 0;
     vertical-align: middle;
 }
