@@ -108,7 +108,7 @@ ul#playlists li a.playlist:active {
 
 ul#playlists li form {
     padding: 0 7px;
-    line-height: 39px;
+    line-height: 32px;
 }
 ul#playlists li a.edit_playlist {
     float: right;

@@ -27,11 +27,11 @@ MODELS.Track.prototype.toHTML = function () {
         .html();
 };
 MODELS.Playlist.prototype.toHTML = function () {
-    var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">╳</a>');
+    var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
     var edit_link   = $('<a href="#" class="edit_playlist">').text(PLAYLICK.edit_playlist_text);
     var name        = $('<a href="#" class="playlist">').text(this.name);
     var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
-        .append('<input type="text" name="name" class="playlist_name"')
+        .append('<input type="text" name="name" class="playlist_name">')
         .append('<input type="submit" value="save">');
     // Wrap in a div so we can return its innerHTML as a string
     return $('<div>')
