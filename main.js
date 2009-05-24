@@ -1,9 +1,14 @@
 // Custom Track and Playlist renderers
 MODELS.Track.prototype.toHTML = function () {
-    var remove_link = $('<a href="#" class="remove" title="Remove from playlist">╳</a>');
-    var source_link = $('<a href="#" class="show_sources" title="Show track sources">sources</a>');
+    var remove_link = $('<a href="#" class="remove" title="Remove from playlist">').text('╳');
+    var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
+    var item_name = $('<span class="haudio">')
+        .append($('<span class="fn">').text(this.name))
+        .append(' - ')
+        .append($('<span class="contributor">').text(this.artist));
     var item_link   = $('<a href="#" class="item">')
         .append($('<span class="elapsed">').text(this.get_duration_string()))
+        // TODO: use background images
         .append($('<span class="status">'
             + '&nbsp;'
             + '<span class="play">▸</span>'
@@ -12,11 +17,7 @@ MODELS.Track.prototype.toHTML = function () {
             + '</span>'
             + '&nbsp;'
         + '</span>'))
-        .append($('<span class="haudio">')
-            .append($('<span class="fn">').text(this.name))
-            .append(' - ')
-            .append($('<span class="contributor">').text(this.artist))
-        );
+        .append(item_name);
     var sources = $('<div class="sources">');
     // Wrap in a div so we can return its innerHTML as a string
     return $('<div>')
@@ -29,7 +30,7 @@ MODELS.Track.prototype.toHTML = function () {
 MODELS.Playlist.prototype.toHTML = function () {
     var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
     var edit_link   = $('<a href="#" class="edit_playlist">').text(PLAYLICK.edit_playlist_text);
-    var name        = $('<a href="#" class="playlist">').text(this.name);
+    var name        = $('<a href="#" class="playlist">').text(PLAYLICK.truncate_string(this.name));
     var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
         .append('<input type="text" name="name" class="playlist_name">')
         .append('<input type="submit" value="save">');
@@ -50,6 +51,14 @@ var PLAYLICK = {
     edit_playlist_text: 'edit',
     cancel_edit_playlist_text: 'cancel',
     track_width: 556,
+    truncate_string: function (name, length, truncation) {
+        length = length || 30;
+        truncation = (typeof truncation == 'undefined') ? '…' : truncation;
+        if (name.length > length) {
+            return name.slice(0, length - truncation.length) + truncation;
+        }
+        return String(name);
+    },
     update_playdar_status: function (message) {
         $('#playdar').html(
             '<img src="/playdar_logo_16x16.png" width="16" height="16"> '
@@ -910,7 +919,7 @@ $('#playlists').click(function (e) {
         var name = form.serializeArray()[0].value;
         var playlist = playlist_item.data('playlist');
         playlist.set_name(name, function () {
-            playlist_item.find('a.playlist').html(name);
+            playlist_item.find('a.playlist').text(PLAYLICK.truncate_string(name));
             PLAYLICK.toggle_playlist_edit(playlist_item);
         });
     }
