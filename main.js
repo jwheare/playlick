@@ -49,6 +49,9 @@ var PLAYLICK = {
     start_button_text: $('#add_track_button').val(),
     add_button_text: 'Add',
     edit_playlist_text: 'edit',
+    loading_playdar_text: $('#playdar').html(),
+    connect_to_playdar_text: 'Connect to Playdar',
+    disconnect_from_playdar_text: 'Disconnect from Playdar',
     cancel_edit_playlist_text: 'cancel',
     track_width: 556,
     truncate_string: function (name, length, truncation) {
@@ -69,20 +72,26 @@ var PLAYLICK = {
         onStat: function (detected) {
             if (detected) {
                 if (!detected.authenticated) {
-                    var connect_link = Playdar.client.get_auth_link_html('Connect to Playdar');
+                    var connect_link = Playdar.client.get_auth_link_html(
+                        PLAYLICK.connect_to_playdar_text
+                    );
                     PLAYLICK.update_playdar_status(connect_link);
                 }
             } else {
-                PLAYLICK.update_playdar_status('Playdar unavailable');
+                PLAYLICK.update_playdar_status('Playdar unavailable. <a href="#" onclick="$(\'#playdar\').html(PLAYLICK.loading_playdar_text); Playdar.client.init(); return false;">retry</a>');
             }
         },
         onAuth: function () {
-            var disconnect_link = Playdar.client.get_disconnect_link_html('Disconnect from Playdar');
+            var disconnect_link = Playdar.client.get_disconnect_link_html(
+                PLAYLICK.disconnect_from_playdar_text
+            );
             PLAYLICK.update_playdar_status(disconnect_link);
             PLAYLICK.resolve_current_playlist();
         },
         onAuthClear: function () {
-            var connect_link = Playdar.client.get_auth_link_html('Connect to Playdar');
+            var connect_link = Playdar.client.get_auth_link_html(
+                PLAYLICK.connect_to_playdar_text
+            );
             PLAYLICK.update_playdar_status(connect_link);
             PLAYLICK.cancel_resolve();
         }
@@ -225,7 +234,7 @@ var PLAYLICK = {
             track_item.removeClass('paused');
             track_item.css('background-position', '0 0');
             var progress = track_item.find('span.elapsed');
-            progress.html(playlist_track.track.get_duration_string());
+            progress.text(playlist_track.track.get_duration_string());
         }
         
         Playdar.player.stop_all();
@@ -268,13 +277,13 @@ var PLAYLICK = {
             track.artist = result.artist;
             playlist_track.playlist.save();
             // Update DOM
-            playlist_track.element.find('span.fn').html(track.name);
-            playlist_track.element.find('span.contributor').html(track.artist);
+            playlist_track.element.find('span.fn').text(track.name);
+            playlist_track.element.find('span.contributor').text(track.artist);
         }
         // If the duration changed, update it
         if (track.duration != result.duration) {
             track.duration = result.duration;
-            playlist_track.element.find('span.elapsed').html(track.get_duration_string());
+            playlist_track.element.find('span.elapsed').text(track.get_duration_string());
         }
         // If the sid has changed, stop the stream if it's playing
         if (playlist_track.track.playdar_sid && playlist_track.track.playdar_sid != result.sid) {
@@ -683,7 +692,7 @@ $('#import_playlist_form').submit(function (e) {
             $('#import_error').html(error_message);
             $('#import_error').show();
         } else {
-            $('#import_error').html('');
+            $('#import_error').empty();
             var playlists = json.playlists.playlist;
             if (playlists) {
                 if (!$.isArray(playlists)) {
