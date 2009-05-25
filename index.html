@@ -51,14 +51,14 @@
                         <p class="messages" id="import_error_no_playlists">No playlists found</p>
                         <p class="messages" id="import_error"></p>
                         
-                        <h1>Import an album from Last.fm</h1>
+                        <h1>Import an album</h1>
                         
                         <form id="album_form">
-                            <label for="album_artist_input">Artist:</label>
-                            <input type="text" name="artist" id="album_artist_input" />
-                            <label for="album_album_input">Album:</label>
-                            <input type="text" name="album" id="album_album_input" />
-                            <input type="submit" id="album_button" value="Load Album" />
+                            <label for="album_import_input">Album:</label>
+                            <input type="text" name="album" id="album_import_input" />
+                            <input type="hidden" name="artist_name" id="album_import_artist" />
+                            <input type="hidden" name="album_name" id="album_import_name" />
+                            <input type="submit" id="album_button" value="Add album" />
                         </form>
                         
                         <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
@@ -76,6 +76,18 @@
                         <p class="messages" id="xspf_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading XSPF…</p>
                         <p class="messages" id="xspf_done">Done! Imported “<span id="xspf_title"></span>” (<span id="xspf_count"></span>)</p>
                         <p class="messages" id="xspf_error"></p>
+                        
+                        <h1>Import a podcast</h1>
+                        
+                        <form id="podcast_form">
+                            <label for="podcast_input">Podcast URL:</label>
+                            <input type="text" name="podcast" id="podcast_input" />
+                            <input type="submit" id="podcast_button" value="Load Podcast" />
+                        </form>
+                        
+                        <p class="messages" id="podcast_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading podcast…</p>
+                        <p class="messages" id="podcast_done">Done! Imported “<span id="podcast_title"></span>” (<span id="podcast_count"></span>)</p>
+                        <p class="messages" id="podcast_error"></p>
                     </div>
                 </div>
                 

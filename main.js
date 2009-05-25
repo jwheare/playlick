@@ -462,6 +462,23 @@ var PLAYLICK = {
         // Add to sidebar
         $('#playlists').append(playlist.element);
     },
+    add_from_podcast: function (podcast) {
+        var title = podcast.title;
+        var track_list = podcast.item;
+        // Create the playlist
+        var playlist = PLAYLICK.add_playlist(title);
+        if (!$.isArray(track_list)) {
+            track_list = [track_list];
+        }
+        // Load tracks
+        $.each(track_list, function (i, track) {
+            // TODO add enclosure URL
+            playlist.add_track(new MODELS.Track(track.title, track.author));
+        });
+        playlist.save();
+        // Add to sidebar
+        $('#playlists').append(playlist.element);
+    },
     fetch_playlists: function () {
         if (MODELS.couch_up) {
             try {
@@ -522,8 +539,8 @@ var PLAYLICK = {
             // console.dir(json);
             var error_text = 'Invalid URL';
             if (json && json.query.results) {
-                var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
                 error_text = 'Invalid XSPF';
+                var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
                 if (xspf) {
                     error_text = 'No tracks';
                     if (xspf.trackList.track) {
@@ -547,6 +564,41 @@ var PLAYLICK = {
                          .append(escaped_request);
             $('#xspf_error').html(error_message);
             $('#xspf_error').show();
+        });
+    },
+    load_podcast: function (podcast_url) {
+        $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
+            q: 'select * from xml where url="' + podcast_url + '"',
+            format: 'json'
+        }, function (json) {
+            console.dir(json);
+            var error_text = 'Invalid URL';
+            if (json && json.query.results) {
+                error_text = 'Invalid Podcast';
+                var podcast = json.query.results.rss.channel;
+                if (podcast) {
+                    error_text = 'No tracks';
+                    if (podcast.item) {
+                        PLAYLICK.add_from_podcast(podcast);
+                        // Update messages
+                        $('#import p.messages').hide();
+                        $('#podcast_title').text(podcast.title);
+                        $('#podcast_count').text(podcast.item.length);
+                        $('#podcast_done').show();
+                        return true;
+                    }
+                }
+            }
+            $('#import p.messages').hide();
+            var escaped_url = $('<b>').text('URL: ' + podcast_url);
+            var escaped_request = $('<small>').text(this.url);
+            var error_message = $('<p>').text(error_text);
+            error_message.append('<br>')
+                         .append(escaped_url)
+                         .append('<br>')
+                         .append(escaped_request);
+            $('#podcast_error').html(error_message);
+            $('#podcast_error').show();
         });
     },
     load_lastfm_playlist: function (playlist_url, onDone, onError, onNoTracks) {
@@ -592,6 +644,7 @@ var PLAYLICK = {
     }
 };
 
+// Add track autocomplete
 $("#add_track_input").autocomplete("http://ws.audioscrobbler.com/2.0/?callback=?", {
     multiple: false,
     delay: 200,
@@ -631,7 +684,6 @@ $("#add_track_input").result(function (e, track, formatted) {
     $("#add_track_artist").val(track.artist);
     $('#add_to_playlist').submit();
 });
-$("#add_track_input").focus();
 
 // Setup playlist reordering behaviour
 $('#playlist').sortable({
@@ -649,6 +701,9 @@ $('#playlist').sortable({
 
 // Start with a blank playlist
 PLAYLICK.blank_playlist();
+
+// Focus add track input
+$("#add_track_input").focus();
 
 // Load playlists
 PLAYLICK.fetch_playlists();
@@ -669,10 +724,10 @@ $('#add_to_playlist').submit(function (e) {
         params[item.name] = item.value;
     });
     if (params.track_name && params.artist_name) {
-        $('#add_track_input').val('');
+        // Clear the inputs and refocus
         $('#add_track_artist').val('');
         $('#add_track_track').val('');
-        $('#add_track_input').select();
+        $('#add_track_input').val('').focus();
         var track = new MODELS.Track(params.track_name, params.artist_name);
         var playlist_track = PLAYLICK.current_playlist.add_track(track);
         PLAYLICK.current_playlist.save();
@@ -684,6 +739,7 @@ $('#add_to_playlist').submit(function (e) {
     }
 });
 
+// Show import screen
 $('#import_playlist').click(function (e) {
     e.preventDefault();
     var target = $(e.target);
@@ -709,8 +765,8 @@ $('#import_playlist_form').submit(function (e) {
     $.each($(this).serializeArray(), function (i, item) {
         params[item.name] = item.value;
     });
-    $('#import_playlist_input').val('');
-    $('#import_playlist_input').select();
+    // Clear the input and refocus
+    $('#import_playlist_input').val('').select();
     // Get this user's playlists
     var username = params.username;
     $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
@@ -786,6 +842,7 @@ $('#import_playlist_form').submit(function (e) {
     });
 });
 
+// Import XSPF form
 $('#xspf_form').submit(function (e) {
     e.preventDefault();
     // Parse the form
@@ -793,15 +850,76 @@ $('#xspf_form').submit(function (e) {
     $.each($(this).serializeArray(), function (i, item) {
         params[item.name] = item.value;
     });
-    $('#xspf_input').val('');
-    $('#xspf_input').select();
+    // Clear the input and refocus
+    $('#xspf_input').val('').select();
     // Show a loading icon
     $('#import p.messages').hide();
     $('#xspf_loading').show();
     // Load the XSPF
     var xspf_url = params.xspf;
-    PLAYLICK.load_xspf(xspf_url);
+    PLAYLICK.load_podcast(podcast_url);
 });
+// Import Podcast form
+$('#podcast_form').submit(function (e) {
+    e.preventDefault();
+    // Parse the form
+    var params = {};
+    $.each($(this).serializeArray(), function (i, item) {
+        params[item.name] = item.value;
+    });
+    // Clear the input and refocus
+    $('#podcast_input').val('').select();
+    // Show a loading icon
+    $('#import p.messages').hide();
+    $('#podcast_loading').show();
+    // Load the podcast
+    var podcast_url = params.podcast;
+    PLAYLICK.load_podcast(podcast_url);
+});
+
+
+// Add album autocomplete
+$("#album_import_input").autocomplete("http://ws.audioscrobbler.com/2.0/?callback=?", {
+    multiple: false,
+    delay: 200,
+    dataType: "jsonp",
+    extraParams: {
+        method: "album.search",
+        album: function () {
+            return $("#album_import_input").val();
+        },
+        api_key: PLAYLICK.lastfm_api_key,
+        format: "json"
+    },
+    cacheLength: 1,
+    parse: function (json) {
+        var parsed = [];
+        if (json && json.results.albummatches.album) {
+            var albums = json.results.albummatches.album;
+            if (!$.isArray(albums)) {
+                albums = [albums];
+            }
+            $.each(albums, function (i, album) {
+                parsed.push({
+                    data: album,
+                    value: album.name,
+                    result: album.artist + " - " + album.name
+                });
+            });
+        }
+        return parsed;
+    },
+    formatItem: function (album, position, length, value) {
+        return album.artist + " - " + album.name;
+    }
+});
+$("#album_import_input").result(function (e, album, formatted) {
+    $("#album_import_name").val(album.name);
+    $("#album_import_artist").val(album.artist);
+    $('#album_import_input').submit();
+});
+
+// Import album playlist
 $('#album_form').submit(function (e) {
     e.preventDefault();
     // Parse the form
@@ -809,22 +927,20 @@ $('#album_form').submit(function (e) {
     $.each($(this).serializeArray(), function (i, item) {
         params[item.name] = item.value;
     });
+    // Clear the inputs and refocus
+    $("#album_import_artist").val('');
+    $("#album_import_name").val('');
+    $("#album_import_input").val('').select();
+    
     // Show a loading icon
     $('#import p.messages').hide();
     $('#album_loading').show();
     // Load the XSPF
-    var album_url = "http://ws.audioscrobbler.com/2.0/?" + $.param({
-        method: "album.getinfo",
-        artist: params.artist,
-        album: params.album,
-        api_key: PLAYLICK.lastfm_api_key,
-        format: "json"
-    });
-    var escaped_album = $('<b>').text('Artist: '+params.artist+' Album: '+params.album);
+    var escaped_album = $('<b>').text('Artist: '+params.artist_name+' Album: '+params.album_name);
     $.getJSON("http://ws.audioscrobbler.com/2.0/?callback=?", {
         method: "album.getinfo",
-        artist: params.artist,
-        album: params.album,
+        artist: params.artist_name,
+        album: params.album_name,
         api_key: PLAYLICK.lastfm_api_key,
         format: "json"
     }, function (album_json) {
@@ -846,7 +962,7 @@ $('#album_form').submit(function (e) {
                 function onDone () {
                     $('#import p.messages').hide();
                     var escaped_album = $('<b>').text('Artist: '+album_json.album.artist+' Album: '+album_json.album.name);
-                    $('#album_name').append(escaped_album);
+                    $('#album_name').html(escaped_album);
                     $('#album_done').show();
                 },
                 function onError (playlist_json) {
