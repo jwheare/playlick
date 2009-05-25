@@ -571,7 +571,7 @@ var PLAYLICK = {
             q: 'select * from xml where url="' + podcast_url + '"',
             format: 'json'
         }, function (json) {
-            console.dir(json);
+            // console.dir(json);
             var error_text = 'Invalid URL';
             if (json && json.query.results) {
                 error_text = 'Invalid Podcast';
