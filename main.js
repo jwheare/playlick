@@ -517,7 +517,7 @@ var PLAYLICK = {
                 var elements = $.map(value.tracks, function (track, i) {
                     var playlist_track = playlist.add_track(new MODELS.Track(track.track.name, track.track.artist));
                     // Build DOM element
-                    return playlist_track.load().get();
+                    return playlist_track.element.get();
                 });
                 // TODO hide loading spinner
                 return elements;
