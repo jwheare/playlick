@@ -70,7 +70,7 @@ form {
     background: #d2f380;
 }
 .sidebar_list p#loading_playlists.unavailable {
-    background: #F37D70;
+    background: #f37d70;
 }
 ul#playlists {
     margin: 0;
@@ -116,6 +116,7 @@ ul#playlists li a.playlist:active {
 ul#playlists li form {
     padding: 0 7px;
     line-height: 32px;
+    background: #c0e95b;
 }
 ul#playlists li a.edit_playlist {
     float: right;
