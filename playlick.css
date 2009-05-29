@@ -11,7 +11,7 @@
 ------- */
 body {
     margin: 0;
-    padding: 15px;
+    padding: 0 15px;
     font: normal 15px 'Helvetica', sans-serif;
     color: #111;
     background: #e8f9bb;
@@ -32,11 +32,13 @@ form {
 #viewport {
     width: 970px;
     margin: 0 auto;
+    border-top: 15px solid #d2f380;
 }
 
 #content {
     clear: both;
     padding: 40px 0 0 0;
+    border-top: 1px solid #c0e95b;
     background: #fff;
 }
 #content p {
@@ -97,7 +99,7 @@ ul#playlists li.current a.playlist {
     background: #d2f380;
 }
 ul#playlists li.playing a.playlist {
-    background: #92c137;
+    background: #a8d840;
 }
 ul#playlists li a.playlist:hover {
     background: #c0e95b;

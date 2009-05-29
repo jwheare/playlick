@@ -1,6 +1,7 @@
 /**
  * Custom Track and Playlist renderers
 **/
+
 MODELS.Track.prototype.toHTML = function () {
     var remove_link = $('<a href="#" class="remove" title="Remove from playlist">').text('╳');
     var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
@@ -46,6 +47,7 @@ MODELS.Playlist.prototype.toHTML = function () {
 };
 
 var PLAYLICK = {
+    
     /**
      * Config
     **/
