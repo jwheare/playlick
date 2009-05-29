@@ -31,6 +31,7 @@ MODELS.Track.prototype.toHTML = function () {
         .html();
 };
 MODELS.Playlist.prototype.toHTML = function () {
+    var play_indicator = $('<span class="playlist_playing">').text('▸');
     var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
     var edit_link   = $('<a href="#" class="edit_playlist">').text(PLAYLICK.edit_playlist_text);
     var name        = $('<a href="#" class="playlist">').text(PLAYLICK.truncate_string(this.name));
@@ -39,6 +40,7 @@ MODELS.Playlist.prototype.toHTML = function () {
         .append('<input type="submit" value="save">');
     // Wrap in a div so we can return its innerHTML as a string
     return $('<div>')
+        .append(play_indicator)
         .append(delete_link)
         .append(edit_link)
         .append(name)
