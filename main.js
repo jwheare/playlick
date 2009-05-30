@@ -6,9 +6,9 @@ MODELS.Track.prototype.toHTML = function () {
     var remove_link = $('<a href="#" class="remove" title="Remove from playlist">').text('╳');
     var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
     var item_name = $('<span class="haudio">')
-        .append($('<span class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name))
+        .append($('<span class="contributor">').text(PLAYLICK.truncate_string(this.artist)).attr('title', this.artist))
         .append(' - ')
-        .append($('<span class="contributor">').text(PLAYLICK.truncate_string(this.artist)).attr('title', this.artist));
+        .append($('<span class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name));
     var item_link   = $('<a href="#" class="item">')
         .append($('<span class="elapsed">').text(this.get_duration_string()))
         // TODO: use background images
@@ -275,32 +275,6 @@ var PLAYLICK = {
         // Comment this out so we always resolve, rather than recheck
         // playlist_track.track.playdar_qid = response.qid;
         if (final_answer) {
-            // HACK - Add the URL as a source
-            if (playlist_track.track.url) {
-                var url_result = {
-                    score: 1,
-                    preference: 80,
-                    url: playlist_track.track.url,
-                    artist: playlist_track.track.artist,
-                    album: playlist_track.track.album,
-                    track: playlist_track.track.name,
-                    source: PLAYLICK.parse_domain(playlist_track.track.url),
-                    duration: playlist_track.track.duration
-                };
-                var highest_non_perfect;
-                $.each(response.results, function (i, result) {
-                    if (result.score != 1) {
-                        highest_non_perfect = i;
-                        return false;
-                    }
-                });
-                if (typeof highest_non_perfect != 'undefined') {
-                    response.results.splice(highest_non_perfect, 0, url_result);
-                } else {
-                    response.results.push(url_result);
-                }
-            }
-            // ENDHACK
             if (response.results.length) {
                 playlist_track.track.playdar_response = response;
                 list_item.addClass('match');
@@ -330,6 +304,32 @@ var PLAYLICK = {
     playdar_track_handler: function (playlist_track) {
         var uuid = Playdar.Util.generate_uuid();
         Playdar.client.register_results_handler(function (response, final_answer) {
+            // HACK - Add the URL as a source
+            if (final_answer && playlist_track.track.url) {
+                var url_result = {
+                    score: 1,
+                    preference: 80,
+                    url: playlist_track.track.url,
+                    artist: playlist_track.track.artist,
+                    album: playlist_track.track.album,
+                    track: playlist_track.track.name,
+                    source: PLAYLICK.parse_domain(playlist_track.track.url),
+                    duration: playlist_track.track.duration
+                };
+                var highest_non_perfect;
+                $.each(response.results, function (i, result) {
+                    if (result.score != 1) {
+                        highest_non_perfect = i;
+                        return false;
+                    }
+                });
+                if (typeof highest_non_perfect != 'undefined') {
+                    response.results.splice(highest_non_perfect, 0, url_result);
+                } else {
+                    response.results.push(url_result);
+                }
+            }
+            // ENDHACK
             PLAYLICK.load_track_results(playlist_track, response, final_answer);
         }, uuid);
         return uuid;
