@@ -20,11 +20,13 @@ var MODELS = {
 (function () {
     /**
      * class MODELS.Track
-     * Track objects have a name, artist and duration
+     * Track objects have a name, artist, album and duration
+     * and can cache playdar queries and results
     **/
-    var Track = function (name, artist, duration) {
+    var Track = function (name, artist, album, duration) {
         this.name = name;
         this.artist = artist;
+        this.album = album || '';
         this.duration = duration;
         this.playdar_qid = null;
         this.playdar_sid = null;
@@ -59,7 +61,8 @@ var MODELS = {
         get_doc: function () {
             var doc = {
                 name: this.name,
-                artist: this.artist
+                artist: this.artist,
+                album: this.album
             };
             return doc;
         }

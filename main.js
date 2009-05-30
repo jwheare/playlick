@@ -95,6 +95,9 @@ var PLAYLICK = {
         }
         return array_or_item;
     },
+    compare_string: function (string_1, string_2) {
+        return string_1.toUpperCase() == string_2.toUpperCase();
+    },
     
     /**
      * Init
@@ -141,6 +144,12 @@ var PLAYLICK = {
             );
             PLAYLICK.update_playdar_status(connect_link);
             PLAYLICK.cancel_playdar_resolve();
+        },
+        onResolveIdle: function () {
+            if (PLAYLICK.current_playlist && PLAYLICK.batch_save) {
+                PLAYLICK.current_playlist.save();
+                PLAYLICK.batch_save = false;
+            }
         }
     },
     update_playdar_status: function (message) {
@@ -269,14 +278,13 @@ var PLAYLICK = {
                     Playdar.client.recheck_results(track.playdar_qid);
                 } else {
                     var qid = PLAYLICK.playdar_track_handler(playlist_track);
-                    Playdar.client.resolve(track.artist, '', track.name, qid);
+                    Playdar.client.resolve(track.artist, track.album, track.name, qid);
                 }
             }
         }
     },
     resolve_current_playlist: function () {
         if (Playdar.client && Playdar.client.is_authed()) {
-            // TODO - Playdar JS needs an onResolveComplete listener. This batching doesn't work.
             $.each(PLAYLICK.current_playlist.tracks, function (i, playlist_track) {
                 PLAYLICK.resolve_track(playlist_track);
             });
@@ -384,15 +392,21 @@ var PLAYLICK = {
         PLAYLICK.current_playlist = PLAYLICK.create_playlist();
     },
     // Update a track's data and persist
-    update_track: function (playlist_track, result) {
+    update_track: function (playlist_track, result, batch) {
         var track  = playlist_track.track;
         // If the track name or artist changed, update it and persist
-        if ((track.name.toUpperCase()   != result.track.toUpperCase())
-         || (track.artist.toUpperCase() != result.artist.toUpperCase())) {
+        if (!PLAYLICK.compare_string(track.name, result.track)
+         || !PLAYLICK.compare_string(track.artist, result.artist)
+         || !PLAYLICK.compare_string(track.album, result.album)) {
             track.name = result.track;
             track.artist = result.artist;
+            track.album = result.album;
             // Persist
-            playlist_track.playlist.save();
+            if (batch) {
+                PLAYLICK.batch_save = true;
+            } else {
+                playlist_track.playlist.save();
+            }
             // Update DOM
             playlist_track.element.find('span.fn').text(track.name);
             playlist_track.element.find('span.contributor').text(track.artist);
@@ -446,8 +460,12 @@ var PLAYLICK = {
                 var row = response.rows[0];
                 var value = row.value;
                 // Load tracks
-                var elements = $.map(value.tracks, function (track, i) {
-                    var playlist_track = playlist.add_track(new MODELS.Track(track.track.name, track.track.artist));
+                var elements = $.map(value.tracks, function (track_data, i) {
+                    var playlist_track = playlist.add_track(new MODELS.Track(
+                        track_data.track.name,
+                        track_data.track.artist,
+                        track_data.track.album
+                    ));
                     // Build DOM element
                     return playlist_track.element.get();
                 });
@@ -597,7 +615,7 @@ var PLAYLICK = {
         var playlist = PLAYLICK.create_playlist(title);
         // Load tracks
         $.each(track_list, function (i, track) {
-            playlist.add_track(new MODELS.Track(track.title, track.creator));
+            playlist.add_track(new MODELS.Track(track.title, track.creator, track.album));
         });
         playlist.save();
     },
