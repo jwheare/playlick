@@ -133,7 +133,7 @@ ul#playlists li a.edit_playlist:hover {
     background: #92c137;
 }
 
-ul#playlists li span.playlist_playing {
+ul#playlists li a.playlist_playing {
     float: left;
     width: 24px;
     margin-left: -24px;
@@ -143,9 +143,12 @@ ul#playlists li span.playlist_playing {
     visibility: hidden;
     text-decoration: none;
 }
-ul#playlists li.playing span.playlist_playing {
+ul#playlists li.playing a.playlist_playing {
     visibility: visible;
     background: #a8d840;
+}
+ul#playlists li.playing a.playlist_playing:hover {
+    background: #92c137;
 }
 
 ul#playlists li a.delete_playlist {

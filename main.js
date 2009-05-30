@@ -31,7 +31,7 @@ MODELS.Track.prototype.toHTML = function () {
         .html();
 };
 MODELS.Playlist.prototype.toHTML = function () {
-    var play_indicator = $('<span class="playlist_playing">').text('▸');
+    var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">').text('▸');
     var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
     var edit_link   = $('<a href="#" class="edit_playlist">').text(PLAYLICK.edit_playlist_text);
     var name        = $('<a href="#" class="playlist">').text(PLAYLICK.truncate_string(this.name));
@@ -88,6 +88,12 @@ var PLAYLICK = {
             params[item.name] = item.value;
         });
         return params;
+    },
+    make_array: function (array_or_item) {
+        if (array_or_item && !$.isArray(array_or_item)) {
+            array_or_item = [array_or_item];
+        }
+        return array_or_item;
     },
     
     /**
@@ -353,7 +359,9 @@ var PLAYLICK = {
     // Highlight the currently playing playlist in the sidebar
     set_playing_playlist_item: function (playlist_item) {
         $('#playlists').find('li.p').removeClass('playing');
-        playlist_item.addClass('playing');
+        if (playlist_item) {
+            playlist_item.addClass('playing');
+        }
     },
     // Create a new empty playlist
     blank_playlist: function () {
@@ -502,17 +510,20 @@ var PLAYLICK = {
     onResultPause: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
         if (track_item) {
+            // Switch track highlight in the playlist
             track_item.removeClass('playing');
             track_item.addClass('paused');
         }
     },
     onResultResume: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
-        var playlist_track = track_item.data('playlist_track');
-        // Highlight the playlist in the sidebar
-        PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
-        // Highlight the track in the playlist
         if (track_item) {
+            var playlist_track = track_item.data('playlist_track');
+            // Update the now playing track
+            PLAYLICK.now_playing = playlist_track;
+            // Highlight the playlist in the sidebar
+            PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
+            // Highlight the track in the playlist
             track_item.removeClass('paused');
             track_item.addClass('playing');
         }
@@ -521,13 +532,17 @@ var PLAYLICK = {
         var track_item = $('#sid' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
+            // Remove track highlight in the playlist
             track_item.removeClass('playing');
             track_item.removeClass('paused');
+            // Reset progress bar
             track_item.css('background-position', '0 0');
+            // Reset elapsed counter
             var progress = track_item.find('span.elapsed');
             progress.text(playlist_track.track.get_duration_string());
         }
-        
+        // Clear the now playing track
+        PLAYLICK.now_playing = null;
         Playdar.player.stop_all();
     },
     onResultFinish: function () {
@@ -537,6 +552,9 @@ var PLAYLICK = {
         if (next_track) {
             var playlist_track = next_track.data('playlist_track');
             PLAYLICK.play_track(playlist_track);
+        } else {
+            // Remove the playlist highlight from the sidebar
+            PLAYLICK.set_playing_playlist_item();
         }
     },
     updatePlaybackProgress: function () {
@@ -571,37 +589,27 @@ var PLAYLICK = {
     // Parse XSPF JSON into a playlist
     add_from_jspf: function (jspf) {
         var title = jspf.title;
-        var track_list = jspf.trackList.track;
+        var track_list = PLAYLICK.make_array(jspf.trackList.track);
         // Create the playlist
         var playlist = PLAYLICK.create_playlist(title);
-        if (!$.isArray(track_list)) {
-            track_list = [track_list];
-        }
         // Load tracks
         $.each(track_list, function (i, track) {
             playlist.add_track(new MODELS.Track(track.title, track.creator));
         });
         playlist.save();
-        // Add to sidebar
-        $('#playlists').append(playlist.element);
     },
     // Parse podcast JSON into a playlist
     add_from_podcast: function (podcast) {
         var title = podcast.title;
-        var track_list = podcast.item;
+        var track_list = PLAYLICK.make_array(podcast.item);
         // Create the playlist
         var playlist = PLAYLICK.create_playlist(title);
-        if (!$.isArray(track_list)) {
-            track_list = [track_list];
-        }
         // Load tracks
         $.each(track_list, function (i, track) {
             // TODO add enclosure URL
             playlist.add_track(new MODELS.Track(track.title, track.author));
         });
         playlist.save();
-        // Add to sidebar
-        $('#playlists').append(playlist.element);
     },
     // Fetch an XSPF as JSON via YQL
     fetch_xspf: function (xspf_url) {
@@ -610,22 +618,32 @@ var PLAYLICK = {
             format: 'json'
         }, function (json) {
             // console.dir(json);
-            var error_text = 'Invalid URL';
-            if (json && json.query.results) {
-                error_text = 'Invalid XSPF';
-                var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
-                if (xspf) {
-                    error_text = 'No tracks';
-                    if (xspf.trackList.track) {
-                        PLAYLICK.add_from_jspf(xspf);
-                        // Update messages
-                        $('#import p.messages').hide();
-                        $('#xspf_title').text(xspf.title);
-                        $('#xspf_count').text(xspf.trackList.track.length);
-                        $('#xspf_done').show();
-                        return true;
+            var error_text;
+            if (json) {
+                if (json.error) {
+                    error_text = json.error.description;
+                } else if (json.query && json.query.results) {
+                    var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
+                    if (xspf) {
+                        if (xspf.trackList.track) {
+                            PLAYLICK.add_from_jspf(xspf);
+                            // Update messages
+                            $('#import p.messages').hide();
+                            $('#xspf_title').text(xspf.title);
+                            $('#xspf_count').text(xspf.trackList.track.length);
+                            $('#xspf_done').show();
+                            return true;
+                        } else {
+                            error_text = 'No tracks';
+                        }
+                    } else {
+                        error_text = 'Invalid XSPF';
                     }
+                } else {
+                    error_text = 'Invalid URL';
                 }
+            } else {
+                error_text = 'No response';
             }
             $('#xspf_input').val(xspf_url);
             $('#import p.messages').hide();
@@ -647,22 +665,32 @@ var PLAYLICK = {
             format: 'json'
         }, function (json) {
             // console.dir(json);
-            var error_text = 'Invalid URL';
-            if (json && json.query.results) {
-                error_text = 'Invalid Podcast';
-                var podcast = json.query.results.rss.channel;
-                if (podcast) {
-                    error_text = 'No tracks';
-                    if (podcast.item) {
-                        PLAYLICK.add_from_podcast(podcast);
-                        // Update messages
-                        $('#import p.messages').hide();
-                        $('#podcast_title').text(podcast.title);
-                        $('#podcast_count').text(podcast.item.length);
-                        $('#podcast_done').show();
-                        return true;
+            var error_text;
+            if (json) {
+                if (json.error) {
+                    error_text = json.error.description;
+                } else if (json.query && json.query.results) {
+                    var podcast = json.query.results.rss.channel;
+                    if (podcast) {
+                        if (podcast.item) {
+                            PLAYLICK.add_from_podcast(podcast);
+                            // Update messages
+                            $('#import p.messages').hide();
+                            $('#podcast_title').text(podcast.title);
+                            $('#podcast_count').text(podcast.item.length);
+                            $('#podcast_done').show();
+                            return true;
+                        } else {
+                            error_text = 'No tracks';
+                        }
+                    } else {
+                        error_text = 'Invalid Podcast';
                     }
+                } else {
+                    error_text = 'Invalid URL';
                 }
+            } else {
+                error_text = 'No response';
             }
             $('#podcast_input').val(podcast_url);
             $('#import p.messages').hide();
@@ -752,11 +780,8 @@ var PLAYLICK = {
                 $('#import_error').show();
             } else {
                 $('#import_error').empty();
-                var playlists = json.playlists.playlist;
+                var playlists = PLAYLICK.make_array(json.playlists.playlist);
                 if (playlists) {
-                    if (!$.isArray(playlists)) {
-                        playlists = [playlists];
-                    }
                     PLAYLICK.playlist_done = {};
                     $.each(playlists, function (i, playlist) {
                         var playlist_url = "lastfm://playlist/" + playlist.id;
@@ -862,11 +887,6 @@ $('#playlist').click(function (e) {
     var track_item = target.closest('li.p_t');
     if (track_item.size()) {
         var playlist_track = track_item.data('playlist_track');
-        if (!playlist_track) {
-            // console.warn('no playlist track');
-            // console.log(track_item);
-            // console.log(target);
-        }
         
         // Clicks to playdar results
         var tbody = target.closest('tbody.result');
@@ -881,20 +901,23 @@ $('#playlist').click(function (e) {
             var result = tbody.data('result');
             PLAYLICK.update_track(playlist_track, result);
             if (!Playdar.player.is_now_playing()) {
-                Playdar.player.play_stream(result.sid);
+                PLAYLICK.play_track(playlist_track);
             }
             track_item.addClass('perfectMatch');
         }
+        
         // Remove track from playlist
         if (target.is('a.remove')) {
             playlist_track.remove();
             return false;
         }
+        
         // Toggle sources
         if (target.is('a.show_sources')) {
             track_item.toggleClass('open');
             return false;
         }
+        
         // Clicks to the main track name
         var track_link = target.closest('li.p_t a.item');
         if (track_link.size()) {
@@ -932,10 +955,7 @@ $("#add_track_input").autocomplete(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", 
     parse: function (json) {
         var parsed = [];
         if (json && json.results.trackmatches.track) {
-            var tracks = json.results.trackmatches.track;
-            if (!$.isArray(tracks)) {
-                tracks = [tracks];
-            }
+            var tracks = PLAYLICK.make_array(json.results.trackmatches.track);
             $.each(tracks, function (i, track) {
                 parsed.push({
                     data: track,
@@ -1025,6 +1045,11 @@ $('#playlists').click(function (e) {
         e.preventDefault();
         PLAYLICK.delete_playlist(playlist_item.data('playlist'));
     }
+    // Toggle play
+    if (target.is('li.p a.playlist_playing')) {
+        e.preventDefault();
+        PLAYLICK.play_track(PLAYLICK.now_playing);
+    }
     // Toggle playlist name editing
     if (target.is('li.p a.edit_playlist')) {
         e.preventDefault();
@@ -1079,10 +1104,7 @@ $("#album_import_input").autocomplete(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?
     parse: function (json) {
         var parsed = [];
         if (json && json.results.albummatches.album) {
-            var albums = json.results.albummatches.album;
-            if (!$.isArray(albums)) {
-                albums = [albums];
-            }
+            var albums = PLAYLICK.make_array(json.results.albummatches.album);
             $.each(albums, function (i, album) {
                 parsed.push({
                     data: album,
@@ -1165,12 +1187,12 @@ $(document).keydown(function (e) {
     switch (e.keyCode) {
     case 80: // p
         e.preventDefault();
-        var current_track = $('#playlist li.playing, #playlist li.paused');
-        if (!current_track.size()) {
+        var current_track = PLAYLICK.now_playing;
+        if (!current_track) {
             // Get the first perfect match
-            current_track = $('#playlist li.perfectMatch');
+            current_track = $('#playlist li.perfectMatch').data('playlist_track');
         }
-        PLAYLICK.play_track(current_track.data('playlist_track'));
+        PLAYLICK.play_track(current_track);
         break;
     case 219: // [
         // Back a track

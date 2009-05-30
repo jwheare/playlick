@@ -80,6 +80,7 @@ var MODELS = {
         if (this.options.doc_ref) {
             // Update the ref values
             this.set_doc_ref(this.options.doc_ref);
+            this.persisted = true;
         } else {
             // Get a new UUID
             if (MODELS.couch_up) {
@@ -234,6 +235,7 @@ var MODELS = {
                     if (result.ok) {
                         this.set_doc_ref(result);
                         this.onSave(callback);
+                        this.persisted = true;
                         // console.info('[saved] ' + result.id + ' [' + result.rev + ']');
                     }
                 } catch (result) {
@@ -259,6 +261,7 @@ var MODELS = {
                     // console.dir(result);
                     if (result.ok) {
                         this.onRemove();
+                        this.persisted = false;
                         // console.info('[delete] ' + result.id + ' [' + result.rev + ']');
                     }
                 } catch (result) {
@@ -301,7 +304,6 @@ var MODELS = {
         set_doc_ref: function (doc_ref) {
             this.set_id(doc_ref.id);
             this.set_rev(doc_ref.rev);
-            this.persisted = true;
         },
         get_doc_ref: function () {
             var doc_ref = {
