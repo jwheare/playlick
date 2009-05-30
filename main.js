@@ -89,14 +89,16 @@ var PLAYLICK = {
         });
         return params;
     },
-    make_array: function (array_or_item) {
-        if (array_or_item && !$.isArray(array_or_item)) {
-            array_or_item = [array_or_item];
-        }
-        return array_or_item;
-    },
     compare_string: function (string_1, string_2) {
         return string_1.toUpperCase() == string_2.toUpperCase();
+    },
+    domain_regex: new RegExp(/.*:\/\/([^\/]*)\/?.*/),
+    parse_domain: function (url) {
+        var matches = PLAYLICK.domain_regex.exec(url);
+        if (matches && matches[1]) {
+            return matches[1];
+        }
+        return url;
     },
     
     /**
@@ -160,8 +162,7 @@ var PLAYLICK = {
     },
     // Render playdar results table
     build_results_table: function (response, list_item) {
-        var sound,
-            tbody_class,
+        var tbody_class,
             score_cell, choice_radio, album_art, name_cell,
             track_row, info_row, result_tbody;
         
@@ -171,14 +172,36 @@ var PLAYLICK = {
         
         $.each(response.results, function (i, result) {
             // Register sound
-            sound = Playdar.player.register_stream(result, {
-                onplay: PLAYLICK.onResultPlay,
-                onpause: PLAYLICK.onResultPause,
-                onresume: PLAYLICK.onResultResume,
-                onstop: PLAYLICK.onResultStop,
-                onfinish: PLAYLICK.onResultFinish,
-                whileplaying: PLAYLICK.updatePlaybackProgress
-            });
+            if (result.sid) {
+                Playdar.player.register_stream(result, {
+                    onplay: PLAYLICK.onResultPlay,
+                    onpause: PLAYLICK.onResultPause,
+                    onresume: PLAYLICK.onResultResume,
+                    onstop: PLAYLICK.onResultStop,
+                    onfinish: PLAYLICK.onResultFinish,
+                    whileplaying: PLAYLICK.updatePlaybackProgress
+                });
+            } else if (result.url) {
+                // HACK: Handle non playdar streams separately
+                result.sid = Playdar.Util.generate_uuid();
+                Playdar.player.soundmanager.createSound({
+                    id: result.sid,
+                    url: result.url,
+                    onplay: PLAYLICK.onResultPlay,
+                    onpause: PLAYLICK.onResultPause,
+                    onresume: PLAYLICK.onResultResume,
+                    onstop: PLAYLICK.onResultStop,
+                    onfinish: PLAYLICK.onResultFinish,
+                    whileplaying: PLAYLICK.updatePlaybackProgress,
+                    whileloading: function () {
+                        PLAYLICK.update_stream_duration(this.sID, this.durationEstimate);
+                    },
+                    onload: function () {
+                        PLAYLICK.update_stream_duration(this.sID, this.duration);
+                    }
+                });
+                // ENDHACK
+            }
             // Build result table item
             tbody_class = 'result';
             score_cell = $('<td class="score">');
@@ -187,7 +210,7 @@ var PLAYLICK = {
                 // Perfect scores get a star and a highlight
                 score_cell.text('★').addClass('perfect');
                 if (!found_perfect) {
-                    // The first perfect score is checked and it's tbody is given a highlight
+                    // The first perfect score is checked and its tbody is given a highlight
                     tbody_class += ' choice';
                     choice_radio.attr('checked', true);
                 }
@@ -204,19 +227,35 @@ var PLAYLICK = {
                 size: "small",
                 api_key: PLAYLICK.lastfm_api_key
             });
-            name_cell = $('<td class="name" colspan="4">')
-                .append($('<img width="34" height="34">').attr('src', album_art))
-                .append(result.track)
-                .append('<br>' + result.artist + ' - ' + result.album);
+            name_cell = $('<td class="name" colspan="4">');
+            var artist_album = result.artist;
+            if (result.album) {
+                artist_album += ' - ' + result.album;
+                name_cell.append($('<img width="34" height="34">').attr('src', album_art));
+            }
+            name_cell.append(result.track)
+                .append('<br>' + artist_album);
             track_row = $('<tr class="track">')
                 .append($('<td class="choice">').append(choice_radio))
                 .append(name_cell);
+            var duration = '';
+            var size = '';
+            var bitrate = '';
+            if (result.duration) {
+                duration = Playdar.Util.mmss(result.duration);
+            }
+            if (result.size) {
+                size = (result.size/1000000).toFixed(1) + 'MB';
+            }
+            if (result.bitrate) {
+                bitrate = result.bitrate + ' kbps';
+            }
             info_row = $('<tr class="info">')
                 .append(score_cell)
-                .append($('<td class="source">').text(result.source))
-                .append($('<td class="time">').text(Playdar.Util.mmss(result.duration)))
-                .append($('<td class="size">').text((result.size/1000000).toFixed(1) + 'MB'))
-                .append($('<td class="bitrate">').text(result.bitrate + ' kbps'));
+                .append($('<td class="source">').text(result.source + ' (' + result.preference + ')'))
+                .append($('<td class="time">').text(duration))
+                .append($('<td class="size">').text(size))
+                .append($('<td class="bitrate">').text(bitrate));
             result_tbody = $('<tbody>')
                 .attr('id', 'sid' + result.sid)
                 .addClass(tbody_class)
@@ -233,13 +272,40 @@ var PLAYLICK = {
     load_track_results: function (playlist_track, response, final_answer) {
         var list_item = playlist_track.element;
         list_item.removeClass('scanning noMatch match perfectMatch');
+        // Comment this out so we always resolve, rather than recheck
         // playlist_track.track.playdar_qid = response.qid;
         if (final_answer) {
-            if (response && response.results.length) {
+            // HACK - Add the URL as a source
+            if (playlist_track.track.url) {
+                var url_result = {
+                    score: 1,
+                    preference: 80,
+                    url: playlist_track.track.url,
+                    artist: playlist_track.track.artist,
+                    album: playlist_track.track.album,
+                    track: playlist_track.track.name,
+                    source: PLAYLICK.parse_domain(playlist_track.track.url),
+                    duration: playlist_track.track.duration
+                };
+                var highest_non_perfect;
+                $.each(response.results, function (i, result) {
+                    if (result.score != 1) {
+                        highest_non_perfect = i;
+                        return false;
+                    }
+                });
+                if (typeof highest_non_perfect != 'undefined') {
+                    response.results.splice(highest_non_perfect, 0, url_result);
+                } else {
+                    response.results.push(url_result);
+                }
+            }
+            // ENDHACK
+            if (response.results.length) {
                 playlist_track.track.playdar_response = response;
                 list_item.addClass('match');
-                var result = response.results[0];
                 var results_table = PLAYLICK.build_results_table(response, list_item);
+                var result = response.results[0];
                 if (result.score == 1) {
                     PLAYLICK.update_track(playlist_track, result, true);
                 }
@@ -583,7 +649,11 @@ var PLAYLICK = {
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
             var progress = track_item.find('span.elapsed');
-            progress.html('<strong>' + Playdar.Util.mmss(Math.round(this.position/1000)) + '</strong> / ' + playlist_track.track.get_duration_string());
+            var elapsed = '<strong>' + Playdar.Util.mmss(Math.round(this.position/1000)) + '</strong>';
+            if (playlist_track.track.duration) {
+                elapsed += ' / ' + playlist_track.track.get_duration_string();
+            }
+            progress.html(elapsed);
             // Update the playback progress bar
             var duration;
             if (this.readyState == 3) { // loaded/success
@@ -593,6 +663,14 @@ var PLAYLICK = {
             }
             var portion_played = this.position / duration;
             track_item.css('background-position', Math.round(portion_played * track_item.width()) + 'px 0');
+        }
+    },
+    update_stream_duration: function (sid, duration) {
+        var track_item = $('#sid' + sid).data('track_item');
+        if (track_item) {
+            var playlist_track = track_item.data('playlist_track');
+            // Update the track duration
+            playlist_track.track.duration = Math.round(duration/1000);
         }
     },
     play_track: function (playlist_track) {
@@ -609,7 +687,7 @@ var PLAYLICK = {
     add_from_jspf: function (jspf) {
         // console.dir(jspf);
         var title = jspf.title;
-        var track_list = PLAYLICK.make_array(jspf.trackList.track);
+        var track_list = $.makeArray(jspf.trackList.track);
         // Create the playlist
         var playlist = PLAYLICK.create_playlist(title);
         // Load tracks
@@ -617,7 +695,8 @@ var PLAYLICK = {
             var track_doc = {
                 name: track.title,
                 artist: track.creator,
-                album: track.album
+                album: track.album,
+                duration: track.duration
             };
             if (track.location) {
                 track_doc.url = track.location;
@@ -630,7 +709,7 @@ var PLAYLICK = {
     add_from_podcast: function (podcast) {
         // console.dir(podcast);
         var title = podcast.title;
-        var track_list = PLAYLICK.make_array(podcast.item);
+        var track_list = $.makeArray(podcast.item);
         // Create the playlist
         var playlist = PLAYLICK.create_playlist(title);
         // Load tracks
@@ -815,7 +894,7 @@ var PLAYLICK = {
                 $('#import_error').show();
             } else {
                 $('#import_error').empty();
-                var playlists = PLAYLICK.make_array(json.playlists.playlist);
+                var playlists = $.makeArray(json.playlists.playlist);
                 if (playlists) {
                     PLAYLICK.playlist_done = {};
                     $.each(playlists, function (i, playlist) {
@@ -990,7 +1069,7 @@ $("#add_track_input").autocomplete(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", 
     parse: function (json) {
         var parsed = [];
         if (json && json.results.trackmatches.track) {
-            var tracks = PLAYLICK.make_array(json.results.trackmatches.track);
+            var tracks = $.makeArray(json.results.trackmatches.track);
             $.each(tracks, function (i, track) {
                 parsed.push({
                     data: track,
@@ -1143,7 +1222,7 @@ $("#album_import_input").autocomplete(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?
     parse: function (json) {
         var parsed = [];
         if (json && json.results.albummatches.album) {
-            var albums = PLAYLICK.make_array(json.results.albummatches.album);
+            var albums = $.makeArray(json.results.albummatches.album);
             $.each(albums, function (i, album) {
                 parsed.push({
                     data: album,
