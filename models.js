@@ -23,11 +23,13 @@ var MODELS = {
      * Track objects have a name, artist, album and duration
      * and can cache playdar queries and results
     **/
-    var Track = function (name, artist, album, duration) {
-        this.name = name;
-        this.artist = artist;
-        this.album = album || '';
-        this.duration = duration;
+    var Track = function (doc) {
+        this.name = doc.name;
+        this.artist = doc.artist;
+        this.album = doc.album || '';
+        this.duration = doc.duration;
+        this.url = doc.url || '';
+        
         this.playdar_qid = null;
         this.playdar_sid = null;
         this.playdar_response = null;
@@ -62,7 +64,8 @@ var MODELS = {
             var doc = {
                 name: this.name,
                 artist: this.artist,
-                album: this.album
+                album: this.album,
+                url: this.url
             };
             return doc;
         }

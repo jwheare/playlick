@@ -278,7 +278,7 @@ var PLAYLICK = {
                     Playdar.client.recheck_results(track.playdar_qid);
                 } else {
                     var qid = PLAYLICK.playdar_track_handler(playlist_track);
-                    Playdar.client.resolve(track.artist, track.album, track.name, qid);
+                    Playdar.client.resolve(track.artist, track.album, track.name, qid, track.url);
                 }
             }
         }
@@ -421,6 +421,8 @@ var PLAYLICK = {
             Playdar.player.stop_stream(playlist_track.track.playdar_sid);
         }
         playlist_track.track.playdar_sid = result.sid;
+        // URL to the actual file, for making a local playlist
+        // For streaming, construct the url from the sid
         playlist_track.track.playdar_url = result.url;
     },
     // Fetch playlists from Couch
@@ -461,11 +463,7 @@ var PLAYLICK = {
                 var value = row.value;
                 // Load tracks
                 var elements = $.map(value.tracks, function (track_data, i) {
-                    var playlist_track = playlist.add_track(new MODELS.Track(
-                        track_data.track.name,
-                        track_data.track.artist,
-                        track_data.track.album
-                    ));
+                    var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
                     // Build DOM element
                     return playlist_track.element.get();
                 });
@@ -609,26 +607,42 @@ var PLAYLICK = {
     
     // Parse XSPF JSON into a playlist
     add_from_jspf: function (jspf) {
+        // console.dir(jspf);
         var title = jspf.title;
         var track_list = PLAYLICK.make_array(jspf.trackList.track);
         // Create the playlist
         var playlist = PLAYLICK.create_playlist(title);
         // Load tracks
         $.each(track_list, function (i, track) {
-            playlist.add_track(new MODELS.Track(track.title, track.creator, track.album));
+            var track_doc = {
+                name: track.title,
+                artist: track.creator,
+                album: track.album
+            };
+            if (track.location) {
+                track_doc.url = track.location;
+            }
+            playlist.add_track(new MODELS.Track(track_doc));
         });
         playlist.save();
     },
     // Parse podcast JSON into a playlist
     add_from_podcast: function (podcast) {
+        // console.dir(podcast);
         var title = podcast.title;
         var track_list = PLAYLICK.make_array(podcast.item);
         // Create the playlist
         var playlist = PLAYLICK.create_playlist(title);
         // Load tracks
         $.each(track_list, function (i, track) {
-            // TODO add enclosure URL
-            playlist.add_track(new MODELS.Track(track.title, track.author));
+            var track_doc = {
+                name: track.title,
+                artist: track.author
+            };
+            if (track.enclosure && track.enclosure.url) {
+                track_doc.url = track.enclosure.url;
+            }
+            playlist.add_track(new MODELS.Track(track_doc));
         });
         playlist.save();
     },
@@ -1007,7 +1021,10 @@ $('#add_to_playlist').submit(function (e) {
         $('#add_track_artist').val('');
         $('#add_track_track').val('');
         $('#add_track_input').val('').focus();
-        var track = new MODELS.Track(params.track_name, params.artist_name);
+        var track = new MODELS.Track({
+            name: params.track_name,
+            artist: params.artist_name
+        });
         var playlist_track = PLAYLICK.current_playlist.add_track(track);
         PLAYLICK.current_playlist.save();
         $('#playlist').append(playlist_track.element);
