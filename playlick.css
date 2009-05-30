@@ -318,7 +318,6 @@ form#podcast_form input#podcast_input {
 
 .sources {
     display: none;
-    background: #d2f380;
     font-size: 12px;
     line-height: 22px;
 }
@@ -330,11 +329,15 @@ form#podcast_form input#podcast_input {
     margin: 0;
     padding: 0;
     border: 0;
+    background: #fff;
 }
-.sources table tbody.choice {
+.sources table tbody td {
+    background: #d2f380;
+}
+.sources table tbody.choice td {
     background: #c0e95b;
 }
-.sources table tbody:hover {
+.sources table tbody:hover td {
     cursor: pointer;
     background: #a8d840;
 }
@@ -366,6 +369,9 @@ form#podcast_form input#podcast_input {
 .sources table td.name img {
     float: right;
     margin: 5px 10px 5px 0;
+    border: 1px solid #335507;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
 }
 .sources table td.time,
 .sources table td.size,
