@@ -12,7 +12,8 @@ TODO
 * Setup CouchDB on playlick.com
 * Tag playlist import from Last.fm
 * XSPF export
-* Applecript export for iTunes
+* iTunes import
+* Applescript export for iTunes
 * Hosted playdar streaming
 * Sessions/URLs
 * Stream tokens

@@ -195,6 +195,17 @@ p#shortcuts {
     margin: 0 0 20px 40px;
 }
 
+p#tracksLoading {
+    display: none;
+    margin: 0 0 20px 40px;
+    line-height: 39px;
+}
+p#tracksLoading img {
+    vertical-align: middle;
+    margin-left: -27px;
+    padding-right: 11px;
+}
+
 /* Import */
 #import {
     display: none;

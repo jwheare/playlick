@@ -6,9 +6,9 @@ MODELS.Track.prototype.toHTML = function () {
     var remove_link = $('<a href="#" class="remove" title="Remove from playlist">').text('╳');
     var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
     var item_name = $('<span class="haudio">')
-        .append($('<span class="fn">').text(this.name))
+        .append($('<span class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name))
         .append(' - ')
-        .append($('<span class="contributor">').text(this.artist));
+        .append($('<span class="contributor">').text(PLAYLICK.truncate_string(this.artist)).attr('title', this.artist));
     var item_link   = $('<a href="#" class="item">')
         .append($('<span class="elapsed">').text(this.get_duration_string()))
         // TODO: use background images
@@ -437,7 +437,7 @@ var PLAYLICK = {
     },
     // Fetch playlist tracks from Couch
     fetch_playlist_tracks: function (playlist) {
-        // TODO loading spinner
+        $('#tracksLoading').show();
         if (MODELS.couch_up) {
             try {
                 var response = MODELS.couch.view("playlist/all", {
@@ -451,14 +451,14 @@ var PLAYLICK = {
                     // Build DOM element
                     return playlist_track.element.get();
                 });
-                // TODO hide loading spinner
+                $('#tracksLoading').hide();
                 return elements;
             } catch (result) {
                 MODELS.couch_down_handler('load tracks', result);
             }
         }
         if (!MODELS.couch_up) {
-            // TODO hide loading spinner
+            $('#tracksLoading').hide();
             // TODO error message
             PLAYLICK.couch_down();
         }
