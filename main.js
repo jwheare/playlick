@@ -7,8 +7,8 @@ MODELS.Track.prototype.toHTML = function () {
     var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
     var item_name = $('<span class="haudio">')
         .append($('<span class="contributor">').text(PLAYLICK.truncate_string(this.artist)).attr('title', this.artist))
-        .append(' - ')
-        .append($('<span class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name));
+        .append(' ')
+        .append($('<strong class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name));
     var item_link   = $('<a href="#" class="item">')
         .append($('<span class="elapsed">').text(this.get_duration_string()))
         // TODO: use background images
@@ -233,8 +233,8 @@ var PLAYLICK = {
                 artist_album += ' - ' + result.album;
                 name_cell.append($('<img width="34" height="34">').attr('src', album_art));
             }
-            name_cell.append(result.track)
-                .append('<br>' + artist_album);
+            name_cell.append($('<span>').text(result.track));
+            name_cell.append('<br>' + artist_album);
             track_row = $('<tr class="track">')
                 .append($('<td class="choice">').append(choice_radio))
                 .append(name_cell);

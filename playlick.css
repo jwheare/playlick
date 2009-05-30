@@ -246,7 +246,7 @@ form#podcast_form input#podcast_input {
 .trackList li {
     border-bottom: 1px solid #c0e95b;
     border-right: 24px solid #fff;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 39px;
 }
 .trackList li.placeholder {
@@ -268,6 +268,12 @@ form#podcast_form input#podcast_input {
 .trackList a.item {
     display: block;
     text-decoration: none;
+}
+.trackList span.contributor {
+    margin-right: 3px;
+    color: #4c7a0f;
+}
+.trackList strong.fn {
 }
 .trackList li.match {
     background-color: #e8f9bb;
@@ -362,27 +368,30 @@ form#podcast_form input#podcast_input {
 .sources tbody > tr:first-child td {
     border-top: 0;
 }
-.sources table tr.info td {
-    padding-bottom: 8px;
-    color: #6ea31e;
-    line-height: 12px;
-}
-.sources table td.choice,
-.sources table tr.info td.score {
-    width: 18px;
-    padding-right: 3px;
-    text-align: center;
-    vertical-align: middle;
-}
-.sources table tr.info td.score {
-    font-size: 11px;
-}
 .sources table td.name img {
     float: right;
     margin: 5px 10px 5px 0;
     border: 1px solid #335507;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+}
+.sources table td.name span {
+    color: #335507;
+}
+.sources table tr.info td {
+    padding-bottom: 8px;
+    color: #6ea31e;
+    line-height: 12px;
+}
+.sources table td.choice,
+.sources table td.score {
+    width: 18px;
+    padding-right: 3px;
+    text-align: center;
+    vertical-align: middle;
+}
+.sources table td.score {
+    font-size: 11px;
 }
 .sources table td.time,
 .sources table td.size,
