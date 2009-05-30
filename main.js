@@ -548,10 +548,9 @@ var PLAYLICK = {
     onResultFinish: function () {
         PLAYLICK.onResultStop.call(this);
         // Chain playback to the next perfect match
-        var next_track = $('#sid' + this.sID).data('track_item').nextAll('li.perfectMatch');
-        if (next_track) {
-            var playlist_track = next_track.data('playlist_track');
-            PLAYLICK.play_track(playlist_track);
+        var next_playlist_track = $('#sid' + this.sID).data('track_item').nextAll('li.perfectMatch').data('playlist_track');
+        if (next_playlist_track) {
+            PLAYLICK.play_track(next_playlist_track);
         } else {
             // Remove the playlist highlight from the sidebar
             PLAYLICK.set_playing_playlist_item();
