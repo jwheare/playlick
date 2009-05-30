@@ -690,7 +690,7 @@ var PLAYLICK = {
                 name: track.title,
                 artist: track.creator,
                 album: track.album,
-                duration: track.duration
+                duration: Math.round(track.duration/1000)
             };
             if (track.location) {
                 track_doc.url = track.location;

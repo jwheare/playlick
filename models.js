@@ -331,6 +331,7 @@ var MODELS = {
         this.id = MODELS.next_playlist_track_id++;
         this.playlist = playlist;
         this.track = track;
+        this.set_track_duration(track.duration);
         
         this.options = options || {};
         
@@ -354,15 +355,17 @@ var MODELS = {
          * Update the track and the playlist duration
         **/
         set_track_duration: function (duration) {
-            var playlist_duration = this.playlist.duration;
-            // Subtract the old duration
-            if (this.track.duration) {
-                playlist_duration -= this.track.duration;
+            if (duration) {
+                var playlist_duration = this.playlist.duration;
+                // Subtract the old duration
+                if (playlist_duration && this.track.duration) {
+                    playlist_duration -= this.track.duration;
+                }
+                this.track.duration = duration;
+                // Add the new duration
+                playlist_duration += this.track.duration;
+                this.playlist.set_duration(playlist_duration);
             }
-            this.track.duration = duration;
-            // Add the new duration
-            playlist_duration += this.track.duration;
-            this.playlist.set_duration(playlist_duration);
         },
         /**
          * Build a DOMElement for the PlaylistTrack

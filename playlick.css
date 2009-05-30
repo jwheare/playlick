@@ -143,6 +143,7 @@ ul#playlists li a.playlist_playing {
     text-align: center;
     font-size: 11px;
     text-decoration: none;
+    cursor: default;
 }
 ul#playlists li.playing a.playlist_playing {
     background: #a8d840 url('track_play.gif') no-repeat 50% 50%;
@@ -413,4 +414,51 @@ form#podcast_form input#podcast_input {
     clear: both;
     background: #d2f380;
     border-top: 1px solid #c0e95b;
+}
+
+/**
+ * Autocomplete
+**/
+
+.ac_results {
+    width: 253px !important;
+    padding: 0;
+    border: 1px solid #6ea31e;
+    border-top: 0;
+    overflow: hidden;
+    z-index: 99999;
+    background: #fff;
+    color: #4c7a0f;
+}
+
+.ac_results ul {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.ac_results li {
+    margin: 0;
+    padding: 3px 5px;
+    cursor: default;
+    display: block;
+    font-size: 13px;
+    line-height: 18px;
+    overflow: hidden;
+}
+.ac_results li strong {
+    color: #335507;
+}
+
+.ac_loading {
+    background: white url('indicator.gif') right center no-repeat;
+}
+
+.ac_odd {
+    background-color: #e8f9bb;
+}
+
+.ac_over {
+    background-color: #c0e95b;
 }
