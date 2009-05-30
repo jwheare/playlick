@@ -1048,6 +1048,7 @@ $('#playlists').click(function (e) {
     // Toggle play
     if (target.is('li.p a.playlist_playing')) {
         e.preventDefault();
+        target.blur();
         PLAYLICK.play_track(PLAYLICK.now_playing);
     }
     // Toggle playlist name editing
