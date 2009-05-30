@@ -40,6 +40,30 @@ MODELS.Playlist.prototype.toHTML = function () {
         .html();
 };
 
+MODELS.couch_down_handler = function (action, result) {
+    MODELS.couch_up = false;
+    // var message = "couchdb unavailable";
+    // if (result.error && result.error != 'unknown') {
+    //     message = result.error+': '+result.reason;
+    // }
+    // console.warn('['+action+'] '+message);
+    // console.warn(result);
+    
+    $('#loading_playlists').addClass('unavailable');
+    $('#loading_playlists').html(
+        '<b>Database unavailable.</b>'
+        + '<br>Your changes will not be saved. '
+        + '<a href="#" onclick="PLAYLICK.retry_couch(); return false;">retry</a>'
+    );
+    $('#loading_playlists').show();
+};
+
+MODELS.couch_up_handler = function (action, response) {
+    MODELS.couch_up = true;
+    $('#loading_playlists').hide();
+    $('#tracksError').hide();
+};
+
 var PLAYLICK = {
     
     /**
@@ -478,82 +502,56 @@ var PLAYLICK = {
         // For streaming, construct the url from the sid
         playlist_track.track.playdar_url = result.url;
     },
-    couch_down: function () {
-        $('#loading_playlists').addClass('unavailable');
-        $('#loading_playlists').html(
-            '<b>Database unavailable.</b>'
-            + '<br>Your changes will not be saved. '
-            + '<a href="#" onclick="PLAYLICK.retry_couch(); return false;">retry</a>'
-        );
-        $('#loading_playlists').show();
-    },
     retry_couch: function () {
         $('#loading_playlists').removeClass('unavailable');
         $('#loading_playlists').html(PLAYLICK.loading_playlists_text);
         $('#loading_playlists').show();
         if (PLAYLICK.fetch_playlists_done) {
-            var stat = MODELS.stat_couch();
-            if (stat) {
-                $('#loading_playlists').hide();
-                $('#tracksError').hide();
-            } else {
-                PLAYLICK.couch_down();
-            }
+            MODELS.stat_couch();
         } else {
-            PLAYLICK.fetch_playlists(true);
+            PLAYLICK.fetch_playlists();
         }
     },
     // Fetch playlists from Couch
-    fetch_playlists: function (force) {
-        if (MODELS.couch_up || force) {
-            try {
-                var response = MODELS.couch.view("playlist/all");
-                MODELS.couch_up = true;
-                PLAYLICK.fetch_playlists_done = true;
-                var elements = $.map(response.rows, function (row, i) {
-                    // console.log(row);
-                    var value = row.value;
-                    // Create the playlist object
-                    var playlist = PLAYLICK.create_playlist(value.name, {
-                        id: value._id,
-                        rev: value._rev
-                    });
-                    // Add to the sidebar
-                    return playlist.element.get();
+    fetch_playlists: function () {
+        try {
+            var response = MODELS.couch.view("playlist/all");
+            MODELS.couch_up_handler('fetch_playlists', response);
+            PLAYLICK.fetch_playlists_done = true;
+            var elements = $.map(response.rows, function (row, i) {
+                // console.log(row);
+                var value = row.value;
+                // Create the playlist object
+                var playlist = PLAYLICK.create_playlist(value.name, {
+                    id: value._id,
+                    rev: value._rev
                 });
-                $('#playlists').append(elements);
-                $('#loading_playlists').hide();
-            } catch (result) {
-                MODELS.couch_down_handler('view playlists', result);
-            }
-        }
-        if (!MODELS.couch_up) {
-            PLAYLICK.couch_down();
+                // Add to the sidebar
+                return playlist.element.get();
+            });
+            $('#playlists').append(elements);
+        } catch (result) {
+            MODELS.couch_down_handler('fetch_playlists', result);
         }
     },
     // Fetch playlist tracks from Couch
-    fetch_playlist_tracks: function (playlist, force) {
-        if (MODELS.couch_up || force) {
-            try {
-                var response = MODELS.couch.view("playlist/all", {
-                    "key": playlist._id
-                });
-                MODELS.couch_up = true;
-                var row = response.rows[0];
-                var value = row.value;
-                // Load tracks
-                var elements = $.map(value.tracks, function (track_data, i) {
-                    var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
-                    // Build DOM element
-                    return playlist_track.element.get();
-                });
-                return elements;
-            } catch (result) {
-                MODELS.couch_down_handler('load tracks', result);
-            }
-        }
-        if (!MODELS.couch_up) {
-            PLAYLICK.couch_down();
+    fetch_playlist_tracks: function (playlist) {
+        try {
+            var response = MODELS.couch.view("playlist/all", {
+                "key": playlist._id
+            });
+            MODELS.couch_up_handler('fetch_playlist_tracks', response);
+            var row = response.rows[0];
+            var value = row.value;
+            // Load tracks
+            var elements = $.map(value.tracks, function (track_data, i) {
+                var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
+                // Build DOM element
+                return playlist_track.element.get();
+            });
+            return elements;
+        } catch (result) {
+            MODELS.couch_down_handler('fetch_playlist_tracks', result);
         }
     },
     // Load a playlist from the sidebar

@@ -7,23 +7,19 @@ var MODELS = {
     couch_up: true,
     next_playlist_id: 0,
     next_playlist_track_id: 0,
-    couch_down_handler: function (action, result) {
-        MODELS.couch_up = false;
-        var message = "couchdb unavailable";
-        if (result.error && result.error != 'unknown') {
-            message = result.error+': '+result.reason;
-        }
-        // console.warn('['+action+'] '+message);
-        // console.warn(result);
-    },
     stat_couch: function () {
         try {
             var version = CouchDB.getVersion('/');
-            MODELS.couch_up = true;
+            MODELS.couch_up_handler('stat', version);
         } catch (result) {
             MODELS.couch_down_handler('stat', result);
         }
-        return MODELS.couch_up;
+    },
+    couch_down_handler: function (action, result) {
+        MODELS.couch_up = false;
+    },
+    couch_up_handler: function (action, response) {
+        MODELS.couch_up = true;
     }
 };
 (function () {
