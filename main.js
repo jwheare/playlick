@@ -61,6 +61,7 @@ var PLAYLICK = {
     disconnect_from_playdar_text: 'Disconnect from Playdar',
     cancel_edit_playlist_text: 'cancel',
     create_playlist_title: $('#playlistTitle').html(),
+    loading_playlists_text: $('#loading_playlists').html(),
     
     /**
      * Utility
@@ -356,13 +357,6 @@ var PLAYLICK = {
     **/
     
     current_playlist: null,
-    couch_down: function () {
-        $('#loading_playlists').addClass('unavailable');
-        $('#loading_playlists').html(
-            '<b>Database unavailable.</b>'
-            + '<br>Your changes will not be saved.'
-        );
-    },
     create_playlist: function (name, doc_ref) {
         var playlist = new MODELS.Playlist({
             doc_ref: doc_ref,
@@ -484,11 +478,38 @@ var PLAYLICK = {
         // For streaming, construct the url from the sid
         playlist_track.track.playdar_url = result.url;
     },
+    couch_down: function () {
+        $('#loading_playlists').addClass('unavailable');
+        $('#loading_playlists').html(
+            '<b>Database unavailable.</b>'
+            + '<br>Your changes will not be saved. '
+            + '<a href="#" onclick="PLAYLICK.retry_couch(); return false;">retry</a>'
+        );
+        $('#loading_playlists').show();
+    },
+    retry_couch: function () {
+        $('#loading_playlists').removeClass('unavailable');
+        $('#loading_playlists').html(PLAYLICK.loading_playlists_text);
+        $('#loading_playlists').show();
+        if (PLAYLICK.fetch_playlists_done) {
+            var stat = MODELS.stat_couch();
+            if (stat) {
+                $('#loading_playlists').hide();
+                $('#tracksError').hide();
+            } else {
+                PLAYLICK.couch_down();
+            }
+        } else {
+            PLAYLICK.fetch_playlists(true);
+        }
+    },
     // Fetch playlists from Couch
-    fetch_playlists: function () {
-        if (MODELS.couch_up) {
+    fetch_playlists: function (force) {
+        if (MODELS.couch_up || force) {
             try {
                 var response = MODELS.couch.view("playlist/all");
+                MODELS.couch_up = true;
+                PLAYLICK.fetch_playlists_done = true;
                 var elements = $.map(response.rows, function (row, i) {
                     // console.log(row);
                     var value = row.value;
@@ -511,13 +532,13 @@ var PLAYLICK = {
         }
     },
     // Fetch playlist tracks from Couch
-    fetch_playlist_tracks: function (playlist) {
-        $('#tracksLoading').show();
-        if (MODELS.couch_up) {
+    fetch_playlist_tracks: function (playlist, force) {
+        if (MODELS.couch_up || force) {
             try {
                 var response = MODELS.couch.view("playlist/all", {
                     "key": playlist._id
                 });
+                MODELS.couch_up = true;
                 var row = response.rows[0];
                 var value = row.value;
                 // Load tracks
@@ -526,15 +547,12 @@ var PLAYLICK = {
                     // Build DOM element
                     return playlist_track.element.get();
                 });
-                $('#tracksLoading').hide();
                 return elements;
             } catch (result) {
                 MODELS.couch_down_handler('load tracks', result);
             }
         }
         if (!MODELS.couch_up) {
-            $('#tracksLoading').hide();
-            // TODO error message
             PLAYLICK.couch_down();
         }
     },
@@ -554,6 +572,9 @@ var PLAYLICK = {
         $('#add_track_button').val(PLAYLICK.add_button_text);
         // Load tracks
         var elements;
+        // Hide error message
+        $('#tracksLoading').show();
+        $('#tracksError').hide();
         if (!PLAYLICK.current_playlist.tracks.length) {
             // Fetch from Couch
             elements = PLAYLICK.fetch_playlist_tracks(PLAYLICK.current_playlist);
@@ -561,15 +582,14 @@ var PLAYLICK = {
             // Already fetched, just build DOM elements
             elements = PLAYLICK.current_playlist.load();
         }
-        if (elements.length) {
+        $('#tracksLoading').hide();
+        if (elements && elements.length) {
             // Add to the DOM
             $('#playlist').append(elements);
             // Resolve tracks with Playdar
             PLAYLICK.resolve_current_playlist();
         } else {
-            // TODO error message for no tracks
-            // Shouldn't have saved playlists without tracks
-            console.error("Couldn't load tracks");
+            $('#tracksError').show();
         }
         // Show manage screen
         $('#import').hide();

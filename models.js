@@ -15,6 +15,15 @@ var MODELS = {
         }
         // console.warn('['+action+'] '+message);
         // console.warn(result);
+    },
+    stat_couch: function () {
+        try {
+            var version = CouchDB.getVersion('/');
+            MODELS.couch_up = true;
+        } catch (result) {
+            MODELS.couch_down_handler('stat', result);
+        }
+        return MODELS.couch_up;
     }
 };
 (function () {
