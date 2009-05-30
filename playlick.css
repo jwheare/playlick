@@ -135,20 +135,20 @@ ul#playlists li a.edit_playlist:hover {
 
 ul#playlists li a.playlist_playing {
     float: left;
+    display: block;
     width: 24px;
+    height: 32px;
     margin-left: -24px;
     padding: 0;
     text-align: center;
     font-size: 11px;
-    visibility: hidden;
     text-decoration: none;
 }
 ul#playlists li.playing a.playlist_playing {
-    visibility: visible;
-    background: #a8d840;
+    background: #a8d840 url('track_play.gif') no-repeat 50% 50%;
 }
 ul#playlists li.playing a.playlist_playing:hover {
-    background: #92c137;
+    background-color: #92c137;
 }
 
 ul#playlists li a.delete_playlist {
@@ -256,12 +256,18 @@ form#podcast_form input#podcast_input {
     display: block;
     float: left;
     width: 39px;
+    height: 39px;
     text-align: center;
+}
+.trackList li.scanning span.status {
+    background: url('track_scanning.gif') no-repeat 50% 50%;
+}
+.trackList li.perfectMatch span.status {
+    background: url('track_play.gif') no-repeat 50% 50%;
 }
 .trackList li span.status span {
     display: none;
 }
-.trackList li.scanning span.status span.scanning,
 .trackList li.perfectMatch span.status span.play {
     display: inline;
 }

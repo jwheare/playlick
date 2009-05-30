@@ -11,15 +11,7 @@ MODELS.Track.prototype.toHTML = function () {
         .append($('<strong class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name));
     var item_link   = $('<a href="#" class="item">')
         .append($('<span class="elapsed">').text(this.get_duration_string()))
-        // TODO: use background images
-        .append($('<span class="status">'
-            + '&nbsp;'
-            + '<span class="play">▸</span>'
-            + '<span class="scanning">'
-                + '<img src="/track_scanning.gif" width="16" height="16" alt="Scanning for sources">'
-            + '</span>'
-            + '&nbsp;'
-        + '</span>'))
+        .append('<span class="status">')
         .append(item_name);
     var sources = $('<div class="sources">');
     // Wrap in a div so we can return its innerHTML as a string
@@ -31,7 +23,7 @@ MODELS.Track.prototype.toHTML = function () {
         .html();
 };
 MODELS.Playlist.prototype.toHTML = function () {
-    var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">').text('▸');
+    var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">');
     var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
     var edit_link   = $('<a href="#" class="edit_playlist">').text(PLAYLICK.edit_playlist_text);
     var name        = $('<a href="#" class="playlist">').text(PLAYLICK.truncate_string(this.name));
@@ -285,12 +277,8 @@ var PLAYLICK = {
                 }
                 var sources = list_item.children('.sources');
                 sources.html(results_table);
-                // Highlight the list item and update the playlist title
+                // Highlight the list item
                 if (playlist_track.track.playdar_sid) {
-                    // TODO, this is private, come up with a better way to update
-                    // the playlist duration
-                    playlist_track.playlist._rebuild();
-                    PLAYLICK.update_playlist_title(playlist_track.playlist.toString());
                     list_item.addClass('perfectMatch');
                 }
             } else {
@@ -392,6 +380,11 @@ var PLAYLICK = {
                 if (this == PLAYLICK.current_playlist) {
                     PLAYLICK.blank_playlist();
                 }
+            },
+            onSetDuration: function () {
+                if (this == PLAYLICK.current_playlist) {
+                    PLAYLICK.update_playlist_title(this.toString());
+                }
             }
         });
         return playlist;
@@ -479,7 +472,7 @@ var PLAYLICK = {
         }
         // If the duration changed, update it
         if (track.duration != result.duration) {
-            track.duration = result.duration;
+            playlist_track.set_track_duration(result.duration);
             playlist_track.element.find('span.elapsed').text(track.get_duration_string());
         }
         // If the sid has changed, stop the stream if it's playing
@@ -575,6 +568,7 @@ var PLAYLICK = {
             PLAYLICK.resolve_current_playlist();
         } else {
             // TODO error message for no tracks
+            // Shouldn't have saved playlists without tracks
             console.error("Couldn't load tracks");
         }
         // Show manage screen
@@ -670,7 +664,7 @@ var PLAYLICK = {
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Update the track duration
-            playlist_track.track.duration = Math.round(duration/1000);
+            playlist_track.set_track_duration(Math.round(duration/1000));
         }
     },
     play_track: function (playlist_track) {
@@ -821,7 +815,6 @@ var PLAYLICK = {
     },
     // Fetch a Last.fm album playlist as JSON
     fetch_lastfm_album: function (artist, album) {
-        // TODO, just get the tracks from album.getinfo
         // Fetch the playlist URL
         $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
             method: "album.getinfo",
@@ -987,6 +980,7 @@ $('#playlist').sortable({
     axis: 'y',
     cursor: 'move',
     opacity: 0.5,
+    delay: 100,
     placeholder: 'placeholder',
     update: function (e, ui) {
         var tracks = $.map($('#playlist li'), function (playlist_item, i) {

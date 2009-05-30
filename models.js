@@ -129,26 +129,18 @@ var MODELS = {
             this.save(onSave);
         },
         /**
-         * MODELS.Playlist->_rebuild()
-         * Update track positions and playlist duration
-        **/
-        _rebuild: function () {
-            var duration = 0;
-            $.each(this.tracks, function (i, playlist_track) {
-                playlist_track.position = i + 1;
-                if (typeof playlist_track.track.duration != 'undefined') {
-                    duration += playlist_track.track.duration;
-                }
-            });
-            this.duration = duration;
-        },
-        /**
          * Playlist management
         **/
         set_name: function (name, onSave) {
             this.name = name;
             // AUTOSAVE
             this.save(onSave);
+        },
+        set_duration: function (duration) {
+            this.duration = duration;
+            if (this.options.onSetDuration) {
+                this.options.onSetDuration.call(this);
+            }
         },
         get_duration: function () {
             return Playdar.Util.mmss(this.duration);
@@ -231,8 +223,6 @@ var MODELS = {
             this.saved = true;
         },
         save: function (callback) {
-            this._rebuild();
-            
             // Persist in CouchDB
             if (MODELS.couch_up) {
                 try {
@@ -358,6 +348,21 @@ var MODELS = {
         remove: function () {
             // Update playlist state
             this.playlist.remove_track(this);
+        },
+        
+        /**
+         * Update the track and the playlist duration
+        **/
+        set_track_duration: function (duration) {
+            var playlist_duration = this.playlist.duration;
+            // Subtract the old duration
+            if (this.track.duration) {
+                playlist_duration -= this.track.duration;
+            }
+            this.track.duration = duration;
+            // Add the new duration
+            playlist_duration += this.track.duration;
+            this.playlist.set_duration(playlist_duration);
         },
         /**
          * Build a DOMElement for the PlaylistTrack
