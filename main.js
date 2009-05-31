@@ -798,9 +798,17 @@ var PLAYLICK = {
                         // console.dir(jspf);
                         if (jspf.trackList && jspf.trackList.track) {
                             var metadata = {
-                                description: jspf.annotation,
-                                image: jspf.image
+                                description: jspf.annotation
                             };
+                            var images = $.makeArray(jspf.image);
+                            var medium_image = $.grep(images, function (value, i) {
+                                return value.size == 'medium';
+                            });
+                            if (medium_image[0]) {
+                                metadata.image = medium_image[0].content;
+                            } else {
+                                metadata.image = images[0].content;
+                            }
                             var playlist = PLAYLICK.create_from_jspf(jspf, metadata);
                             if (playlist) {
                                 // Update messages
