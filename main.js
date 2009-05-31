@@ -39,6 +39,30 @@ MODELS.Playlist.prototype.toHTML = function () {
         .append(edit_form)
         .html();
 };
+var autolink_regexp = new RegExp(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g);
+MODELS.Playlist.prototype.titleHTML = function () {
+    var wrapper = $('<div>');
+    // Add an image
+    if (this.image) {
+        wrapper.append($('<img>').attr('src', this.image));
+    }
+    wrapper.append(this.toString());
+    // Autolink description
+    if (this.description) {
+        var description = $('<small>');
+        $.each(this.description.split(/[ \n]/), function (i, word) {
+            var matches = autolink_regexp.exec(word);
+            if (matches) {
+                description.append($('<a>').attr('href', word).text(word));
+            } else {
+                description.append(' '+word+' ');
+            }
+        });
+        wrapper.append('<br>')
+            .append(description);
+    }
+    return wrapper.html();
+};
 
 MODELS.couch_down_handler = function (action, result) {
     MODELS.couch_up = false;
@@ -381,13 +405,19 @@ var PLAYLICK = {
     **/
     
     current_playlist: null,
-    create_playlist: function (name, doc_ref) {
+    create_playlist: function (data) {
+        data = data || {};
         var playlist = new MODELS.Playlist({
-            doc_ref: doc_ref,
-            name: name,
+            doc_ref: {
+                id: data._id,
+                rev: data._rev
+            },
+            name: data.name,
+            image: data.image,
+            description: data.description,
             onSave: function () {
                 if (this == PLAYLICK.current_playlist) {
-                    PLAYLICK.update_playlist_title(this.toString());
+                    PLAYLICK.update_playlist_title(this.titleHTML());
                 }
             },
             onCreate: function () {
@@ -401,7 +431,7 @@ var PLAYLICK = {
             },
             onSetDuration: function () {
                 if (this == PLAYLICK.current_playlist) {
-                    PLAYLICK.update_playlist_title(this.toString());
+                    PLAYLICK.update_playlist_title(this.titleHTML());
                 }
             }
         });
@@ -409,7 +439,7 @@ var PLAYLICK = {
     },
     // Update the playlist title (when loading a playlist or updating the duration)
     update_playlist_title: function (title) {
-        $('#playlistTitle').text(title);
+        $('#playlistTitle').html(title);
     },
     // Show/hide edit mode for playlist in sidebar
     toggle_playlist_edit: function (playlist_item) {
@@ -520,12 +550,9 @@ var PLAYLICK = {
             PLAYLICK.fetch_playlists_done = true;
             var elements = $.map(response.rows, function (row, i) {
                 // console.log(row);
-                var value = row.value;
+                var data = row.value;
                 // Create the playlist object
-                var playlist = PLAYLICK.create_playlist(value.name, {
-                    id: value._id,
-                    rev: value._rev
-                });
+                var playlist = PLAYLICK.create_playlist(data);
                 // Add to the sidebar
                 return playlist.element.get();
             });
@@ -565,7 +592,7 @@ var PLAYLICK = {
         // Update the current playlist object
         PLAYLICK.current_playlist = playlist_item.data('playlist');
         // Update the title
-        PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.toString());
+        PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.titleHTML());
         // Switch the add track button text
         $('#add_track_button').val(PLAYLICK.add_button_text);
         // Load tracks
@@ -696,14 +723,15 @@ var PLAYLICK = {
     **/
     
     // Parse XSPF JSON into a playlist
-    add_from_jspf: function (jspf) {
+    create_from_jspf: function (jspf, metadata) {
         // console.dir(jspf);
         var title = jspf.title;
-        var track_list = $.makeArray(jspf.trackList.track);
         // Create the playlist
-        var playlist = PLAYLICK.create_playlist(title);
+        var playlist = PLAYLICK.create_playlist({
+            name: title
+        });
         // Load tracks
-        $.each(track_list, function (i, track) {
+        $.each(jspf.trackList.track, function (i, track) {
             var track_doc = {
                 name: track.title,
                 artist: track.creator,
@@ -715,17 +743,22 @@ var PLAYLICK = {
             }
             playlist.add_track(new MODELS.Track(track_doc));
         });
+        // Save metadata
+        playlist.image = metadata.image;
+        playlist.description = metadata.description;
         playlist.save();
+        return playlist;
     },
     // Parse podcast JSON into a playlist
-    add_from_podcast: function (podcast) {
+    create_from_podcast: function (podcast) {
         // console.dir(podcast);
         var title = podcast.title;
-        var track_list = $.makeArray(podcast.item);
         // Create the playlist
-        var playlist = PLAYLICK.create_playlist(title);
+        var playlist = PLAYLICK.create_playlist({
+            name: title
+        });
         // Load tracks
-        $.each(track_list, function (i, track) {
+        $.each(podcast.item, function (i, track) {
             var track_doc = {
                 name: track.title,
                 artist: track.author
@@ -749,14 +782,16 @@ var PLAYLICK = {
                 if (json.error) {
                     error_text = json.error.description;
                 } else if (json.query && json.query.results) {
-                    var xspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
-                    if (xspf) {
-                        if (xspf.trackList.track) {
-                            PLAYLICK.add_from_jspf(xspf);
+                    var jspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
+                    if (jspf && jspf.trackList && jspf.trackList.track) {
+                        if (jspf.trackList.track.length) {
+                            // TODO - check XSPF metadata
+                            var metadata = {};
+                            var playlist = PLAYLICK.create_from_jspf(jspf, metadata);
                             // Update messages
                             $('#import p.messages').hide();
-                            $('#xspf_title').text(xspf.title);
-                            $('#xspf_count').text(xspf.trackList.track.length);
+                            $('#xspf_title').text(jspf.title);
+                            $('#xspf_count').text(jspf.trackList.track.length);
                             $('#xspf_done').show();
                             return true;
                         } else {
@@ -795,11 +830,11 @@ var PLAYLICK = {
             if (json) {
                 if (json.error) {
                     error_text = json.error.description;
-                } else if (json.query && json.query.results) {
+                } else if (json.query && json.query.results && json.query.results.rss) {
                     var podcast = json.query.results.rss.channel;
-                    if (podcast) {
+                    if (podcast.length) {
                         if (podcast.item) {
-                            PLAYLICK.add_from_podcast(podcast);
+                            PLAYLICK.create_from_podcast(podcast);
                             // Update messages
                             $('#import p.messages').hide();
                             $('#podcast_title').text(podcast.title);
@@ -856,8 +891,16 @@ var PLAYLICK = {
                 // Fetch the playlist XSPF
                 var playlist_url = "lastfm://playlist/album/" + album_json.album.id;
                 var escaped_playlist = $('<b>').text('Album Playlist: ' + playlist_url);
-                PLAYLICK.fetch_lastfm_playlist(
+                var metadata = {};
+                var image = $.grep(album_json.album.image, function (value, i) {
+                    return value.size == 'medium';
+                });
+                if (image[0]) {
+                    metadata.image = image[0]['#text'];
+                }
+                var playlist = PLAYLICK.fetch_lastfm_playlist(
                     playlist_url,
+                    metadata,
                     function onDone () {
                         $('#import p.messages').hide();
                         var escaped_album = $('<b>').text('Artist: '+album_json.album.artist+' Album: '+album_json.album.name);
@@ -905,14 +948,26 @@ var PLAYLICK = {
                 $('#import_error').show();
             } else {
                 $('#import_error').empty();
+                // Last.fm APIs return single item lists as single items
                 var playlists = $.makeArray(json.playlists.playlist);
-                if (playlists) {
+                if (playlists.length) {
                     PLAYLICK.playlist_done = {};
-                    $.each(playlists, function (i, playlist) {
-                        var playlist_url = "lastfm://playlist/" + playlist.id;
+                    $.each(playlists, function (i, playlist_data) {
+                        // console.dir(playlist_data);
+                        var playlist_url = "lastfm://playlist/" + playlist_data.id;
                         var escaped_playlist = $('<b>').text('Playlist: ' + playlist_url);
-                        PLAYLICK.fetch_lastfm_playlist(
+                        var metadata = {
+                            description: playlist_data.description
+                        };
+                        var image = $.grep(playlist_data.image, function (value, i) {
+                            return value.size == 'medium';
+                        });
+                        if (image[0]) {
+                            metadata.image = image[0]['#text'];
+                        }
+                        var playlist = PLAYLICK.fetch_lastfm_playlist(
                             playlist_url,
+                            metadata,
                             function onDone () {
                                 $('#import p.messages').hide();
                                 $('#import_count').text(playlists.length);
@@ -944,7 +999,7 @@ var PLAYLICK = {
         });
     },
     // Fetch a Last.fm playlist as JSON
-    fetch_lastfm_playlist: function (playlist_url, onDone, onError) {
+    fetch_lastfm_playlist: function (playlist_url, metadata, onDone, onError) {
         if (PLAYLICK.playlist_done) {
             PLAYLICK.playlist_done[playlist_url] = false;
         }
@@ -961,29 +1016,35 @@ var PLAYLICK = {
                     var error_message = $('<p>').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
                     onError.call(this, error_message);
                 }
-            } else if (playlist_json.playlist.trackList.track) {
-                PLAYLICK.add_from_jspf(playlist_json.playlist);
-                if (onDone) {
-                    if (PLAYLICK.playlist_done) {
-                        PLAYLICK.playlist_done[playlist_url] = true;
-                        var done_loading = true;
-                        for (var k in PLAYLICK.playlist_done) {
-                            if (PLAYLICK.playlist_done[k] === false) {
-                                done_loading = false;
-                                break;
+            } else {
+                // Last.fm APIs return single item lists as single items
+                var playlist_data = playlist_json.playlist;
+                playlist_data.trackList.track = $.makeArray(playlist_data.trackList.track);
+                if (playlist_data.trackList.track.length) {
+                    var playlist = PLAYLICK.create_from_jspf(playlist_data, metadata);
+                    if (onDone) {
+                        if (PLAYLICK.playlist_done) {
+                            PLAYLICK.playlist_done[playlist_url] = true;
+                            var done_loading = true;
+                            for (var k in PLAYLICK.playlist_done) {
+                                if (PLAYLICK.playlist_done[k] === false) {
+                                    done_loading = false;
+                                    break;
+                                }
+                            };
+                            if (done_loading) {
+                                PLAYLICK.playlist_done = null;
+                                onDone.call(this);
                             }
-                        };
-                        if (done_loading) {
-                            PLAYLICK.playlist_done = null;
+                        } else {
                             onDone.call(this);
                         }
-                    } else {
-                        onDone.call(this);
                     }
+                    return playlist;
+                } else if (onError) {
+                    var error_message = $('<p>').text('No tracks');
+                    onError.call(this, error_message);
                 }
-            } else if (onError) {
-                var error_message = $('<p>').text('No tracks');
-                onError.call(this, error_message);
             }
         });
     }
@@ -1080,7 +1141,8 @@ $("#add_track_input").autocomplete(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", 
     cacheLength: 1,
     parse: function (json) {
         var parsed = [];
-        if (json && json.results.trackmatches.track) {
+        if (json && json.results && json.results.trackmatches && json.results.trackmatches.track) {
+            // Last.fm APIs return single item lists as single items
             var tracks = $.makeArray(json.results.trackmatches.track);
             $.each(tracks, function (i, track) {
                 parsed.push({
@@ -1233,7 +1295,8 @@ $("#album_import_input").autocomplete(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?
     cacheLength: 1,
     parse: function (json) {
         var parsed = [];
-        if (json && json.results.albummatches.album) {
+        if (json && json.results && json.results.albummatches && json.results.albummatches.album) {
+            // Last.fm APIs return single item lists as single items
             var albums = $.makeArray(json.results.albummatches.album);
             $.each(albums, function (i, album) {
                 parsed.push({

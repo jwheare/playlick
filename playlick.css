@@ -191,6 +191,17 @@ ul#playlists li input.playlist_name {
 #main h1 {
     margin: 0 0 15px 40px;
 }
+#main h1 img {
+    float: right;
+    margin-right: 24px;
+    vertical-align: middle;
+}
+#main h1 small {
+    display: block;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 20px;
+}
 
 p#shortcuts {
     margin: 0 0 20px 40px;

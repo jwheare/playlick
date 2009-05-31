@@ -88,7 +88,7 @@ var MODELS = {
         this.duration = 0;
         
         this.options = options || {};
-        if (this.options.doc_ref) {
+        if (this.options.doc_ref && this.options.doc_ref.id && this.options.doc_ref.rev) {
             // Update the ref values
             this.set_doc_ref(this.options.doc_ref);
             this.persisted = true;
@@ -106,6 +106,8 @@ var MODELS = {
             }
         }
         this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
+        this.image = this.options.image || '';
+        this.description = this.options.description || '';
         
         // Create the DOM element
         this.set_element(this.options.dom_element);
@@ -185,6 +187,9 @@ var MODELS = {
             return "p_" + this.get_id();
         },
         toHTML: function () {
+            return this.toString();
+        },
+        titleHTML: function () {
             return this.toString();
         },
         get_urls: function () {
@@ -315,10 +320,12 @@ var MODELS = {
         },
         get_doc: function () {
             var doc = $.extend(this.get_doc_ref(), {
+                published: this.published,
                 type: 'playlist',
                 name: this.name,
                 duration: this.duration,
-                published: this.published,
+                image: this.image,
+                description: this.description,
                 tracks: $.map(this.tracks, function (playlist_track, i) {
                     return playlist_track.get_doc();
                 })
