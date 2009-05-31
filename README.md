@@ -9,7 +9,6 @@ Persists in a CouchDB database.
 TODO
 ----
 
-* Extra playlist metadata, album art, description, creator
 * Setup CouchDB on playlick.com
 * Tag playlist import from Last.fm
 * XSPF export

@@ -515,13 +515,17 @@ var PLAYLICK = {
                 playlist_track.playlist.save();
             }
             // Update DOM
-            playlist_track.element.find('span.fn').text(track.name);
-            playlist_track.element.find('span.contributor').text(track.artist);
+            playlist_track.element.find('.fn')
+                .text(PLAYLICK.truncate_string(track.name))
+                .attr('title', track.name);
+            playlist_track.element.find('.contributor')
+                .text(PLAYLICK.truncate_string(track.artist))
+                .attr('title', track.artist);
         }
         // If the duration changed, update it
         if (track.duration != result.duration) {
             playlist_track.set_track_duration(result.duration);
-            playlist_track.element.find('span.elapsed').text(track.get_duration_string());
+            playlist_track.element.find('.elapsed').text(track.get_duration_string());
         }
         // If the sid has changed, stop the stream if it's playing
         if (playlist_track.track.playdar_sid && playlist_track.track.playdar_sid != result.sid) {
@@ -659,7 +663,7 @@ var PLAYLICK = {
             // Reset progress bar
             track_item.css('background-position', '0 0');
             // Reset elapsed counter
-            var progress = track_item.find('span.elapsed');
+            var progress = track_item.find('.elapsed');
             progress.text(playlist_track.track.get_duration_string());
         }
         // Clear the now playing track
@@ -687,7 +691,7 @@ var PLAYLICK = {
             track_item.addClass('playing');
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
-            var progress = track_item.find('span.elapsed');
+            var progress = track_item.find('.elapsed');
             var elapsed = '<strong>' + Playdar.Util.mmss(Math.round(this.position/1000)) + '</strong>';
             if (playlist_track.track.duration) {
                 elapsed += ' / ' + playlist_track.track.get_duration_string();
