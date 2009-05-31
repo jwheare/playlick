@@ -784,9 +784,12 @@ var PLAYLICK = {
                 } else if (json.query && json.query.results) {
                     var jspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
                     if (jspf && jspf.trackList && jspf.trackList.track) {
+                        // console.dir(jspf);
                         if (jspf.trackList.track.length) {
-                            // TODO - check XSPF metadata
-                            var metadata = {};
+                            var metadata = {
+                                description: jspf.annotation,
+                                image: jspf.image
+                            };
                             var playlist = PLAYLICK.create_from_jspf(jspf, metadata);
                             // Update messages
                             $('#import p.messages').hide();
