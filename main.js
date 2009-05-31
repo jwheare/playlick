@@ -612,7 +612,7 @@ var PLAYLICK = {
             elements = PLAYLICK.current_playlist.load();
         }
         $('#tracksLoading').hide();
-        if (elements && elements.length) {
+        if (elements) {
             // Add to the DOM
             $('#playlist').append(elements);
             // Resolve tracks with Playdar
@@ -730,28 +730,35 @@ var PLAYLICK = {
     create_from_jspf: function (jspf, metadata) {
         // console.dir(jspf);
         var title = jspf.title;
+        // XML to JSON converters often return single item lists as single items
+        var track_list = $.makeArray(jspf.trackList.track);
         // Create the playlist
         var playlist = PLAYLICK.create_playlist({
             name: title
         });
         // Load tracks
-        $.each(jspf.trackList.track, function (i, track) {
-            var track_doc = {
-                name: track.title,
-                artist: track.creator,
-                album: track.album,
-                duration: Math.round(track.duration/1000)
-            };
-            if (track.location) {
-                track_doc.url = track.location;
+        $.each(track_list, function (i, track_data) {
+            if (track_data.title && track_data.creator) {
+                var track_doc = {
+                    name: track_data.title,
+                    artist: track_data.creator,
+                    album: track_data.album,
+                    duration: Math.round(track_data.duration/1000)
+                };
+                if (track_data.location) {
+                    track_doc.url = track_data.location;
+                }
+                playlist.add_track(new MODELS.Track(track_doc));
             }
-            playlist.add_track(new MODELS.Track(track_doc));
         });
-        // Save metadata
-        playlist.image = metadata.image;
-        playlist.description = metadata.description;
-        playlist.save();
-        return playlist;
+        if (playlist.tracks.length) {
+            // Save metadata
+            playlist.image = metadata.image;
+            playlist.description = metadata.description;
+            playlist.save();
+            return playlist;
+        }
+        return false;
     },
     // Parse podcast JSON into a playlist
     create_from_podcast: function (podcast) {
@@ -787,20 +794,24 @@ var PLAYLICK = {
                     error_text = json.error.description;
                 } else if (json.query && json.query.results) {
                     var jspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
-                    if (jspf && jspf.trackList && jspf.trackList.track) {
+                    if (jspf) {
                         // console.dir(jspf);
-                        if (jspf.trackList.track.length) {
+                        if (jspf.trackList && jspf.trackList.track) {
                             var metadata = {
                                 description: jspf.annotation,
                                 image: jspf.image
                             };
                             var playlist = PLAYLICK.create_from_jspf(jspf, metadata);
-                            // Update messages
-                            $('#import p.messages').hide();
-                            $('#xspf_title').text(jspf.title);
-                            $('#xspf_count').text(jspf.trackList.track.length);
-                            $('#xspf_done').show();
-                            return true;
+                            if (playlist) {
+                                // Update messages
+                                $('#import p.messages').hide();
+                                $('#xspf_title').text(playlist.name);
+                                $('#xspf_count').text(playlist.tracks.length);
+                                $('#xspf_done').show();
+                                return true;
+                            } else {
+                                error_text = 'No valid tracks';
+                            }
                         } else {
                             error_text = 'No tracks';
                         }
@@ -1024,30 +1035,33 @@ var PLAYLICK = {
                     onError.call(this, error_message);
                 }
             } else {
-                // Last.fm APIs return single item lists as single items
                 var playlist_data = playlist_json.playlist;
-                playlist_data.trackList.track = $.makeArray(playlist_data.trackList.track);
-                if (playlist_data.trackList.track.length) {
+                if (playlist_data.trackList && playlist_data.trackList.track) {
                     var playlist = PLAYLICK.create_from_jspf(playlist_data, metadata);
-                    if (onDone) {
-                        if (PLAYLICK.playlist_done) {
-                            PLAYLICK.playlist_done[playlist_url] = true;
-                            var done_loading = true;
-                            for (var k in PLAYLICK.playlist_done) {
-                                if (PLAYLICK.playlist_done[k] === false) {
-                                    done_loading = false;
-                                    break;
+                    if (playlist) {
+                        if (onDone) {
+                            if (PLAYLICK.playlist_done) {
+                                PLAYLICK.playlist_done[playlist_url] = true;
+                                var done_loading = true;
+                                for (var k in PLAYLICK.playlist_done) {
+                                    if (PLAYLICK.playlist_done[k] === false) {
+                                        done_loading = false;
+                                        break;
+                                    }
+                                };
+                                if (done_loading) {
+                                    PLAYLICK.playlist_done = null;
+                                    onDone.call(this);
                                 }
-                            };
-                            if (done_loading) {
-                                PLAYLICK.playlist_done = null;
+                            } else {
                                 onDone.call(this);
                             }
-                        } else {
-                            onDone.call(this);
                         }
+                        return playlist;
+                    } else {
+                        var error_message = $('<p>').text('No valid tracks');
+                        onError.call(this, error_message);
                     }
-                    return playlist;
                 } else if (onError) {
                     var error_message = $('<p>').text('No tracks');
                     onError.call(this, error_message);
