@@ -9,6 +9,7 @@ Persists in a CouchDB database.
 TODO
 ----
 
+* Error handling for streaming
 * Setup CouchDB on playlick.com
 * Tag playlist import from Last.fm
 * XSPF export

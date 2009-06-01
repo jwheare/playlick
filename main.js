@@ -261,17 +261,17 @@ var PLAYLICK = {
             } else {
                 score_cell.html('&nbsp;');
             }
-            album_art = PLAYLICK.lastfm_ws_url + "/2.0/?" + $.param({
-                artist: result.artist,
-                album: result.album,
-                method: "album.coverredirect",
-                size: "small",
-                api_key: PLAYLICK.lastfm_api_key
-            });
             name_cell = $('<td class="name" colspan="4">');
             var artist_album = result.artist;
             if (result.album) {
                 artist_album += ' - ' + result.album;
+                album_art = PLAYLICK.lastfm_ws_url + "/2.0/?" + $.param({
+                    artist: result.artist,
+                    album: result.album,
+                    method: "album.coverredirect",
+                    size: "small",
+                    api_key: PLAYLICK.lastfm_api_key
+                });
                 name_cell.append($('<img width="34" height="34">').attr('src', album_art));
             }
             name_cell.append($('<span>').text(result.track));
