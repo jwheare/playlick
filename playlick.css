@@ -184,8 +184,9 @@ ul#playlists li input.playlist_name {
 
 /* Main */
 #main {
+    float: left;
     width: 580px;
-    margin: 0 15px;
+    margin: 15px;
     min-height: 200px;
 }
 #main h1 {
@@ -193,7 +194,7 @@ ul#playlists li input.playlist_name {
 }
 #main h1 img {
     float: right;
-    margin-right: 24px;
+    margin: 0 24px 24px 0;
     vertical-align: middle;
 }
 #main h1 small {
@@ -257,6 +258,7 @@ form#podcast_form input#podcast_input {
 
 /* Track list */
 .trackList {
+    clear: both;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -426,7 +428,7 @@ form#podcast_form input#podcast_input {
 }
 
 #footer {
-    margin-top: 30px;
+    margin-top: 15px;
     padding: 10px;
     clear: both;
     background: #d2f380;
