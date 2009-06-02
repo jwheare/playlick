@@ -10,11 +10,12 @@ TODO
 ----
 
 * Error handling for streaming
-* Setup CouchDB on playlick.com
 * Tag playlist import from Last.fm
 * XSPF export
 * iTunes import
 * Applescript export for iTunes
+
+* Setup CouchDB on playlick.com
 * Hosted playdar streaming
 * Sessions/URLs
 * Stream tokens

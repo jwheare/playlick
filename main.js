@@ -850,7 +850,8 @@ var PLAYLICK = {
                     error_text = json.error.description;
                 } else if (json.query && json.query.results && json.query.results.rss) {
                     var podcast = json.query.results.rss.channel;
-                    if (podcast.length) {
+                    // console.dir(podcast);
+                    if (podcast.item.length) {
                         if (podcast.item) {
                             PLAYLICK.create_from_podcast(podcast);
                             // Update messages
