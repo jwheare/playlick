@@ -7,11 +7,13 @@ MODELS.Track.prototype.toHTML = function () {
     var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
     var item_name = $('<span class="haudio">')
         .append($('<span class="contributor">').text(PLAYLICK.truncate_string(this.artist)).attr('title', this.artist))
-        .append(' ')
+        // .append(' ')
         .append($('<strong class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name));
+    var elapsed = $('<span class="elapsed">').text(this.get_duration_string());
+    var status = $('<span class="status">');
     var item_link   = $('<a href="#" class="item">')
-        .append($('<span class="elapsed">').text(this.get_duration_string()))
-        .append('<span class="status">')
+        .append(elapsed)
+        .append(status)
         .append(item_name);
     var sources = $('<div class="sources">');
     // Wrap in a div so we can return its innerHTML as a string
@@ -268,7 +270,7 @@ var PLAYLICK = {
                 album_art = PLAYLICK.lastfm_ws_url + "/2.0/?" + $.param({
                     artist: result.artist,
                     album: result.album,
-                    method: "album.coverredirect",
+                    method: "album.imageredirect",
                     size: "small",
                     api_key: PLAYLICK.lastfm_api_key
                 });
