@@ -243,7 +243,8 @@ form#add_to_playlist,
 form#import_playlist_form,
 form#xspf_form,
 form#podcast_form,
-form#album_form {
+form#album_form,
+form#generate_form {
     margin: 20px 0 20px 40px;
     line-height: 25px;
 }
@@ -254,6 +255,10 @@ form#xspf_form input#xspf_input,
 form#podcast_form input#podcast_input {
     margin: 0 10px;
     width: 250px;
+}
+form#generate_form input#generate_input_you,
+form#generate_form input#generate_input_they {
+    margin: 0 10px;
 }
 
 /* Track list */

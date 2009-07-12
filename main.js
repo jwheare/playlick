@@ -944,6 +944,36 @@ var PLAYLICK = {
             }
         });
     },
+    // Generate a playlist given two Last.fm usernames
+    generate_playlist: function (you, they) {
+        $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
+            method: "tasteometer.compare",
+            type1: 'user',
+            value1: you,
+            type2: 'user',
+            value2: they,
+            limit: 20,
+            api_key: PLAYLICK.lastfm_api_key,
+            format: 'json'
+        }, function (json) {
+            if (json.error) {
+                $('#import p.messages').hide();
+                var escaped_input = $('<b>').text('You ' + you + ' They ' + they);
+                var escaped_request = $('<small>').text(this.url);
+                var error_message = $('<p>').text('Error ' + json.error + ': ' + json.message);
+                error_message.append('<br>')
+                             .append(escaped_input)
+                             .append('<br>')
+                             .append(escaped_request);
+                $('#generate_error').html(error_message);
+                $('#generate_error').show();
+            } else {
+                console.dir(json.comparison.result.artists.artist);
+                $('#import p.messages').hide();
+                $('#generate_done').show();
+            }
+        });
+    },
     // Fetch a Last.fm user's playlists as JSON
     fetch_lastfm_user_playlists: function (username) {
         $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
@@ -1032,9 +1062,10 @@ var PLAYLICK = {
             format: 'json'
         }, function (playlist_json) {
             // console.dir(playlist_json);
+            var error_message;
             if (playlist_json.error) {
                 if (onError) {
-                    var error_message = $('<p>').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
+                    error_message = $('<p>').text('Error ' + playlist_json.error + ': ' + playlist_json.message);
                     onError.call(this, error_message);
                 }
             } else {
@@ -1062,11 +1093,11 @@ var PLAYLICK = {
                         }
                         return playlist;
                     } else {
-                        var error_message = $('<p>').text('No valid tracks');
+                        error_message = $('<p>').text('No valid tracks');
                         onError.call(this, error_message);
                     }
                 } else if (onError) {
-                    var error_message = $('<p>').text('No tracks');
+                    error_message = $('<p>').text('No tracks');
                     onError.call(this, error_message);
                 }
             }
@@ -1387,6 +1418,21 @@ $('#podcast_form').submit(function (e) {
     PLAYLICK.fetch_podcast(params.podcast);
 });
 
+// Generate playlist form submit
+$('#generate_form').submit(function (e) {
+    e.preventDefault();
+    // Show a loading icon
+    $('#import p.messages').hide();
+    $('#generate_loading').show();
+    // Parse the form
+    var params = PLAYLICK.serialize_form(this);
+    // Clear the inputs and refocus
+    $("#generate_input_they").val('');
+    $("#generate_input_you").val('').select();
+    // Generate the playlist
+    PLAYLICK.generate_playlist(params.you, params.they);
+});
+
 /**
  * Keyboard shortcuts
 **/
@@ -1401,10 +1447,11 @@ $(document).keydown(function (e) {
     if (e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) {
         return true;
     }
+    var current_track, previous_track, next_track;
     switch (e.keyCode) {
     case 80: // p
         e.preventDefault();
-        var current_track = PLAYLICK.now_playing;
+        current_track = PLAYLICK.now_playing;
         if (!current_track) {
             // Get the first perfect match
             current_track = $('#playlist li.perfectMatch').data('playlist_track');
@@ -1414,15 +1461,15 @@ $(document).keydown(function (e) {
     case 219: // [
         // Back a track
         e.preventDefault();
-        var current_track = $('#playlist li.playing, #playlist li.paused');
-        var previous_track = current_track.prevAll('li.perfectMatch');
+        current_track = $('#playlist li.playing, #playlist li.paused');
+        previous_track = current_track.prevAll('li.perfectMatch');
         PLAYLICK.play_track(previous_track.data('playlist_track'));
         break;
     case 221: // ]
         // Skip track
         e.preventDefault();
-        var current_track = $('#playlist li.playing, #playlist li.paused');
-        var next_track = current_track.nextAll('li.perfectMatch');
+        current_track = $('#playlist li.playing, #playlist li.paused');
+        next_track = current_track.nextAll('li.perfectMatch');
         PLAYLICK.play_track(next_track.data('playlist_track'));
         break;
     }
