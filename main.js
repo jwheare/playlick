@@ -149,12 +149,6 @@ var PLAYLICK = {
     **/
     
     init: function () {
-        // Start with a blank playlist
-        PLAYLICK.blank_playlist();
-        
-        // Focus add track input
-        $("#add_track_input").focus();
-        
         // Load playlists
         PLAYLICK.fetch_playlists();
     },
@@ -392,7 +386,7 @@ var PLAYLICK = {
         }
     },
     resolve_current_playlist: function () {
-        if (Playdar.client && Playdar.client.is_authed()) {
+        if (Playdar.client && Playdar.client.is_authed() && PLAYLICK.current_playlist) {
             $.each(PLAYLICK.current_playlist.tracks, function (i, playlist_track) {
                 PLAYLICK.resolve_track(playlist_track);
             });
@@ -594,10 +588,12 @@ var PLAYLICK = {
     load_playlist_item: function (playlist_item) {
         // Cancel Playdar
         PLAYLICK.cancel_playdar_resolve();
+        // Unload the current playlist
+        if (PLAYLICK.current_playlist) {
+            PLAYLICK.current_playlist.unload();
+        }
         // Update current sidebar item
         PLAYLICK.set_current_playlist_item(playlist_item);
-        // Unload the current playlist
-        PLAYLICK.current_playlist.unload();
         // Update the current playlist object
         PLAYLICK.current_playlist = playlist_item.data('playlist');
         // Update the title

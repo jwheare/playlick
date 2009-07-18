@@ -225,9 +225,14 @@ p#tracksError {
     color: #B0252B;
 }
 
+/* Manage */
+#manage {
+    display: none;
+}
+
 /* Import */
 #import {
-    display: none;
+    
 }
 #import p.messages {
     display: none;
