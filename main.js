@@ -973,6 +973,71 @@ var PLAYLICK = {
             }
         });
     },
+    shuffle: function (array) {
+        var copy = $.makeArray(array);
+        copy.sort(function () {
+            return 0.5 - Math.random();
+        });
+        return copy;
+    },
+    get_random_top_tracks: function (artists, callback) {
+        PLAYLICK.random_tracks = {};
+        $.each(artists, function (i, artist) {
+            var artist = artist.name;
+            PLAYLICK.random_tracks[artist] = false;
+            $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
+                method: "artist.getTopTracks",
+                artist: artist,
+                api_key: PLAYLICK.lastfm_api_key,
+                format: 'json'
+            }, function (json) {
+                if (json.error) {
+                    // console.warn(json.message);
+                    delete PLAYLICK.random_tracks[artist];
+                } else {
+                    var tracks = PLAYLICK.shuffle(json.toptracks.track);
+                    PLAYLICK.random_tracks[artist] = tracks[0];
+                }
+                var done_loading = true;
+                for (var artist_name in PLAYLICK.random_tracks) {
+                    if (PLAYLICK.random_tracks[artist_name] === false) {
+                        done_loading = false;
+                        break;
+                    }
+                };
+                if (done_loading) {
+                    callback(PLAYLICK.random_tracks);
+                }
+            });
+        });
+    },
+    generate_callback: function (you, they, tracks) {
+        // console.dir(tracks);
+        var title = you + ' and ' + they;
+        // Create the playlist
+        var playlist = PLAYLICK.create_playlist({
+            name: title
+        });
+        // Load tracks
+        for (var artist_name in tracks) {
+            var track_data = tracks[artist_name];
+            if (track_data.name && track_data.artist) {
+                var track_doc = {
+                    name: track_data.name,
+                    artist: track_data.artist.name
+                };
+                playlist.add_track(new MODELS.Track(track_doc));
+            }
+        };
+        if (playlist.tracks.length) {
+            // Save metadata
+            playlist.description = 'A playlist based on your shared artists';
+            playlist.save();
+        }
+        
+        $('#import p.messages').hide();
+        $('#generate_done').show();
+    },
     // Generate a playlist given two Last.fm usernames
     generate_playlist: function (you, they) {
         $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
@@ -997,9 +1062,10 @@ var PLAYLICK = {
                 $('#generate_error').html(error_message);
                 $('#generate_error').show();
             } else {
-                console.dir(json.comparison.result.artists.artist);
-                $('#import p.messages').hide();
-                $('#generate_done').show();
+                var artists = PLAYLICK.shuffle(json.comparison.result.artists.artist);
+                PLAYLICK.get_random_top_tracks(artists, function (tracks) {
+                    PLAYLICK.generate_callback(you, they, tracks);
+                });
             }
         });
     },
