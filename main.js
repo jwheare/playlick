@@ -651,7 +651,7 @@ var PLAYLICK = {
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Update the now playing track
-            PLAYLICK.now_playing = track_item;
+            PLAYLICK.now_playing = playlist_track;
             // Highlight the playlist in the sidebar
             PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
         }
@@ -696,7 +696,7 @@ var PLAYLICK = {
         var track_item = PLAYLICK.onResultStop.call(this);
         // Chain playback to the next perfect match
         if (track_item) {
-            var next_playlist_track = track_item.nextAll('li.perfectMatch');
+            var next_playlist_track = track_item.nextAll('li.perfectMatch').data('playlist_track');
             if (next_playlist_track) {
                 PLAYLICK.play_track(next_playlist_track);
                 return true;
@@ -744,12 +744,9 @@ var PLAYLICK = {
         }
         return track_item;
     },
-    play_track: function (track_item) {
-        if (track_item) {
-            var playlist_track = track_item.data('playlist_track');
-            if (playlist_track && playlist_track.track.playdar_sid) {
-                Playdar.player.play_stream(playlist_track.track.playdar_sid);
-            }
+    play_track: function (playlist_track) {
+        if (playlist_track && playlist_track.track.playdar_sid) {
+            Playdar.player.play_stream(playlist_track.track.playdar_sid);
         }
     },
     
@@ -1238,7 +1235,7 @@ $('#playlist').click(function (e) {
             var result = tbody.data('result');
             PLAYLICK.update_track(playlist_track, result);
             if (!Playdar.player.is_now_playing()) {
-                PLAYLICK.play_track(track_item);
+                PLAYLICK.play_track(playlist_track);
             }
             track_item.addClass('perfectMatch');
         }
@@ -1260,7 +1257,7 @@ $('#playlist').click(function (e) {
         if (track_link.size()) {
             e.preventDefault();
             if (track_item.is('li.perfectMatch') && playlist_track.track.playdar_sid) {
-                PLAYLICK.play_track(track_item);
+                PLAYLICK.play_track(playlist_track);
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
             } else {
@@ -1549,7 +1546,7 @@ $(document).keydown(function (e) {
         current_track = PLAYLICK.now_playing;
         if (!current_track) {
             // Get the first perfect match
-            current_track = $('#playlist li.perfectMatch');
+            current_track = $('#playlist li.perfectMatch').data('playlist_track');
         }
         PLAYLICK.play_track(current_track);
         break;
@@ -1557,16 +1554,16 @@ $(document).keydown(function (e) {
         // Back a track
         e.preventDefault();
         if (PLAYLICK.now_playing) {
-            previous_track = PLAYLICK.now_playing.prevAll('li.perfectMatch');
-            PLAYLICK.play_track(previous_track);
+            previous_track = PLAYLICK.now_playing.element.prevAll('li.perfectMatch');
+            PLAYLICK.play_track(previous_track.data('playlist_track'));
         }
         break;
     case 221: // ]
         // Skip track
         e.preventDefault();
         if (PLAYLICK.now_playing) {
-            next_track = PLAYLICK.now_playing.nextAll('li.perfectMatch');
-            PLAYLICK.play_track(next_track);
+            next_track = PLAYLICK.now_playing.element.nextAll('li.perfectMatch');
+            PLAYLICK.play_track(next_track.data('playlist_track'));
         }
         break;
     }

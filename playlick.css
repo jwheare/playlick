@@ -186,7 +186,7 @@ ul#playlists li input.playlist_name {
 #main {
     float: left;
     width: 580px;
-    margin: 15px;
+    margin: 0 15px 15px 15px;
     min-height: 200px;
 }
 #main h1 {
