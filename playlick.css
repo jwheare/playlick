@@ -320,6 +320,12 @@ form#generate_form input#generate_input_they {
 .trackList li.paused:hover {
     background-color: #a8d840;
 }
+.trackList li.error {
+    background: #FFAF59;
+}
+.trackList li.error:hover {
+    background: #FF9E29;
+}
 .trackList a.remove {
     float: right;
     width: 24px;

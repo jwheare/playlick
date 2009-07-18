@@ -217,9 +217,11 @@ var PLAYLICK = {
             // Register sound
             if (result.sid) {
                 Playdar.player.register_stream(result, {
-                    onplay: PLAYLICK.onResultPlay,
+                    chained: true,
+                    onload: PLAYLICK.onResultLoad,
+                    onplay: PLAYLICK.onResultStart,
                     onpause: PLAYLICK.onResultPause,
-                    onresume: PLAYLICK.onResultResume,
+                    onresume: PLAYLICK.onResultPlay,
                     onstop: PLAYLICK.onResultStop,
                     onfinish: PLAYLICK.onResultFinish,
                     whileplaying: PLAYLICK.updatePlaybackProgress
@@ -230,9 +232,10 @@ var PLAYLICK = {
                 Playdar.player.soundmanager.createSound({
                     id: result.sid,
                     url: result.url,
-                    onplay: PLAYLICK.onResultPlay,
+                    onload: PLAYLICK.onResultLoad,
+                    onplay: PLAYLICK.onResultStart,
                     onpause: PLAYLICK.onResultPause,
-                    onresume: PLAYLICK.onResultResume,
+                    onresume: PLAYLICK.onResultPlay,
                     onstop: PLAYLICK.onResultStop,
                     onfinish: PLAYLICK.onResultFinish,
                     whileplaying: PLAYLICK.updatePlaybackProgress,
@@ -631,8 +634,28 @@ var PLAYLICK = {
      * Playback
     **/
     
-    onResultPlay: function () {
-        PLAYLICK.onResultResume.call(this);
+    // Not called when served from cache
+    onResultLoad: function () {
+        var track_item = $('#sid' + this.sID).data('track_item');
+        if (track_item) {
+            if (this.readyState == 2) { // failed/error
+                // Switch track highlight in the playlist
+                PLAYLICK.resetResult.call(this);
+                track_item.addClass('error');
+            }
+        }
+        return track_item;
+    },
+    onResultStart: function () {
+        var track_item = $('#sid' + this.sID).data('track_item');
+        if (track_item) {
+            var playlist_track = track_item.data('playlist_track');
+            // Update the now playing track
+            PLAYLICK.now_playing = track_item;
+            // Highlight the playlist in the sidebar
+            PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
+        }
+        PLAYLICK.onResultPlay.call(this);
     },
     onResultPause: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
@@ -641,56 +664,57 @@ var PLAYLICK = {
             track_item.removeClass('playing');
             track_item.addClass('paused');
         }
+        return track_item;
     },
-    onResultResume: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
-        if (track_item) {
-            var playlist_track = track_item.data('playlist_track');
-            // Update the now playing track
-            PLAYLICK.now_playing = playlist_track;
-            // Highlight the playlist in the sidebar
-            PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
-            // Highlight the track in the playlist
-            track_item.removeClass('paused');
-            track_item.addClass('playing');
-        }
+    onResultPlay: function () {
     },
-    onResultStop: function () {
+    resetResult: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Remove track highlight in the playlist
             track_item.removeClass('playing');
-            track_item.removeClass('paused');
             // Reset progress bar
             track_item.css('background-position', '0 0');
             // Reset elapsed counter
             var progress = track_item.find('.elapsed');
             progress.text(playlist_track.track.get_duration_string());
         }
+        return track_item;
+    },
+    onResultStop: function () {
+        var track_item = PLAYLICK.resetResult.call(this);
+        if (track_item) {
+            track_item.removeClass('paused');
+        }
         // Clear the now playing track
         PLAYLICK.now_playing = null;
-        Playdar.player.stop_all();
+        Playdar.player.stop_current();
+        return track_item;
     },
     onResultFinish: function () {
-        PLAYLICK.onResultStop.call(this);
+        var track_item = PLAYLICK.onResultStop.call(this);
         // Chain playback to the next perfect match
-        var playlist_track = $('#sid' + this.sID).data('track_item');
-        if (playlist_track) {
-            var next_playlist_track = playlist_track.nextAll('li.perfectMatch').data('playlist_track');
+        if (track_item) {
+            var next_playlist_track = track_item.nextAll('li.perfectMatch');
             if (next_playlist_track) {
                 PLAYLICK.play_track(next_playlist_track);
                 return true;
             }
         }
-        // Remove the playlist highlight from the sidebar
+        // Otherwise hard stop play session and remove the playlist highlight from the sidebar
+        Playdar.player.stop_current(true);
         PLAYLICK.set_playing_playlist_item();
-        return false;
+        return track_item;
     },
     updatePlaybackProgress: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
         if (track_item) {
+            // Highlight the track in the playlist
+            track_item.removeClass('paused');
+            track_item.removeClass('error');
             track_item.addClass('playing');
+            
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
             var progress = track_item.find('.elapsed');
@@ -709,6 +733,7 @@ var PLAYLICK = {
             var portion_played = this.position / duration;
             track_item.css('background-position', Math.round(portion_played * track_item.width()) + 'px 0');
         }
+        return track_item;
     },
     update_stream_duration: function (sid, duration) {
         var track_item = $('#sid' + sid).data('track_item');
@@ -717,10 +742,14 @@ var PLAYLICK = {
             // Update the track duration
             playlist_track.set_track_duration(Math.round(duration/1000));
         }
+        return track_item;
     },
-    play_track: function (playlist_track) {
-        if (playlist_track && playlist_track.track.playdar_sid) {
-            Playdar.player.play_stream(playlist_track.track.playdar_sid);
+    play_track: function (track_item) {
+        if (track_item) {
+            var playlist_track = track_item.data('playlist_track');
+            if (playlist_track && playlist_track.track.playdar_sid) {
+                Playdar.player.play_stream(playlist_track.track.playdar_sid);
+            }
         }
     },
     
@@ -1143,7 +1172,7 @@ $('#playlist').click(function (e) {
             var result = tbody.data('result');
             PLAYLICK.update_track(playlist_track, result);
             if (!Playdar.player.is_now_playing()) {
-                PLAYLICK.play_track(playlist_track);
+                PLAYLICK.play_track(track_item);
             }
             track_item.addClass('perfectMatch');
         }
@@ -1165,7 +1194,7 @@ $('#playlist').click(function (e) {
         if (track_link.size()) {
             e.preventDefault();
             if (track_item.is('li.perfectMatch') && playlist_track.track.playdar_sid) {
-                PLAYLICK.play_track(playlist_track);
+                PLAYLICK.play_track(track_item);
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
             } else {
@@ -1454,23 +1483,25 @@ $(document).keydown(function (e) {
         current_track = PLAYLICK.now_playing;
         if (!current_track) {
             // Get the first perfect match
-            current_track = $('#playlist li.perfectMatch').data('playlist_track');
+            current_track = $('#playlist li.perfectMatch');
         }
         PLAYLICK.play_track(current_track);
         break;
     case 219: // [
         // Back a track
         e.preventDefault();
-        current_track = $('#playlist li.playing, #playlist li.paused');
-        previous_track = current_track.prevAll('li.perfectMatch');
-        PLAYLICK.play_track(previous_track.data('playlist_track'));
+        if (PLAYLICK.now_playing) {
+            previous_track = PLAYLICK.now_playing.prevAll('li.perfectMatch');
+            PLAYLICK.play_track(previous_track);
+        }
         break;
     case 221: // ]
         // Skip track
         e.preventDefault();
-        current_track = $('#playlist li.playing, #playlist li.paused');
-        next_track = current_track.nextAll('li.perfectMatch');
-        PLAYLICK.play_track(next_track.data('playlist_track'));
+        if (PLAYLICK.now_playing) {
+            next_track = PLAYLICK.now_playing.nextAll('li.perfectMatch');
+            PLAYLICK.play_track(next_track);
+        }
         break;
     }
 });
