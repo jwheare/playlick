@@ -425,7 +425,7 @@ var PLAYLICK = {
             },
             onDelete: function () {
                 if (this == PLAYLICK.current_playlist) {
-                    PLAYLICK.blank_playlist();
+                    PLAYLICK.show_import();
                 }
             },
             onSetDuration: function () {
@@ -496,6 +496,20 @@ var PLAYLICK = {
         }, 1);
         // Create the playlist object
         PLAYLICK.current_playlist = PLAYLICK.create_playlist();
+    },
+    show_import: function () {
+        // Cancel Playdar
+        PLAYLICK.cancel_playdar_resolve();
+        // Update current sidebar item
+        PLAYLICK.set_current_playlist_item($('#import_playlist').parent('li'));
+        // Show Import screen
+        $('#manage').hide();
+        $('#import p.messages').hide();
+        $('#import').show();
+        // Select input
+        setTimeout(function () {
+            $('#import_playlist_input').select();
+        }, 1);
     },
     // Update a track's data and persist
     update_track: function (playlist_track, result, batch) {
@@ -1059,6 +1073,8 @@ var PLAYLICK = {
                 PLAYLICK.get_random_top_tracks(artists, function (tracks) {
                     PLAYLICK.generate_callback(you, they, tracks);
                 });
+                $('#import p.messages').hide();
+                $('#generate_loading_tracks').show();
             }
         });
     },
@@ -1343,17 +1359,7 @@ $('#create_playlist').click(function (e) {
 // Click handler to show import screen
 $('#import_playlist').click(function (e) {
     e.preventDefault();
-    var target = $(e.target);
-    // Update current sidebar item
-    PLAYLICK.set_current_playlist_item($('#import_playlist').parent('li'));
-    // Show Import screen
-    $('#manage').hide();
-    $('#import p.messages').hide();
-    $('#import').show();
-    // Select input
-    setTimeout(function () {
-        $('#import_playlist_input').select();
-    }, 1);
+    PLAYLICK.show_import();
 });
 // Capture ESC while toggling playlist editing
 $('#playlists').keydown(function (e) {
@@ -1511,7 +1517,7 @@ $('#generate_form').submit(function (e) {
     e.preventDefault();
     // Show a loading icon
     $('#import p.messages').hide();
-    $('#generate_loading').show();
+    $('#generate_loading_artists').show();
     // Parse the form
     var params = PLAYLICK.serialize_form(this);
     // Clear the inputs and refocus
