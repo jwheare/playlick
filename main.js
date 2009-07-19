@@ -657,7 +657,7 @@ var PLAYLICK = {
         return track_item;
     },
     onResultStart: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
+        var track_item = PLAYLICK.onResultPlay.call(this);
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Update the now playing track
@@ -665,7 +665,6 @@ var PLAYLICK = {
             // Highlight the playlist in the sidebar
             PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
         }
-        PLAYLICK.onResultPlay.call(this);
     },
     onResultPause: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
@@ -677,6 +676,14 @@ var PLAYLICK = {
         return track_item;
     },
     onResultPlay: function () {
+        var track_item = $('#sid' + this.sID).data('track_item');
+        if (track_item) {
+            // Highlight the track in the playlist
+            track_item.removeClass('paused');
+            track_item.removeClass('error');
+            track_item.addClass('playing');
+        }
+        return track_item;
     },
     resetResult: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
@@ -720,11 +727,6 @@ var PLAYLICK = {
     updatePlaybackProgress: function () {
         var track_item = $('#sid' + this.sID).data('track_item');
         if (track_item) {
-            // Highlight the track in the playlist
-            track_item.removeClass('paused');
-            track_item.removeClass('error');
-            track_item.addClass('playing');
-            
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
             var progress = track_item.find('.elapsed');
