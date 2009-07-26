@@ -207,26 +207,28 @@ var MODELS = {
         toApplescript: function () {
             var track_records = $.map(this.tracks, function (playlist_track, i) {
                 return '{'
-                    + 'artist: "' + playlist_track.track.artist + '",'
-                    + 'track: "' + playlist_track.track.name + '"'
+                    + 'artist: "' + playlist_track.track.artist.replace(/"/g, '\\"') + '",'
+                    + 'track: "' + playlist_track.track.name.replace(/"/g, '\\"') + '"'
                     + '}';
             });
-            var applescript = 'set playlist_name to "' + this.name + '"%0D'
-            + 'tell application "iTunes"%0D'
-            + '    set new_playlist to (make playlist with properties {name:playlist_name})%0D'
-            + '    set l to source "Library"%0D'
+            var applescript = 'set playlist_name to "' + this.name + '"\n'
+            + 'tell application "iTunes"\n'
+            + '    set new_playlist to (make playlist with properties {name:playlist_name})\n'
+            + '    set l to source "Library"\n'
             + '    set tracks_to_search to {'
                    + track_records.join(',')
-                + '}%0D'
-            + '    repeat with t in tracks_to_search%0D'
+                + '}\n'
+            + '    repeat with t in tracks_to_search\n'
             + '        duplicate ('
                        + 'every file track of l '
                        + 'whose artist contains (artist of t) '
                        + 'and name contains (track of t)'
-                    + ') to new_playlist%0D'
-            + '    end repeat%0D'
+                    + ') to new_playlist\n'
+            + '    end repeat\n'
+            + '    reveal new_playlist\n'
+            + '    activate\n'
             + 'end tell';
-            return "applescript://com.apple.scripteditor?action=new&script=" + applescript;
+            return "applescript://com.apple.scripteditor?action=new&script=" + encodeURIComponent(applescript);
         },
         /**
          * Track accessors
