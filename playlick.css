@@ -204,6 +204,11 @@ ul#playlists li input.playlist_name {
     line-height: 20px;
 }
 
+/* Manage */
+#manage {
+    display: none;
+}
+
 p#shortcuts {
     margin: 0 0 20px 40px;
 }
@@ -224,10 +229,16 @@ p#tracksError {
     line-height: 39px;
     color: #B0252B;
 }
-
-/* Manage */
-#manage {
-    display: none;
+a#playlistApplescript {
+    float: right;
+    font-size: 13px;
+}
+a#playlistApplescript:hover {
+    color: #4c7a0f;
+}
+a#playlistApplescript img {
+    margin-right: 5px;
+    float: left;
 }
 
 /* Import */

@@ -417,6 +417,7 @@ var PLAYLICK = {
             onSave: function () {
                 if (this == PLAYLICK.current_playlist) {
                     PLAYLICK.update_playlist_title(this.titleHTML());
+                    PLAYLICK.update_playlist_applescript(this);
                 }
             },
             onCreate: function () {
@@ -439,6 +440,10 @@ var PLAYLICK = {
     // Update the playlist title (when loading a playlist or updating the duration)
     update_playlist_title: function (title) {
         $('#playlistTitle').html(title);
+    },
+    // Update the playlist iTunes export AppleScript (when loading a playlist or saving)
+    update_playlist_applescript: function (playlist) {
+        $('#playlistApplescript').attr('href', playlist.toApplescript());
     },
     // Show/hide edit mode for playlist in sidebar
     toggle_playlist_edit: function (playlist_item) {
@@ -626,6 +631,7 @@ var PLAYLICK = {
             // Already fetched, just build DOM elements
             elements = PLAYLICK.current_playlist.load();
         }
+        PLAYLICK.update_playlist_applescript(PLAYLICK.current_playlist);
         $('#tracksLoading').hide();
         if (elements) {
             // Add to the DOM

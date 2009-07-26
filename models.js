@@ -202,6 +202,33 @@ var MODELS = {
             return urls;
         },
         /**
+         * Build an applescript for exporting to iTunes
+        **/
+        toApplescript: function () {
+            var track_records = $.map(this.tracks, function (playlist_track, i) {
+                return '{'
+                    + 'artist: "' + playlist_track.track.artist + '",'
+                    + 'track: "' + playlist_track.track.name + '"'
+                    + '}';
+            });
+            var applescript = 'set playlist_name to "' + this.name + '"%0D'
+            + 'tell application "iTunes"%0D'
+            + '    set new_playlist to (make playlist with properties {name:playlist_name})%0D'
+            + '    set l to source "Library"%0D'
+            + '    set tracks_to_search to {'
+                   + track_records.join(',')
+                + '}%0D'
+            + '    repeat with t in tracks_to_search%0D'
+            + '        duplicate ('
+                       + 'every file track of l '
+                       + 'whose artist contains (artist of t) '
+                       + 'and name contains (track of t)'
+                    + ') to new_playlist%0D'
+            + '    end repeat%0D'
+            + 'end tell';
+            return "applescript://com.apple.scripteditor?action=new&script=" + applescript;
+        },
+        /**
          * Track accessors
         **/
         get_track_by_id: function (playlist_track_id) {
