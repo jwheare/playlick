@@ -13,7 +13,6 @@ TODO
 * Tag playlist import from Last.fm
 * XSPF export
 * iTunes import
-* Applescript export for iTunes
 
 * Setup CouchDB on playlick.com
 * Hosted playdar streaming
