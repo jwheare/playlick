@@ -149,14 +149,14 @@
         <script>
             PLAYLICK.init();
             
+            Playdar.USE_STATUS_BAR = false;
+            // Playdar.USE_SCROBBLER = false;
+            Playdar.MAX_CONCURRENT_RESOLUTIONS = 20;
             Playdar.setup({
                 name: "Playlick",
                 website: "http://www.playlick.com/",
                 receiverurl: "http://www.playlick.com/playdar_auth.html"
             });
-            Playdar.USE_STATUS_BAR = false;
-            // Playdar.USE_SCROBBLER = false;
-            Playdar.MAX_CONCURRENT_RESOLUTIONS = 20;
             Playdar.client.register_listeners(PLAYLICK.playdar_listeners);
             
             soundManager.url = '/lib/soundmanager2_flash9.swf';
