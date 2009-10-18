@@ -1,0 +1,3 @@
+[submodule "lib/playdar"]
+	path = lib/playdar
+	url = git://github.com/jwheare/playdar.js.git
