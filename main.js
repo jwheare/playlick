@@ -246,7 +246,7 @@ var PLAYLICK = {
             tbody_class = 'result';
             score_cell = $('<td class="score">');
             choice_radio = $('<input type="radio" name="choice">').val(result.sid);
-            if (result.score == 1) {
+            if (result.score > 0.99) {
                 // Perfect scores get a star and a highlight
                 score_cell.text('★').addClass('perfect');
                 if (!found_perfect) {
@@ -320,7 +320,7 @@ var PLAYLICK = {
                 list_item.addClass('match');
                 var results_table = PLAYLICK.build_results_table(response, list_item);
                 var result = response.results[0];
-                if (result.score == 1) {
+                if (result.score > 0.99) {
                     PLAYLICK.update_track(playlist_track, result, true);
                 }
                 var sources = list_item.children('.sources');
@@ -354,7 +354,7 @@ var PLAYLICK = {
                 };
                 var highest_non_perfect;
                 $.each(response.results, function (i, result) {
-                    if (result.score != 1) {
+                    if (result.score < 0.99) {
                         highest_non_perfect = i;
                         return false;
                     }

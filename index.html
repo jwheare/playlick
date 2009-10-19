@@ -150,7 +150,6 @@
             PLAYLICK.init();
             
             Playdar.USE_STATUS_BAR = false;
-            // Playdar.USE_SCROBBLER = false;
             Playdar.MAX_CONCURRENT_RESOLUTIONS = 20;
             Playdar.setup({
                 name: "Playlick",
@@ -160,9 +159,8 @@
             Playdar.client.register_listeners(PLAYLICK.playdar_listeners);
             
             soundManager.url = '/lib/soundmanager2_flash9.swf';
-            soundManager.flashVersion = 9;
-            soundManager.debugMode = false;
             soundManager.consoleOnly = true;
+            soundManager.flashVersion = 9;
             soundManager.onload = function () {
                 Playdar.setup_player(soundManager);
                 Playdar.client.init();
