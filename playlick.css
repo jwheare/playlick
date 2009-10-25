@@ -508,3 +508,12 @@ form#generate_form input#generate_input_they {
 .ac_over {
     background-color: #c0e95b;
 }
+
+/**
+ * Soundmanager 2 container 
+**/
+
+#sm2-container {
+    height: 40px;
+    margin-top: 10px;
+}

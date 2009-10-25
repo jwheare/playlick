@@ -106,7 +106,8 @@ var PLAYLICK = {
     start_button_text: $('#add_track_button').val(),
     add_button_text: 'Add',
     edit_playlist_text: 'edit',
-    loading_playdar_text: $('#playdar').html(),
+    loading_flash_text: $('#playdar').html(),
+    loading_playdar_text: 'Checking for Playdar…',
     connect_to_playdar_text: 'Connect to Playdar',
     disconnect_from_playdar_text: 'Disconnect from Playdar',
     cancel_edit_playlist_text: 'cancel',
@@ -151,6 +152,16 @@ var PLAYLICK = {
     init: function () {
         // Load playlists
         PLAYLICK.fetch_playlists();
+    },
+    
+    soundmanager_ready: function (status) {
+        if (status.success) {
+            $('#playdar').html(PLAYLICK.loading_playdar_text);
+            Playdar.setup_player(soundManager); // soundManager is global at this point
+        } else {
+            console.warn('soundManager load failed');
+        }
+        Playdar.client.init();
     },
     
     /**
