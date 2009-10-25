@@ -107,6 +107,7 @@ var PLAYLICK = {
     add_button_text: 'Add',
     edit_playlist_text: 'edit',
     loading_flash_text: $('#playdar').html(),
+    loading_flash_error_text: 'Flash player unavailable',
     loading_playdar_text: 'Checking for Playdar…',
     connect_to_playdar_text: 'Connect to Playdar',
     disconnect_from_playdar_text: 'Disconnect from Playdar',
@@ -158,10 +159,10 @@ var PLAYLICK = {
         if (status.success) {
             $('#playdar').html(PLAYLICK.loading_playdar_text);
             Playdar.setup_player(soundManager); // soundManager is global at this point
+            Playdar.client.init();
         } else {
-            console.warn('soundManager load failed');
+            $('#playdar').html(PLAYLICK.loading_flash_error_text);
         }
-        Playdar.client.init();
     },
     
     /**
