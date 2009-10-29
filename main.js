@@ -1,97 +1,4 @@
-/**
- * Custom Track and Playlist renderers
-**/
-
-MODELS.Track.prototype.toHTML = function () {
-    var remove_link = $('<a href="#" class="remove" title="Remove from playlist">').text('╳');
-    var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
-    var item_name = $('<span class="haudio">')
-        .append($('<span class="contributor">').text(PLAYLICK.truncate_string(this.artist)).attr('title', this.artist))
-        // .append(' ')
-        .append($('<strong class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name));
-    var elapsed = $('<span class="elapsed">').text(this.get_duration_string());
-    var status = $('<span class="status">');
-    var item_link   = $('<a href="#" class="item">')
-        .append(elapsed)
-        .append(status)
-        .append(item_name);
-    var sources = $('<div class="sources">');
-    // Wrap in a div so we can return its innerHTML as a string
-    return $('<div>')
-        .append(remove_link)
-        .append(source_link)
-        .append(item_link)
-        .append(sources)
-        .html();
-};
-MODELS.Playlist.prototype.toHTML = function () {
-    var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">');
-    var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
-    var edit_link   = $('<a href="#" class="edit_playlist">').text(PLAYLICK.edit_playlist_text);
-    var name        = $('<a href="#" class="playlist">').text(PLAYLICK.truncate_string(this.name));
-    var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
-        .append('<input type="text" name="name" class="playlist_name">')
-        .append('<input type="submit" value="save">');
-    // Wrap in a div so we can return its innerHTML as a string
-    return $('<div>')
-        .append(play_indicator)
-        .append(delete_link)
-        .append(edit_link)
-        .append(name)
-        .append(edit_form)
-        .html();
-};
-var autolink_regexp = new RegExp(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g);
-MODELS.Playlist.prototype.titleHTML = function () {
-    var wrapper = $('<div>');
-    // Add an image
-    if (this.image) {
-        wrapper.append($('<img>').attr('src', this.image));
-    }
-    wrapper.append(this.toString());
-    // Autolink description
-    if (this.description) {
-        var description = $('<small>');
-        $.each(this.description.split(/[ \n]/), function (i, word) {
-            var matches = autolink_regexp.exec(word);
-            if (matches) {
-                description.append($('<a>').attr('href', word).text(word));
-            } else {
-                description.append(' '+word+' ');
-            }
-        });
-        wrapper.append('<br>')
-            .append(description);
-    }
-    return wrapper.html();
-};
-
-MODELS.couch_down_handler = function (action, result) {
-    MODELS.couch_up = false;
-    // var message = "couchdb unavailable";
-    // if (result.error && result.error != 'unknown') {
-    //     message = result.error+': '+result.reason;
-    // }
-    // console.warn('['+action+'] '+message);
-    // console.warn(result);
-    
-    $('#loading_playlists').addClass('unavailable');
-    $('#loading_playlists').html(
-        '<b>Database unavailable.</b>'
-        + '<br>Your changes will not be saved. '
-        + '<a href="#" onclick="PLAYLICK.retry_couch(); return false;">retry</a>'
-    );
-    $('#loading_playlists').show();
-};
-
-MODELS.couch_up_handler = function (action, response) {
-    MODELS.couch_up = true;
-    $('#loading_playlists').hide();
-    $('#tracksError').hide();
-};
-
 var PLAYLICK = {
-    
     /**
      * Config
     **/
@@ -116,44 +23,30 @@ var PLAYLICK = {
     loading_playlists_text: $('#loading_playlists').html(),
     
     /**
-     * Utility
-    **/
-    
-    truncate_string: function (name, length, truncation) {
-        length = length || 30;
-        truncation = (typeof truncation == 'undefined') ? '…' : truncation;
-        if (name.length > length) {
-            return name.slice(0, length - truncation.length) + truncation;
-        }
-        return String(name);
-    },
-    serialize_form: function (form) {
-        var params = {};
-        $.each($(form).serializeArray(), function (i, item) {
-            params[item.name] = item.value;
-        });
-        return params;
-    },
-    compare_string: function (string_1, string_2) {
-        return string_1.toUpperCase() == string_2.toUpperCase();
-    },
-    domain_regex: new RegExp(/.*:\/\/([^\/]*)\/?.*/),
-    parse_domain: function (url) {
-        var matches = PLAYLICK.domain_regex.exec(url);
-        if (matches && matches[1]) {
-            return matches[1];
-        }
-        return url;
-    },
-    
-    /**
      * Init
     **/
     
     init: function () {
+        // Prefill URLs
+        PLAYLICK.check_url_params();
         // Load playlists
         PLAYLICK.fetch_playlists();
     },
+    
+    check_url_params: function () {
+        var hash_parts = PLAYLICK.get_hash_parts();
+        if (hash_parts.xspf) {
+            // Show a loading icon
+            $('#import p.messages').hide();
+            $('#xspf_loading').show();
+            // Load the XSPF
+            PLAYLICK.fetch_xspf(hash_parts.xspf);
+        }
+    },
+    
+    /**
+     * Playdar
+    **/
     
     soundmanager_ready: function (status) {
         if (status.success) {
@@ -164,10 +57,6 @@ var PLAYLICK = {
             $('#playdar').html(PLAYLICK.loading_flash_error_text);
         }
     },
-    
-    /**
-     * Playdar
-    **/
     
     playdar_listeners: {
         onStat: function (detected) {
@@ -236,7 +125,7 @@ var PLAYLICK = {
                 // HACK: Handle non playdar streams separately
                 result.sid = Playdar.Util.generate_uuid();
                 Playdar.player.soundmanager.createSound({
-                    id: result.sid,
+                    id: 's_' + result.sid,
                     url: result.url,
                     onload: PLAYLICK.onResultLoad,
                     onplay: PLAYLICK.onResultStart,
@@ -1226,8 +1115,152 @@ var PLAYLICK = {
                 }
             }
         });
+    },
+    
+    /**
+     * Model customisation
+    **/
+    
+    track_toHTML: function () {
+        var remove_link = $('<a href="#" class="remove" title="Remove from playlist">').text('╳');
+        var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
+        var item_name = $('<span class="haudio">')
+            .append($('<span class="contributor">').text(PLAYLICK.truncate_string(this.artist)).attr('title', this.artist))
+            // .append(' ')
+            .append($('<strong class="fn">').text(PLAYLICK.truncate_string(this.name)).attr('title', this.name));
+        var elapsed = $('<span class="elapsed">').text(this.get_duration_string());
+        var status = $('<span class="status">');
+        var item_link   = $('<a href="#" class="item">')
+            .append(elapsed)
+            .append(status)
+            .append(item_name);
+        var sources = $('<div class="sources">');
+        // Wrap in a div so we can return its innerHTML as a string
+        return $('<div>')
+            .append(remove_link)
+            .append(source_link)
+            .append(item_link)
+            .append(sources)
+            .html();
+    },
+    playlist_toHTML: function () {
+        var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">');
+        var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
+        var edit_link   = $('<a href="#" class="edit_playlist">').text(PLAYLICK.edit_playlist_text);
+        var name        = $('<a href="#" class="playlist">').text(PLAYLICK.truncate_string(this.name));
+        var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
+            .append('<input type="text" name="name" class="playlist_name">')
+            .append('<input type="submit" value="save">');
+        // Wrap in a div so we can return its innerHTML as a string
+        return $('<div>')
+            .append(play_indicator)
+            .append(delete_link)
+            .append(edit_link)
+            .append(name)
+            .append(edit_form)
+            .html();
+    },
+    autolink_regexp: new RegExp(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g),
+    playlist_titleHTML: function () {
+        var wrapper = $('<div>');
+        // Add an image
+        if (this.image) {
+            wrapper.append($('<img>').attr('src', this.image));
+        }
+        wrapper.append(this.toString());
+        // Autolink description
+        if (this.description) {
+            var description = $('<small>');
+            $.each(this.description.split(/[ \n]/), function (i, word) {
+                var matches = PLAYLICK.autolink_regexp.exec(word);
+                if (matches) {
+                    description.append($('<a>').attr('href', word).text(word));
+                } else {
+                    description.append(' '+word+' ');
+                }
+            });
+            wrapper.append('<br>')
+                .append(description);
+        }
+        return wrapper.html();
+    },
+    couch_down_handler: function (action, result) {
+        MODELS.couch_up = false;
+        // var message = "couchdb unavailable";
+        // if (result.error && result.error != 'unknown') {
+        //     message = result.error+': '+result.reason;
+        // }
+        // console.warn('['+action+'] '+message);
+        // console.warn(result);
+        
+        $('#loading_playlists').addClass('unavailable');
+        $('#loading_playlists').html(
+            '<b>Database unavailable.</b>'
+            + '<br>Your changes will not be saved. '
+            + '<a href="#" onclick="PLAYLICK.retry_couch(); return false;">retry</a>'
+        );
+        $('#loading_playlists').show();
+    },
+    couch_up_handler: function (action, response) {
+        MODELS.couch_up = true;
+        $('#loading_playlists').hide();
+        $('#tracksError').hide();
+    },
+    
+    /**
+     * Utility
+    **/
+    
+    truncate_string: function (name, length, truncation) {
+        length = length || 30;
+        truncation = (typeof truncation == 'undefined') ? '…' : truncation;
+        if (name.length > length) {
+            return name.slice(0, length - truncation.length) + truncation;
+        }
+        return String(name);
+    },
+    serialize_form: function (form) {
+        var params = {};
+        $.each($(form).serializeArray(), function (i, item) {
+            params[item.name] = item.value;
+        });
+        return params;
+    },
+    compare_string: function (string_1, string_2) {
+        return string_1.toUpperCase() == string_2.toUpperCase();
+    },
+    domain_regex: new RegExp(/.*:\/\/([^\/]*)\/?.*/),
+    parse_domain: function (url) {
+        var matches = PLAYLICK.domain_regex.exec(url);
+        if (matches && matches[1]) {
+            return matches[1];
+        }
+        return url;
+    },
+    
+    get_hash_parts: function () {
+        var hash_sections = window.location.hash.replace(/^#(.*)/, '$1').split(';');
+        var hash_parts = {};
+        $.each(hash_sections, function (i, section) {
+            var kv = section.split('=');
+            if (kv[0] && kv[1]) {
+                hash_parts[kv[0]] = kv[1];
+            }
+        });
+        return hash_parts;
     }
+
 };
+
+/**
+ * Custom Models overrides
+**/
+
+MODELS.Track.prototype.toHTML = PLAYLICK.track_toHTML;
+MODELS.Playlist.prototype.toHTML = PLAYLICK.playlist_toHTML;
+MODELS.Playlist.prototype.titleHTML = PLAYLICK.playlist_titleHTML;
+MODELS.couch_down_handler = PLAYLICK.couch_down_handler;
+MODELS.couch_up_handler = PLAYLICK.couch_up_handler;
 
 /**
  * Current playlist handlers
@@ -1514,8 +1547,7 @@ $('#xspf_form').submit(function (e) {
     $('#import p.messages').hide();
     $('#xspf_loading').show();
     // Load the XSPF
-    var xspf_url = params.xspf;
-    PLAYLICK.fetch_xspf(xspf_url);
+    PLAYLICK.fetch_xspf(params.xspf);
 });
 
 // Import Podcast form

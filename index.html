@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta charset="utf-8">
         <title>Playlick</title>
         <meta name="description" content="Playlick lets you create and share playlists with your friends.">
         <meta name="keywords" content="playlist, music, album, last.fm, podcast, playlick, playdar, github">
-        <link rel="stylesheet" type="text/css" media="screen" charset="utf-8" href="/playlick.css">
+        <link rel="stylesheet" href="/playlick.css">
     </head>
     <body>
         <div id="viewport">
@@ -122,7 +121,7 @@
                 
                 <div id="footer">
                     <a href="http://github.com/jwheare/playlick/tree/master">Playlick on github</a> |
-                    Made by <a href="http://james.wheare.org/">James Wheare</a>
+                    Made by <a href="http://james.wheare.org/" rel="author">James Wheare</a>
                 </div>
             </div>
         </div>
@@ -146,7 +145,7 @@
         <script src="/main.js"></script>
         
         <!-- Sound Manager 2 -->
-        <script src="/lib/soundmanager2-nodebug-jsmin.js"></script>
+        <script src="/lib/playdar/soundmanager2-nodebug-jsmin.js"></script>
         <script>
             PLAYLICK.init();
             
@@ -161,7 +160,7 @@
             
             /* Soundmanager options */
             soundManager.waitForWindowLoad = true;
-            soundManager.url = '/lib/soundmanager2_flash9.swf';
+            soundManager.url = '/lib/playdar/soundmanager2_flash9.swf';
             
             // Enable flash 9 features, like mpeg4 support
             soundManager.flashVersion = 9;
