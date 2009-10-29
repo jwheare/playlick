@@ -241,8 +241,7 @@ var PLAYLICK = {
     load_track_results: function (playlist_track, response, final_answer) {
         var list_item = playlist_track.element;
         list_item.removeClass('scanning noMatch match perfectMatch');
-        // Comment this out so we always resolve, rather than recheck
-        // playlist_track.track.playdar_qid = response.qid;
+        playlist_track.track.playdar_qid = response.qid;
         if (final_answer) {
             if (response.results.length) {
                 playlist_track.track.playdar_response = response;
@@ -265,39 +264,47 @@ var PLAYLICK = {
             list_item.addClass('scanning');
         }
     },
+    splice_url_result: function (playlist_track, response) {
+        var url_result = {
+            score: 1,
+            preference: 80,
+            url: playlist_track.track.url,
+            artist: playlist_track.track.artist,
+            album: playlist_track.track.album,
+            track: playlist_track.track.name,
+            source: PLAYLICK.parse_domain(playlist_track.track.url),
+            duration: playlist_track.track.duration
+        };
+        var highest_non_perfect;
+        $.each(response.results, function (i, result) {
+            if (result.score < 0.99) {
+                highest_non_perfect = i;
+                return false;
+            }
+        });
+        if (typeof highest_non_perfect != 'undefined') {
+            response.results.splice(highest_non_perfect, 0, url_result);
+        } else {
+            response.results.push(url_result);
+        }
+    },
     // Generate a query ID and a results handler for a track
     playdar_track_handler: function (playlist_track) {
         var uuid = Playdar.Util.generate_uuid();
         Playdar.client.register_results_handler(function (response, final_answer) {
             // HACK - Add the URL as a source
             if (final_answer && playlist_track.track.url) {
-                var url_result = {
-                    score: 1,
-                    preference: 80,
-                    url: playlist_track.track.url,
-                    artist: playlist_track.track.artist,
-                    album: playlist_track.track.album,
-                    track: playlist_track.track.name,
-                    source: PLAYLICK.parse_domain(playlist_track.track.url),
-                    duration: playlist_track.track.duration
-                };
-                var highest_non_perfect;
-                $.each(response.results, function (i, result) {
-                    if (result.score < 0.99) {
-                        highest_non_perfect = i;
-                        return false;
-                    }
-                });
-                if (typeof highest_non_perfect != 'undefined') {
-                    response.results.splice(highest_non_perfect, 0, url_result);
-                } else {
-                    response.results.push(url_result);
-                }
+                PLAYLICK.splice_url_result(playlist_track, response);
             }
             // ENDHACK
             PLAYLICK.load_track_results(playlist_track, response, final_answer);
         }, uuid);
         return uuid;
+    },
+    recheck_track: function (playlist_track) {
+        if (playlist_track.track.playdar_qid) {
+            Playdar.client.recheck_results(playlist_track.track.playdar_qid);
+        }
     },
     resolve_track: function (playlist_track, force) {
         if (Playdar.client && Playdar.client.is_authed()) {
@@ -305,12 +312,8 @@ var PLAYLICK = {
             if (!force && track.playdar_response) {
                 PLAYLICK.load_track_results(playlist_track, track.playdar_response, true);
             } else {
-                if (track.playdar_qid) {
-                    Playdar.client.recheck_results(track.playdar_qid);
-                } else {
-                    var qid = PLAYLICK.playdar_track_handler(playlist_track);
-                    Playdar.client.resolve(track.artist, track.album, track.name, qid, track.url);
-                }
+                var qid = PLAYLICK.playdar_track_handler(playlist_track);
+                Playdar.client.resolve(track.artist, track.album, track.name, qid, track.url);
             }
         }
     },
@@ -500,7 +503,6 @@ var PLAYLICK = {
             MODELS.couch_up_handler('fetch_playlists', response);
             PLAYLICK.fetch_playlists_done = true;
             var elements = $.map(response.rows, function (row, i) {
-                // console.log(row);
                 var data = row.value;
                 // Create the playlist object
                 var playlist = PLAYLICK.create_playlist(data);
@@ -1341,6 +1343,7 @@ $('#playlist').click(function (e) {
         
         // Toggle sources
         if (target.is('a.show_sources')) {
+            PLAYLICK.recheck_track(playlist_track);
             track_item.toggleClass('open');
             return false;
         }
@@ -1353,6 +1356,9 @@ $('#playlist').click(function (e) {
                 PLAYLICK.play_track(playlist_track);
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
+            } else if (playlist_track.track.playdar_qid) {
+                playlist_track.element.addClass('scanning');
+                PLAYLICK.recheck_track(playlist_track);
             } else {
                 PLAYLICK.resolve_track(playlist_track, true);
             }
