@@ -42,6 +42,20 @@ var PLAYLICK = {
             // Load the XSPF
             PLAYLICK.fetch_xspf(hash_parts.xspf);
         }
+        if (hash_parts.podcast) {
+            // Show a loading icon
+            $('#import p.messages').hide();
+            $('#podcast_loading').show();
+            // Load the podcast
+            PLAYLICK.fetch_podcast(hash_parts.podcast);
+        }
+        if (hash_parts.lastfm_user_playlists) {
+            // Show a loading icon
+            $('#import p.messages').hide();
+            $('#import_loading').show();
+            // Get this user's playlists
+            PLAYLICK.fetch_lastfm_user_playlists(hash_parts.lastfm_user_playlists);
+        }
     },
     
     /**
@@ -1470,13 +1484,13 @@ $('#playlists').click(function (e) {
 // Import Last.fm playlist form
 $('#import_playlist_form').submit(function (e) {
     e.preventDefault();
-    // Show a loading icon
-    $('#import p.messages').hide();
-    $('#import_loading').show();
     // Parse the form
     var params = PLAYLICK.serialize_form(this);
     // Clear the input and refocus
     $('#import_playlist_input').val('').select();
+    // Show a loading icon
+    $('#import p.messages').hide();
+    $('#import_loading').show();
     // Get this user's playlists
     PLAYLICK.fetch_lastfm_user_playlists(params.username);
 });
@@ -1553,13 +1567,13 @@ $('#xspf_form').submit(function (e) {
 // Import Podcast form
 $('#podcast_form').submit(function (e) {
     e.preventDefault();
-    // Show a loading icon
-    $('#import p.messages').hide();
-    $('#podcast_loading').show();
     // Parse the form
     var params = PLAYLICK.serialize_form(this);
     // Clear the input and refocus
     $('#podcast_input').val('').select();
+    // Show a loading icon
+    $('#import p.messages').hide();
+    $('#podcast_loading').show();
     // Load the podcast
     PLAYLICK.fetch_podcast(params.podcast);
 });
