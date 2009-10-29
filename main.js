@@ -49,12 +49,26 @@ var PLAYLICK = {
             // Load the podcast
             PLAYLICK.fetch_podcast(hash_parts.podcast);
         }
-        if (hash_parts.lastfm_user_playlists) {
+        if (hash_parts.lastfm_playlists) {
             // Show a loading icon
             $('#import p.messages').hide();
             $('#import_loading').show();
             // Get this user's playlists
-            PLAYLICK.fetch_lastfm_user_playlists(hash_parts.lastfm_user_playlists);
+            PLAYLICK.fetch_lastfm_user_playlists(hash_parts.lastfm_playlists);
+        }
+        if (hash_parts.artist && hash_parts.album) {
+            // Show a loading icon
+            $('#import p.messages').hide();
+            $('#album_loading').show();
+            // Load the XSPF
+            PLAYLICK.fetch_lastfm_album(hash_parts.artist, hash_parts.album);
+        }
+        if (hash_parts.lastfm_you && hash_parts.lastfm_they) {
+            // Show a loading icon
+            $('#import p.messages').hide();
+            $('#generate_loading_artists').show();
+            // Generate the playlist
+            PLAYLICK.generate_playlist(hash_parts.lastfm_you, hash_parts.lastfm_they);
         }
     },
     
@@ -1537,15 +1551,15 @@ $("#album_import_input").result(function (e, album, formatted) {
 // Import album playlist form submit
 $('#album_form').submit(function (e) {
     e.preventDefault();
-    // Show a loading icon
-    $('#import p.messages').hide();
-    $('#album_loading').show();
     // Parse the form
     var params = PLAYLICK.serialize_form(this);
     // Clear the inputs and refocus
     $("#album_import_artist").val('');
     $("#album_import_name").val('');
     $("#album_import_input").val('').select();
+    // Show a loading icon
+    $('#import p.messages').hide();
+    $('#album_loading').show();
     // Load the XSPF
     PLAYLICK.fetch_lastfm_album(params.artist_name, params.album_name);
 });
@@ -1581,14 +1595,14 @@ $('#podcast_form').submit(function (e) {
 // Generate playlist form submit
 $('#generate_form').submit(function (e) {
     e.preventDefault();
-    // Show a loading icon
-    $('#import p.messages').hide();
-    $('#generate_loading_artists').show();
     // Parse the form
     var params = PLAYLICK.serialize_form(this);
     // Clear the inputs and refocus
     $("#generate_input_they").val('');
     $("#generate_input_you").val('').select();
+    // Show a loading icon
+    $('#import p.messages').hide();
+    $('#generate_loading_artists').show();
     // Generate the playlist
     PLAYLICK.generate_playlist(params.you, params.they);
 });
