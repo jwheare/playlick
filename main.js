@@ -1272,7 +1272,7 @@ var PLAYLICK = {
         $.each(hash_sections, function (i, section) {
             var kv = section.split('=');
             if (kv[0] && kv[1]) {
-                hash_parts[kv[0]] = kv[1];
+                hash_parts[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
             }
         });
         return hash_parts;

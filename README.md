@@ -6,6 +6,17 @@ Hooks into [Playdar](http://www.playdar.org) for content resolution.
 
 Persists in a CouchDB database.
 
+URL Import
+----------
+
+You can import playlists into Playlick by using URL hash parameters that map to the import forms:
+
+* http://www.playlick.com#xspf=http://www.playgrub.com/8afc7ead91698404be84e27190c72fdd.xspf
+* http://www.playlick.com#podcast=http%3A%2F%2Fmokele.co.uk%2Fmusic.xml
+* http://www.playlick.com#artist=Miles+Davis;album=Kind+of+Blue
+* http://www.playlick.com#lastfm_playlists=jwheare
+* http://www.playlick.com#lastfm_you=jwheare;lastfm_they=rj
+
 TODO
 ----
 
