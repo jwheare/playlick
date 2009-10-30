@@ -13,7 +13,7 @@ You can import playlists into Playlick by using URL hash parameters that map to 
 
 * [#xspf=http://ws.audioscrobbler.com/2.0/artist/Hiromi/toptracks.xspf](http://www.playlick.com#xspf=http://ws.audioscrobbler.com/2.0/artist/Hiromi/toptracks.xspf)
 * [#podcast=http%3A%2F%2Fmokele.co.uk%2Fmusic.xml](http://www.playlick.com#podcast=http%3A%2F%2Fmokele.co.uk%2Fmusic.xml)
-* [#artist=Miles+Davis;album=Kind+of+Blue](http://www.playlick.com#artist=Miles+Davis;album=Kind+of+Blue)
+* [#artist=Miles%20Davis;album=Kind%20of%20Blue](http://www.playlick.com#artist=Miles%20Davis;album=Kind%20of%20Blue)
 * [#lastfm_playlists=jwheare](http://www.playlick.com#lastfm_playlists=jwheare)
 * [#lastfm_you=jwheare;lastfm_they=rj](http://www.playlick.com#lastfm_you=jwheare;lastfm_they=rj)
 
