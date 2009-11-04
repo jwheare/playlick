@@ -41,14 +41,14 @@ var PLAYLICK = {
             $('#import p.messages').hide();
             $('#xspf_loading').show();
             // Load the XSPF
-            PLAYLICK.fetch_xspf(hash_parts.xspf);
+            PLAYLICK.fetch_xspf(hash_parts.xspf, true);
         }
         if (hash_parts.podcast) {
             // Show a loading icon
             $('#import p.messages').hide();
             $('#podcast_loading').show();
             // Load the podcast
-            PLAYLICK.fetch_podcast(hash_parts.podcast);
+            PLAYLICK.fetch_podcast(hash_parts.podcast, true);
         }
         if (hash_parts.lastfm_playlists) {
             // Show a loading icon
@@ -62,14 +62,20 @@ var PLAYLICK = {
             $('#import p.messages').hide();
             $('#album_loading').show();
             // Load the XSPF
-            PLAYLICK.fetch_lastfm_album(hash_parts.artist, hash_parts.album);
+            PLAYLICK.fetch_lastfm_album(hash_parts.artist, hash_parts.album, true);
         }
         if (hash_parts.lastfm_you && hash_parts.lastfm_they) {
             // Show a loading icon
             $('#import p.messages').hide();
             $('#generate_loading_artists').show();
             // Generate the playlist
-            PLAYLICK.generate_playlist(hash_parts.lastfm_you, hash_parts.lastfm_they);
+            PLAYLICK.generate_playlist(hash_parts.lastfm_you, hash_parts.lastfm_they, true);
+        }
+        if (hash_parts.artist && hash_parts.track) {
+            // Make a new playlist
+            PLAYLICK.blank_playlist();
+            // Add a track to it
+            PLAYLICK.add_track(hash_parts.artist, hash_parts.track);
         }
     },
     
@@ -368,6 +374,7 @@ var PLAYLICK = {
                 }
             }
         });
+        PLAYLICK.last_playlist = playlist;
         return playlist;
     },
     // Update the playlist title (when loading a playlist or updating the duration)
@@ -448,6 +455,19 @@ var PLAYLICK = {
         setTimeout(function () {
             $('#import_playlist_input').select();
         }, 1);
+    },
+    add_track: function (artist, track) {
+        var new_track = new MODELS.Track({
+            artist: artist,
+            name: track
+        });
+        var playlist_track = PLAYLICK.current_playlist.add_track(new_track);
+        PLAYLICK.current_playlist.save();
+        $('#playlist').append(playlist_track.element);
+        if (playlist_track.position == 1) {
+            $('#add_track_button').val(PLAYLICK.add_button_text);
+        }
+        PLAYLICK.resolve_track(playlist_track);
     },
     // Update a track's data and persist
     update_track: function (playlist_track, result, batch) {
@@ -758,9 +778,10 @@ var PLAYLICK = {
             playlist.add_track(new MODELS.Track(track_doc));
         });
         playlist.save();
+        return playlist;
     },
     // Fetch an XSPF as JSON via YQL
-    fetch_xspf: function (xspf_url) {
+    fetch_xspf: function (xspf_url, auto_switch) {
         $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
             q: 'select * from xml where url="' + xspf_url + '"',
             format: 'json'
@@ -786,6 +807,9 @@ var PLAYLICK = {
                                 $('#xspf_title').text(playlist.name);
                                 $('#xspf_count').text(playlist.tracks.length);
                                 $('#xspf_done').show();
+                                if (auto_switch) {
+                                    PLAYLICK.load_playlist_item(playlist.element);
+                                }
                                 return true;
                             } else {
                                 error_text = 'No valid tracks';
@@ -816,7 +840,7 @@ var PLAYLICK = {
         });
     },
     // Fetch a podcast as JSON via YQL
-    fetch_podcast: function (podcast_url) {
+    fetch_podcast: function (podcast_url, auto_switch) {
         $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
             q: 'select * from xml where url="' + podcast_url + '"',
             format: 'json'
@@ -831,13 +855,18 @@ var PLAYLICK = {
                     // console.dir(podcast);
                     if (podcast.item.length) {
                         if (podcast.item) {
-                            PLAYLICK.create_from_podcast(podcast);
-                            // Update messages
-                            $('#import p.messages').hide();
-                            $('#podcast_title').text(podcast.title);
-                            $('#podcast_count').text(podcast.item.length);
-                            $('#podcast_done').show();
-                            return true;
+                            var playlist = PLAYLICK.create_from_podcast(podcast);
+                            if (playlist) {
+                                // Update messages
+                                $('#import p.messages').hide();
+                                $('#podcast_title').text(podcast.title);
+                                $('#podcast_count').text(podcast.item.length);
+                                $('#podcast_done').show();
+                                if (auto_switch) {
+                                    PLAYLICK.load_playlist_item(playlist.element);
+                                }
+                                return true;
+                            }
                         } else {
                             error_text = 'No tracks';
                         }
@@ -864,7 +893,7 @@ var PLAYLICK = {
         });
     },
     // Fetch a Last.fm album playlist as JSON
-    fetch_lastfm_album: function (artist, album) {
+    fetch_lastfm_album: function (artist, album, auto_switch) {
         // Fetch the playlist URL
         $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
             method: "album.getinfo",
@@ -898,11 +927,14 @@ var PLAYLICK = {
                 var playlist = PLAYLICK.fetch_lastfm_playlist(
                     playlist_url,
                     metadata,
-                    function onDone () {
+                    function onDone (playlist) {
                         $('#import p.messages').hide();
                         var escaped_album = $('<b>').text('Artist: '+album_json.album.artist+' Album: '+album_json.album.name);
                         $('#album_name').html(escaped_album);
                         $('#album_done').show();
+                        if (auto_switch) {
+                            PLAYLICK.load_playlist_item(playlist.element);
+                        }
                     },
                     function onError (error_message) {
                         $('#import p.messages').hide();
@@ -958,7 +990,7 @@ var PLAYLICK = {
             });
         });
     },
-    generate_callback: function (you, they, tracks) {
+    generate_callback: function (you, they, tracks, auto_switch) {
         // console.dir(tracks);
         var title = you + ' and ' + they;
         // Create the playlist
@@ -980,13 +1012,15 @@ var PLAYLICK = {
             // Save metadata
             playlist.description = 'A playlist based on your shared artists';
             playlist.save();
+            if (auto_switch) {
+                PLAYLICK.load_playlist_item(playlist.element);
+            }
+            return true;
         }
-        
-        $('#import p.messages').hide();
-        $('#generate_done').show();
+        return false;
     },
     // Generate a playlist given two Last.fm usernames
-    generate_playlist: function (you, they) {
+    generate_playlist: function (you, they, auto_switch) {
         $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
             method: "tasteometer.compare",
             type1: 'user',
@@ -997,10 +1031,10 @@ var PLAYLICK = {
             api_key: PLAYLICK.lastfm_api_key,
             format: 'json'
         }, function (json) {
+            var escaped_input = $('<b>').text('You ' + you + ' They ' + they);
+            var escaped_request = $('<small>').text(this.url);
             if (json.error) {
                 $('#import p.messages').hide();
-                var escaped_input = $('<b>').text('You ' + you + ' They ' + they);
-                var escaped_request = $('<small>').text(this.url);
                 var error_message = $('<p>').text('Error ' + json.error + ': ' + json.message);
                 error_message.append('<br>')
                              .append(escaped_input)
@@ -1011,7 +1045,20 @@ var PLAYLICK = {
             } else {
                 var artists = PLAYLICK.shuffle(json.comparison.result.artists.artist);
                 PLAYLICK.get_random_top_tracks(artists, function (tracks) {
-                    PLAYLICK.generate_callback(you, they, tracks);
+                    var success = PLAYLICK.generate_callback(you, they, tracks, auto_switch);
+                    if (success) {
+                        $('#import p.messages').hide();
+                        $('#generate_done').show();
+                    } else {
+                        $('#import p.messages').hide();
+                        var error_message = $('<p>').text("Couldn't find enough tracks to make a playlist.");
+                        error_message.append('<br>')
+                                     .append(escaped_input)
+                                     .append('<br>')
+                                     .append(escaped_request);
+                        $('#generate_error').html(error_message);
+                        $('#generate_error').show();
+                    }
                 });
                 $('#import p.messages').hide();
                 $('#generate_loading_tracks').show();
@@ -1129,10 +1176,10 @@ var PLAYLICK = {
                                 };
                                 if (done_loading) {
                                     PLAYLICK.playlist_done = null;
-                                    onDone.call(this);
+                                    onDone.call(this, playlist);
                                 }
                             } else {
-                                onDone.call(this);
+                                onDone.call(this, playlist);
                             }
                         }
                         return playlist;
@@ -1421,17 +1468,7 @@ $('#add_to_playlist').submit(function (e) {
         $('#add_track_artist').val('');
         $('#add_track_track').val('');
         $('#add_track_input').val('').focus();
-        var track = new MODELS.Track({
-            name: params.track_name,
-            artist: params.artist_name
-        });
-        var playlist_track = PLAYLICK.current_playlist.add_track(track);
-        PLAYLICK.current_playlist.save();
-        $('#playlist').append(playlist_track.element);
-        if (playlist_track.position == 1) {
-            $('#add_track_button').val(PLAYLICK.add_button_text);
-        }
-        PLAYLICK.resolve_track(playlist_track);
+        PLAYLICK.add_track(params.artist_name, params.track_name);
     }
 });
 
