@@ -18,7 +18,7 @@ You can import playlists into Playlick by using URL hash parameters that map to 
 * Generated playlist from 2 Last.fm users: [#lastfm_you=jwheare;lastfm_they=rj](http://www.playlick.com#lastfm_you=jwheare;lastfm_they=rj)
 * New playlist from a track: [#artist=Billy%20Joel;track=Piano%20Man](http://www.playlick.com#artist=Billy%20Joel;track=Piano%20Man)
 * Album from Spotify URL: [#spotify_album=spotify:album:6G9fHYDCoyEErUkHrFYfs4](http://www.playlick.com#spotify_album=spotify:album:6G9fHYDCoyEErUkHrFYfs4)
-* Track from Spotify URL: [#spotify_album=spotify:track:6NmXV4o6bmp704aPGyTVVG](http://www.playlick.com#spotify_album=spotify:track:6NmXV4o6bmp704aPGyTVVG)
+* Track from Spotify URL: [#spotify_track=spotify:track:6NmXV4o6bmp704aPGyTVVG](http://www.playlick.com#spotify_track=spotify:track:6NmXV4o6bmp704aPGyTVVG)
 
 TODO
 ----
