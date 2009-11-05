@@ -6,6 +6,10 @@ var PLAYLICK = {
     lastfm_api_key: "b25b959554ed76058ac220b7b2e0a026",
     lastfm_ws_url: "http://ws.audioscrobbler.com",
     
+    spotify_lookup_root: "http://ws.spotify.com/lookup/1/?uri=",
+    
+    yql_root: "http://query.yahooapis.com/v1/public/yql?callback=?",
+    
     /**
      * Strings
     **/
@@ -78,7 +82,10 @@ var PLAYLICK = {
             PLAYLICK.add_track(hash_parts.artist, hash_parts.track);
         }
         if (hash_parts.spotify_album) {
-            PLAYLICK.fetch_spotify_url(hash_parts.spotify_album);
+            PLAYLICK.fetch_spotify_album(hash_parts.spotify_album, true);
+        }
+        if (hash_parts.spotify_track) {
+            PLAYLICK.fetch_spotify_track(hash_parts.spotify_track);
         }
     },
     
@@ -785,7 +792,7 @@ var PLAYLICK = {
     },
     // Fetch an XSPF as JSON via YQL
     fetch_xspf: function (xspf_url, auto_switch) {
-        $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
+        $.getJSON(PLAYLICK.yql_root, {
             q: 'select * from xml where url="' + xspf_url + '"',
             format: 'json'
         }, function (json) {
@@ -844,7 +851,7 @@ var PLAYLICK = {
     },
     // Fetch a podcast as JSON via YQL
     fetch_podcast: function (podcast_url, auto_switch) {
-        $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
+        $.getJSON(PLAYLICK.yql_root, {
             q: 'select * from xml where url="' + podcast_url + '"',
             format: 'json'
         }, function (json) {
@@ -1198,10 +1205,9 @@ var PLAYLICK = {
         });
     },
     
-    fetch_spotify_url: function (url) {
-        var album_base = "http://ws.spotify.com/lookup/1/?uri=";
-        var album_lookup_url = album_base + url;
-        $.getJSON("http://query.yahooapis.com/v1/public/yql?callback=?", {
+    fetch_spotify_album: function (url, auto_switch) {
+        var album_lookup_url = PLAYLICK.spotify_lookup_root + url + '&extras=trackdetail';
+        $.getJSON(PLAYLICK.yql_root, {
             q: 'select * from xml where url="' + album_lookup_url + '"',
             format: 'json'
         }, function (json) {
@@ -1214,12 +1220,39 @@ var PLAYLICK = {
                     var album = json.query.results.album;
                     // console.dir(album);
                     if (album.artist && album.name) {
-                        // Show a loading icon
-                        $('#import p.messages').hide();
-                        $('#album_loading').show();
-                        // Load the XSPF
-                        PLAYLICK.fetch_lastfm_album(album.artist.name, album.name, true);
-                        return true;
+                        // XML to JSON converters often return single item lists as single items
+                        var track_list = $.makeArray(album.tracks.track);
+                        // console.dir(track_list);
+                        // Create the playlist
+                        var playlist = PLAYLICK.create_playlist({
+                            name: album.artist.name + ' - ' + album.name
+                        });
+                        // Load tracks
+                        $.each(track_list, function (i, track_data) {
+                            if (track_data.name && track_data.artist) {
+                                var track_doc = {
+                                    name: track_data.name,
+                                    artist: track_data.artist.name,
+                                    album: album.name,
+                                    duration: Math.round(track_data.length)
+                                };
+                                if (track_data.href) {
+                                    track_doc.url = track_data.href;
+                                }
+                                playlist.add_track(new MODELS.Track(track_doc));
+                            }
+                        });
+                        if (playlist.tracks.length) {
+                            // Save metadata
+                            playlist.description = url;
+                            playlist.save();
+                            if (auto_switch) {
+                                PLAYLICK.load_playlist_item(playlist.element);
+                            }
+                            return playlist;
+                        } else {
+                            error_text = 'No tracks';
+                        }
                     } else {
                         error_text = 'Invalid album';
                     }
@@ -1230,6 +1263,37 @@ var PLAYLICK = {
                 error_text = 'No response';
             }
             console.warn(error_text + ': ' + album_lookup_url + ' [' + this.url + ']');
+        });
+    },
+    fetch_spotify_track: function (url) {
+        var track_lookup_url = PLAYLICK.spotify_lookup_root + url;
+        $.getJSON(PLAYLICK.yql_root, {
+            q: 'select * from xml where url="' + track_lookup_url + '"',
+            format: 'json'
+        }, function (json) {
+            console.dir(json);
+            var error_text;
+            if (json) {
+                if (json.error) {
+                    error_text = json.error.description;
+                } else if (json.query && json.query.results && json.query.results.track) {
+                    var track = json.query.results.track;
+                    console.dir(track);
+                    if (track.artist && track.name) {
+                        // Make a new playlist
+                        PLAYLICK.blank_playlist();
+                        // Add a track to it
+                        PLAYLICK.add_track(track.artist.name, track.name);
+                    } else {
+                        error_text = 'Invalid track';
+                    }
+                } else {
+                    error_text = 'No track';
+                }
+            } else {
+                error_text = 'No response';
+            }
+            console.warn(error_text + ': ' + track_lookup_url + ' [' + this.url + ']');
         });
     },
     
@@ -1276,7 +1340,7 @@ var PLAYLICK = {
             .append(edit_form)
             .html();
     },
-    autolink_regexp: new RegExp(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g),
+    autolink_regexp: new RegExp(/((https?\:\/\/)|spotify:)[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g),
     playlist_titleHTML: function () {
         var wrapper = $('<div>');
         // Add an image
