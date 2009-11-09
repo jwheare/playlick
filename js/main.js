@@ -6,8 +6,6 @@ var PLAYLICK = {
     lastfm_api_key: "b25b959554ed76058ac220b7b2e0a026",
     lastfm_ws_url: "http://ws.audioscrobbler.com",
     
-    spotify_lookup_root: "http://ws.spotify.com/lookup/1/?uri=",
-    
     yql_root: "http://query.yahooapis.com/v1/public/yql?callback=?",
     
     /**
@@ -38,6 +36,9 @@ var PLAYLICK = {
         PLAYLICK.fetch_playlists();
     },
     
+    load_playlist: function (playlist) {
+        PLAYLICK.load_playlist_item(playlist.element);
+    },
     check_url_params: function () {
         var hash_parts = PLAYLICK.get_hash_parts();
         if (hash_parts.xspf) {
@@ -82,10 +83,10 @@ var PLAYLICK = {
             PLAYLICK.add_track(hash_parts.artist, hash_parts.track);
         }
         if (hash_parts.spotify_album) {
-            PLAYLICK.fetch_spotify_album(hash_parts.spotify_album, true);
+            IMPORTERS.Spotify.import_album(hash_parts.spotify_album, PLAYLICK.load_playlist);
         }
         if (hash_parts.spotify_track) {
-            PLAYLICK.fetch_spotify_track(hash_parts.spotify_track);
+            IMPORTERS.Spotify.import_track(hash_parts.spotify_track, PLAYLICK.load_playlist);
         }
     },
     
@@ -1202,98 +1203,6 @@ var PLAYLICK = {
                     onError.call(this, error_message);
                 }
             }
-        });
-    },
-    
-    fetch_spotify_album: function (url, auto_switch) {
-        var album_lookup_url = PLAYLICK.spotify_lookup_root + url + '&extras=trackdetail';
-        $.getJSON(PLAYLICK.yql_root, {
-            q: 'select * from xml where url="' + album_lookup_url + '"',
-            format: 'json'
-        }, function (json) {
-            // console.dir(json);
-            var error_text;
-            if (json) {
-                if (json.error) {
-                    error_text = json.error.description;
-                } else if (json.query && json.query.results && json.query.results.album) {
-                    var album = json.query.results.album;
-                    // console.dir(album);
-                    if (album.artist && album.name) {
-                        // XML to JSON converters often return single item lists as single items
-                        var track_list = $.makeArray(album.tracks.track);
-                        // console.dir(track_list);
-                        // Create the playlist
-                        var playlist = PLAYLICK.create_playlist({
-                            name: album.artist.name + ' - ' + album.name
-                        });
-                        // Load tracks
-                        $.each(track_list, function (i, track_data) {
-                            if (track_data.name && track_data.artist) {
-                                var track_doc = {
-                                    name: track_data.name,
-                                    artist: track_data.artist.name,
-                                    album: album.name,
-                                    duration: Math.round(track_data.length)
-                                };
-                                if (track_data.href) {
-                                    track_doc.url = track_data.href;
-                                }
-                                playlist.add_track(new MODELS.Track(track_doc));
-                            }
-                        });
-                        if (playlist.tracks.length) {
-                            // Save metadata
-                            playlist.description = url;
-                            playlist.save();
-                            if (auto_switch) {
-                                PLAYLICK.load_playlist_item(playlist.element);
-                            }
-                            return playlist;
-                        } else {
-                            error_text = 'No tracks';
-                        }
-                    } else {
-                        error_text = 'Invalid album';
-                    }
-                } else {
-                    error_text = 'No album';
-                }
-            } else {
-                error_text = 'No response';
-            }
-            console.warn(error_text + ': ' + album_lookup_url + ' [' + this.url + ']');
-        });
-    },
-    fetch_spotify_track: function (url) {
-        var track_lookup_url = PLAYLICK.spotify_lookup_root + url;
-        $.getJSON(PLAYLICK.yql_root, {
-            q: 'select * from xml where url="' + track_lookup_url + '"',
-            format: 'json'
-        }, function (json) {
-            console.dir(json);
-            var error_text;
-            if (json) {
-                if (json.error) {
-                    error_text = json.error.description;
-                } else if (json.query && json.query.results && json.query.results.track) {
-                    var track = json.query.results.track;
-                    console.dir(track);
-                    if (track.artist && track.name) {
-                        // Make a new playlist
-                        PLAYLICK.blank_playlist();
-                        // Add a track to it
-                        PLAYLICK.add_track(track.artist.name, track.name);
-                    } else {
-                        error_text = 'Invalid track';
-                    }
-                } else {
-                    error_text = 'No track';
-                }
-            } else {
-                error_text = 'No response';
-            }
-            console.warn(error_text + ': ' + track_lookup_url + ' [' + this.url + ']');
         });
     },
     
