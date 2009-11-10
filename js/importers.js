@@ -99,8 +99,8 @@ IMPORTERS = {
             }
         });
         // Save metadata
-        playlist.image = metadata.image;
-        playlist.description = metadata.description;
+        playlist.image = metadata.image || jspf.image;
+        playlist.description = metadata.description || jspf.annotation || jspf.info;
         playlist.save();
         return playlist;
     },
@@ -252,10 +252,7 @@ IMPORTERS = {
             if (!jspf) {
                 throw exception('Invalid XSPF', json.query.results);
             }
-            var metadata = {
-                description: jspf.annotation,
-                image: jspf.image
-            };
+            var metadata = {};
             var playlist = IMPORTERS.createPlaylistFromJspf(jspf, metadata, exception);
             if (callback) {
                 callback(playlist);
@@ -566,9 +563,7 @@ IMPORTERS = {
                 var url = "lastfm://playlist/" + data.id;
                 importedPlaylists[url] = false;
                 // Extract other metadata from playlist info
-                var metadata = {
-                    description: data.description
-                };
+                var metadata = {};
                 var image = $.grep(data.image, function (value, i) {
                     return value.size == 'medium';
                 });
@@ -661,7 +656,13 @@ IMPORTERS = {
             }
             var url = "lastfm://playlist/album/" + json.album.id;
             // Extract other metadata from album info
-            var metadata = {};
+            var description = json.album.url;
+            if (json.album.wiki) {
+                description += " " + $('<div/>').html(json.album.wiki.summary).text();
+            }
+            var metadata = {
+                description: description
+            };
             var image = $.grep(json.album.image, function (value, i) {
                 return value.size == 'medium';
             });

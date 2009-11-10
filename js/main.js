@@ -272,7 +272,7 @@ var PLAYLICK = {
             artist: playlist_track.track.artist,
             album: playlist_track.track.album,
             track: playlist_track.track.name,
-            source: PLAYLICK.parse_domain(playlist_track.track.url),
+            source: Playdar.Util.location_from_url(playlist_track.track.url).host,
             duration: playlist_track.track.duration
         };
         var highest_non_perfect;
@@ -1023,7 +1023,7 @@ var PLAYLICK = {
             .append(edit_form)
             .html();
     },
-    autolink_regexp: new RegExp(/((https?\:\/\/)|spotify:)[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g),
+    autolink_regexp: /((https?\:\/\/)|spotify:)[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g,
     playlist_titleHTML: function () {
         var wrapper = $('<div>');
         // Add an image
@@ -1035,8 +1035,7 @@ var PLAYLICK = {
         if (this.description) {
             var description = $('<small>');
             $.each(this.description.split(/[ \n]/), function (i, word) {
-                var matches = PLAYLICK.autolink_regexp.exec(word);
-                if (matches) {
+                if (word.match(PLAYLICK.autolink_regexp)) {
                     description.append($('<a>').attr('href', word).text(word));
                 } else {
                     description.append(' '+word+' ');
@@ -1096,16 +1095,8 @@ var PLAYLICK = {
         });
         return params;
     },
-    compare_string: function (string_1, string_2) {
-        return string_1.toUpperCase() == string_2.toUpperCase();
-    },
-    domain_regex: new RegExp(/.*:\/\/([^\/]*)\/?.*/),
-    parse_domain: function (url) {
-        var matches = PLAYLICK.domain_regex.exec(url);
-        if (matches && matches[1]) {
-            return matches[1];
-        }
-        return url;
+    compare_string: function (a, b) {
+        return a.toUpperCase() == b.toUpperCase();
     },
     
     get_hash_parts: function () {
