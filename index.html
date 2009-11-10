@@ -64,6 +64,18 @@
                         <p class="messages" id="import_error_no_playlists">No playlists found</p>
                         <p class="messages" id="import_error"></p>
                         
+                        <h1>Import loved tracks from Last.fm</h1>
+                        
+                        <form id="loved_form">
+                            <label for="loved_input">Username:</label>
+                            <input type="text" name="username" id="loved_input" />
+                            <input type="submit" id="loved_button" value="Get Loved Tracks" />
+                        </form>
+                        
+                        <p class="messages" id="loved_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading loved tracks…</p>
+                        <p class="messages" id="loved_done">Done! Loved tracks imported</p>
+                        <p class="messages" id="loved_error"></p>
+                        
                         <h1>Import an album</h1>
                         
                         <form id="album_form">

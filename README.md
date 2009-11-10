@@ -15,6 +15,7 @@ You can import playlists into Playlick by using URL hash parameters that map to 
 * Podcast: [#podcast=http%3A%2F%2Fmokele.co.uk%2Fmusic.xml](http://www.playlick.com#podcast=http%3A%2F%2Fmokele.co.uk%2Fmusic.xml)
 * Album: [#artist=Miles%20Davis;album=Kind%20of%20Blue](http://www.playlick.com#artist=Miles%20Davis;album=Kind%20of%20Blue)
 * Last.fm user playlists: [#lastfm_playlists=jwheare](http://www.playlick.com#lastfm_playlists=jwheare)
+* Last.fm loved tracks: [#lastfm_loved=jwheare](http://www.playlick.com#lastfm_loved=jwheare)
 * Generated playlist from 2 Last.fm users: [#lastfm_you=jwheare;lastfm_they=rj](http://www.playlick.com#lastfm_you=jwheare;lastfm_they=rj)
 * New playlist from a track: [#artist=Billy%20Joel;track=Piano%20Man](http://www.playlick.com#artist=Billy%20Joel;track=Piano%20Man)
 * Album from Spotify URL: [#spotify_album=spotify:album:6G9fHYDCoyEErUkHrFYfs4](http://www.playlick.com#spotify_album=spotify:album:6G9fHYDCoyEErUkHrFYfs4)
