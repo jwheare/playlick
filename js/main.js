@@ -37,10 +37,10 @@ var PLAYLICK = {
     check_url_params: function () {
         var hash_parts = PLAYLICK.get_hash_parts();
         if (hash_parts.xspf) {
-            PLAYLICK.fetchXspf(hash_parts.xspf, true);
+            PLAYLICK.fetchXspf(hash_parts.xspf);
         }
         if (hash_parts.podcast) {
-            PLAYLICK.fetchPodcast(hash_parts.podcast, true);
+            PLAYLICK.fetchPodcast(hash_parts.podcast);
         }
         if (hash_parts.lastfm_playlists) {
             PLAYLICK.fetchLastFmUserPlaylists(hash_parts.lastfm_playlists);
@@ -49,7 +49,7 @@ var PLAYLICK = {
             PLAYLICK.fetchLastFmLovedTracks(hash_parts.lastfm_loved);
         }
         if (hash_parts.artist && hash_parts.album) {
-            PLAYLICK.fetchLastFmAlbum(hash_parts.artist, hash_parts.album, true);
+            PLAYLICK.fetchLastFmAlbum(hash_parts.artist, hash_parts.album);
         }
         if (hash_parts.lastfm_you && hash_parts.lastfm_they) {
             // Show a loading icon
