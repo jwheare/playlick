@@ -361,14 +361,14 @@ IMPORTERS = {
             }
             // Create the playlist
             var playlist = PLAYLICK.create_playlist({
-                name: album.artist.name + ' - ' + album.name
+                name: (album.artist.name || album.artist[0].name) + ' - ' + album.name
             });
             // Load tracks
             $.each(trackList, function (i, trackData) {
                 if (trackData.name && trackData.artist) {
                     var trackDoc = {
                         name: trackData.name,
-                        artist: trackData.artist.name,
+                        artist: trackData.artist.name || trackData.artist[0].name,
                         album: album.name,
                         duration: Math.round(trackData.length)
                     };
@@ -412,7 +412,7 @@ IMPORTERS = {
             var playlist = PLAYLICK.create_playlist();
             var trackDoc = {
                 name: track.name,
-                artist: track.artist.name,
+                artist: track.artist.name || track.artist[0].name,
                 album: track.album.name,
                 duration: Math.round(track.length)
             };
