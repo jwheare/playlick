@@ -226,7 +226,7 @@ var PLAYLICK = {
                 .append($('<td class="size">').text(size))
                 .append($('<td class="bitrate">').text(bitrate));
             result_tbody = $('<tbody>')
-                .attr('id', 'sid' + result.sid)
+                .attr('id', 's_' + result.sid)
                 .addClass(tbody_class)
                 .append(track_row)
                 .append(info_row)
@@ -600,7 +600,7 @@ var PLAYLICK = {
     
     // Not called when served from cache
     onResultLoad: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
+        var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             if (this.readyState == 2) { // failed/error
                 // Switch track highlight in the playlist
@@ -621,7 +621,7 @@ var PLAYLICK = {
         }
     },
     onResultPause: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
+        var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             // Switch track highlight in the playlist
             track_item.removeClass('playing');
@@ -630,7 +630,7 @@ var PLAYLICK = {
         return track_item;
     },
     onResultPlay: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
+        var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             // Highlight the track in the playlist
             track_item.removeClass('paused');
@@ -640,7 +640,7 @@ var PLAYLICK = {
         return track_item;
     },
     resetResult: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
+        var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Remove track highlight in the playlist
@@ -679,7 +679,7 @@ var PLAYLICK = {
         return track_item;
     },
     updatePlaybackProgress: function () {
-        var track_item = $('#sid' + this.sID).data('track_item');
+        var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
@@ -702,7 +702,7 @@ var PLAYLICK = {
         return track_item;
     },
     update_stream_duration: function (sid, duration) {
-        var track_item = $('#sid' + sid).data('track_item');
+        var track_item = $('#' + sid).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Update the track duration
@@ -851,9 +851,10 @@ var PLAYLICK = {
         $('#loved_error').empty();
         IMPORTERS.LastFm.lovedTracks(
             username,
-            function callback (playlists) {
+            function callback (playlist) {
                 $('#import p.messages').hide();
                 $('#loved_done').show();
+                PLAYLICK.load_playlist(playlist);
             },
             function exceptionHandler (exception) {
                 // Reset input
