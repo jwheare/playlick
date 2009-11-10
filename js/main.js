@@ -1183,7 +1183,6 @@ $('#playlist').click(function (e) {
         
         // Toggle sources
         if (target.is('a.show_sources')) {
-            PLAYLICK.recheck_track(playlist_track);
             track_item.toggleClass('open');
             return false;
         }
