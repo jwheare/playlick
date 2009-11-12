@@ -55,10 +55,7 @@ Url.xspf = function (url, callback, exceptionHandler) {
             throw exception('Invalid XSPF', json.query.results);
         }
         var metadata = {};
-        var playlist = IMPORTERS.createPlaylistFromJspf(jspf, metadata, exception);
-        if (callback) {
-            callback(playlist);
-        }
+        var playlist = IMPORTERS.createPlaylistFromJspf(jspf, metadata, callback, exception);
     }, exception, exceptionHandler);
 };
 /**
@@ -78,9 +75,6 @@ Url.podcast = function (url, callback, exceptionHandler) {
         if (!podcast) {
             throw exception('Invalid Podcast', json.query.results);
         }
-        var playlist = IMPORTERS.createPlaylistFromPodcast(podcast, exception);
-        if (callback) {
-            callback(playlist);
-        }
+        var playlist = IMPORTERS.createPlaylistFromPodcast(podcast, callback, exception);
     }, exception, exceptionHandler);
 };

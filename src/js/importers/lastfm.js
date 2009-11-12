@@ -82,17 +82,16 @@ LastFm.getPlaylist = function (url, metadata, callback, exceptionHandler) {
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
     LastFm.getJson(method, params, function (json) {
-        var playlist = IMPORTERS.createPlaylistFromJspf(json.playlist, metadata, exception);
-        if (callback) {
-            callback(playlist);
-        }
+        var playlist = IMPORTERS.createPlaylistFromJspf(json.playlist, metadata, callback, exception);
     }, exception, exceptionHandler);
 };
 /**
- * LastFm.userPlaylists(user[, callback][, exceptionHandler][, noPlaylistHandler])
+ * LastFm.userPlaylists(user[, callback][, finalCallback][, exceptionHandler][, noPlaylistHandler])
  * - user (String): Last.fm username to fetch playlists for
  * - callback(playlist) (Function): Function to be called for each playlist that's successfully created
  *      Takes the playlist object as the only argument
+ * - finalCallback(playlists) (Function): Function to be called after all playlists have been successfully created
+ *      Takes an array of playlist objects as the only argument
  * - exceptionHandler(exception) (Function): Function to be called in case of an import exception
  *      Takes the exception object as the only argument
  * - noPlaylistHandler() (Function): Function to be called when the user has no playlists
@@ -100,7 +99,7 @@ LastFm.getPlaylist = function (url, metadata, callback, exceptionHandler) {
  * Imports user playlists from Last.fm
  * http://www.last.fm/api/show?service=313
 **/
-LastFm.userPlaylists = function (user, callback, exceptionHandler, noPlaylistHandler) {
+LastFm.userPlaylists = function (user, callback, finalCallback, exceptionHandler, noPlaylistHandler) {
     var method = "user.getplaylists";
     var params = {
         user: user
@@ -125,8 +124,8 @@ LastFm.userPlaylists = function (user, callback, exceptionHandler, noPlaylistHan
                     return;
                 }
             }
-            // All playlists are processed, call the LastFm.userPlaylists callback
-            callback(importedPlaylists);
+            // All playlists are processed, call the LastFm.userPlaylists finalCallback
+            finalCallback(importedPlaylists);
         }
         // Create a playlist for each in the API response
         // Requires a separate call to LastFm.getPlaylist for each
@@ -147,6 +146,7 @@ LastFm.userPlaylists = function (user, callback, exceptionHandler, noPlaylistHan
                 metadata,
                 function playlistCallback (playlist) {
                     importedPlaylists[url] = playlist;
+                    callback(playlist);
                     playlistDone(url, playlist);
                 },
                 function playlistExceptionHandler (exception) {
@@ -184,7 +184,7 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
             throw exception('No loved tracks', jspf.trackList);
         }
         // Create the playlist
-        var playlist = PLAYLICK.create_playlist({
+        var playlist = new MODELS.Playlist({
             name: 'Loved tracks for ' + json.lovedtracks['@attr'].user
         });
         // Load tracks
@@ -195,11 +195,11 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
             };
             playlist.add_track(new MODELS.Track(trackDoc));
         });
-        // Save
-        playlist.save();
         if (callback) {
             callback(playlist);
         }
+        // Save
+        playlist.save();
     }, exception, exceptionHandler);
 };
 /**
@@ -273,9 +273,9 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
         if (!json.comparison || !json.comparison.result || !json.comparison.result.artists || !json.comparison.result.artists.artist) {
             throw exception("No shared artists found", json);
         }
-        var artists = PLAYLICK.shuffle(json.comparison.result.artists.artist);
+        var artists = UTIL.shuffle(json.comparison.result.artists.artist);
         // Create the playlist
-        var playlist = PLAYLICK.create_playlist({
+        var playlist = new MODELS.Playlist({
             name: userA + ' and ' + userB,
             description: 'A playlist based on your shared artists'
         });
@@ -288,14 +288,16 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
                     return;
                 }
             }
+            // Playlist is filled with tracks, check length
             if (!playlist.tracks.length) {
                 return exceptionHandler(exception("No valid tracks found for artists", playlistTracks));
             }
-            // Playlist is filled with tracks, save and call the LastFm.generateUsersPlaylist callback
-            playlist.save();
+            // Call the LastFm.generateUsersPlaylist callback
             if (callback) {
                 callback(playlist);
             }
+            // Save
+            playlist.save();
         }
         // Get a random top track for each in the tasteometer shared artists response
         // Requires a separate call to LastFm.getTopTracks for each
@@ -306,7 +308,7 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
                 artist_name,
                 function callback (tracks) {
                     // Pick a random track
-                    var tracks = PLAYLICK.shuffle(tracks);
+                    var tracks = UTIL.shuffle(tracks);
                     var track = tracks[0];
                     var trackDoc = {
                         name: track.name,
@@ -324,4 +326,14 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
             );
         });
     }, exception, exceptionHandler);
+};
+
+LastFm.getAlbumArt = function (artist, album) {
+    return LastFm.WS_ROOT + "/2.0/?" + $.param({
+        artist: artist,
+        album: album,
+        method: "album.imageredirect",
+        size: "small",
+        api_key: LastFm.API_KEY
+    });
 };

@@ -69,8 +69,9 @@ Spotify.album = function (url, callback, exceptionHandler) {
             throw exception('No tracks', album);
         }
         // Create the playlist
-        var playlist = PLAYLICK.create_playlist({
-            name: (album.artist.name || album.artist[0].name) + ' - ' + album.name
+        var playlist = new MODELS.Playlist({
+            name: (album.artist.name || album.artist[0].name) + ' - ' + album.name,
+            description: url
         });
         // Load tracks
         $.each(trackList, function (i, trackData) {
@@ -87,12 +88,12 @@ Spotify.album = function (url, callback, exceptionHandler) {
                 playlist.add_track(new MODELS.Track(trackDoc));
             }
         });
-        // Save metadata
-        playlist.description = url;
-        playlist.save();
+        // Call the Spotify.album callback
         if (callback) {
             callback(playlist);
         }
+        // Save
+        playlist.save();
     }, exception, exceptionHandler);
 };
 /**
@@ -118,7 +119,7 @@ Spotify.track = function (url, callback, exceptionHandler) {
             throw exception('Invalid track', album);
         }
         // Create a playlist
-        var playlist = PLAYLICK.create_playlist();
+        var playlist = new MODELS.Playlist();
         var trackDoc = {
             name: track.name,
             artist: track.artist.name || track.artist[0].name,
@@ -129,9 +130,11 @@ Spotify.track = function (url, callback, exceptionHandler) {
             trackDoc.url = track.href;
         }
         playlist.add_track(new MODELS.Track(trackDoc));
-        playlist.save();
+        // Call the Spotify.track callback
         if (callback) {
             callback(playlist);
         }
+        // Save
+        playlist.save();
     }, exception, exceptionHandler);
 };

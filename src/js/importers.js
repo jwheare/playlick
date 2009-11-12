@@ -62,14 +62,15 @@ IMPORTERS = {
         }, exception, exceptionHandler);
     },
     /**
-     * createPlaylistFromJspf(jspf, metadata, exception) -> MODELS.Playlist
+     * createPlaylistFromJspf(jspf, metadata, callback, exception) -> MODELS.Playlist
      * - jspf (Object): JSON object representation of an XSPF
      * - metadata (Object): Extra metadata about the playlist
+     * - callback(playlist) (Function): Function to be called if a playlist is successfully created
      * - exception (Exception): Partially initialised exception object to be thrown on error
      * 
      * Creates a playlist from a JSON representation of an XSPF. A JSPF if you will.
     **/
-    createPlaylistFromJspf: function (jspf, metadata, exception) {
+    createPlaylistFromJspf: function (jspf, metadata, callback, exception) {
         if (!jspf.trackList || !jspf.trackList.track) {
             throw exception('No tracks in JSPF response', jspf);
         }
@@ -80,8 +81,10 @@ IMPORTERS = {
             throw exception('No tracks in JSPF', jspf.trackList);
         }
         // Create the playlist
-        var playlist = PLAYLICK.create_playlist({
-            name: jspf.title
+        var playlist = new MODELS.Playlist({
+            name: jspf.title,
+            image: metadata.image || jspf.image,
+            description: metadata.description || jspf.annotation || jspf.info
         });
         // Load tracks
         $.each(trackList, function (i, data) {
@@ -98,13 +101,15 @@ IMPORTERS = {
                 playlist.add_track(new MODELS.Track(trackDoc));
             }
         });
-        // Save metadata
-        playlist.image = metadata.image || jspf.image;
-        playlist.description = metadata.description || jspf.annotation || jspf.info;
+        // Call the IMPORTERS.createPlaylistFromJspf callback
+        if (callback) {
+            callback(playlist);
+        }
+        // Save
         playlist.save();
         return playlist;
     },
-    createPlaylistFromPodcast: function (podcast, exception) {
+    createPlaylistFromPodcast: function (podcast, callback, exception) {
         if (!podcast.item) {
             throw exception('No tracks in Podcast response', podcast);
         }
@@ -114,7 +119,7 @@ IMPORTERS = {
             throw exception('No tracks in Podcast', jspf.trackList);
         }
         // Create the playlist
-        var playlist = PLAYLICK.create_playlist({
+        var playlist = new MODELS.Playlist({
             name: podcast.title
         });
         // Load tracks
@@ -128,6 +133,10 @@ IMPORTERS = {
             }
             playlist.add_track(new MODELS.Track(trackDoc));
         });
+        // Call the IMPORTERS.createPlaylistFromPodcast callback
+        if (callback) {
+            callback(playlist);
+        }
         // Save
         playlist.save();
         return playlist;

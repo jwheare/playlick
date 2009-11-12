@@ -10,12 +10,12 @@ var Playlist = function (options) {
     this.duration = 0;
     
     this.options = options || {};
-    if (this.options.doc_ref && this.options.doc_ref.id && this.options.doc_ref.rev) {
-        // Update the ref values
-        this.set_doc_ref(this.options.doc_ref);
+    
+    // If ref values were passed in, set them
+    if (this.set_doc_ref(this.options._id, this.options._rev)) {
         this.persisted = true;
     } else {
-        // Get a new UUID
+        // Otherwise get a new UUID
         if (MODELS.couch_up) {
             try {
                 this.set_id(CouchDB.newUuids(1)[0]);
@@ -35,6 +35,9 @@ var Playlist = function (options) {
     this.set_element(this.options.dom_element);
 };
 Playlist.prototype = {
+    addOptions: function (options) {
+        $.extend(this.options, options);
+    },
     /**
      * State management
     **/
@@ -82,9 +85,46 @@ Playlist.prototype = {
         return this.name + duration;
     },
     /**
-     * Load and unload PlaylistTracks from the DOM
+     * Fetch tracks from Couch
+    **/
+    fetchTracks: function () {
+        try {
+            var response = MODELS.couch.view("playlist/all", {
+                "key": this._id
+            });
+            MODELS.couch_up_handler('fetchTracks', response);
+            var row = response.rows[0];
+            var value = row.value;
+            // Load tracks
+            var playlist = this;
+            var elements = $.map(value.tracks, function (track_data, i) {
+                var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
+                // Build DOM element
+                return playlist_track.element.get();
+            });
+            return elements;
+        } catch (result) {
+            MODELS.couch_down_handler('fetchTracks', result);
+        }
+    },
+    /**
+     * Load tracks to the DOM, fetching from Couch if needed
     **/
     load: function () {
+        var elements;
+        if (!this.tracks.length) {
+            // Fetch from Couch
+            elements = this.fetchTracks();
+        } else {
+            // Already fetched, just build DOM elements
+            elements = this.loadDom();
+        }
+        return elements;
+    },
+    /**
+     * Load and unload PlaylistTracks from the DOM
+    **/
+    loadDom: function () {
         var elements = $.map(this.tracks, function (playlist_track, i) {
             return playlist_track.load().get();
         });
@@ -190,7 +230,7 @@ Playlist.prototype = {
                 var result = MODELS.couch.save(this.get_doc());
                 // console.dir(result);
                 if (result.ok) {
-                    this.set_doc_ref(result);
+                    this.set_doc_ref(result.id, result.rev);
                     this.onSave(callback);
                     this.persisted = true;
                     // console.info('[saved] ' + result.id + ' [' + result.rev + ']');
@@ -248,19 +288,20 @@ Playlist.prototype = {
     **/
     set_id: function (id) {
         this._id = id;
+        return id;
     },
     get_id: function () {
         return this._id;
     },
     set_rev: function (rev) {
         this._rev = rev;
+        return rev;
     },
     get_rev: function () {
         return this._rev;
     },
-    set_doc_ref: function (doc_ref) {
-        this.set_id(doc_ref.id);
-        this.set_rev(doc_ref.rev);
+    set_doc_ref: function (id, rev) {
+        return this.set_id(id) && this.set_rev(rev);
     },
     get_doc_ref: function () {
         var doc_ref = {
@@ -282,5 +323,25 @@ Playlist.prototype = {
             })
         });
         return doc;
+    }
+};
+/**
+ * Fetch all playlists from Couch
+**/
+Playlist.fetchAll = function (callback) {
+    try {
+        var response = MODELS.couch.view("playlist/all");
+        MODELS.couch_up_handler('Playlist.fetchAll', response);
+        var playlists = $.map(response.rows, function (row, i) {
+            var data = row.value;
+            var playlist = new Playlist(row.value);
+            if (callback) {
+                callback(playlist);
+            }
+            return playlist;
+        });
+        return playlists;
+    } catch (result) {
+        MODELS.couch_down_handler('Playlist.fetchAll', result);
     }
 };
