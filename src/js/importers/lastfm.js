@@ -82,7 +82,7 @@ LastFm.getPlaylist = function (url, metadata, callback, exceptionHandler) {
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
     LastFm.getJson(method, params, function (json) {
-        var playlist = IMPORTERS.createPlaylistFromJspf(json.playlist, metadata, callback, exception);
+        var playlist = IMPORTERS.createPlaylistFromJspf(this.url, json.playlist, metadata, callback, exception);
     }, exception, exceptionHandler);
 };
 /**

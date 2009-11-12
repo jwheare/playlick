@@ -62,7 +62,8 @@ IMPORTERS = {
         }, exception, exceptionHandler);
     },
     /**
-     * createPlaylistFromJspf(jspf, metadata, callback, exception) -> MODELS.Playlist
+     * createPlaylistFromJspf(url, jspf, metadata, callback, exception) -> MODELS.Playlist
+     * - url (String): URL from which the XSPF was fetched
      * - jspf (Object): JSON object representation of an XSPF
      * - metadata (Object): Extra metadata about the playlist
      * - callback(playlist) (Function): Function to be called if a playlist is successfully created
@@ -70,7 +71,7 @@ IMPORTERS = {
      * 
      * Creates a playlist from a JSON representation of an XSPF. A JSPF if you will.
     **/
-    createPlaylistFromJspf: function (jspf, metadata, callback, exception) {
+    createPlaylistFromJspf: function (url, jspf, metadata, callback, exception) {
         if (!jspf.trackList || !jspf.trackList.track) {
             throw exception('No tracks in JSPF response', jspf);
         }
@@ -86,17 +87,26 @@ IMPORTERS = {
             image: metadata.image || jspf.image,
             description: metadata.description || jspf.annotation || jspf.info
         });
+        var trackDoc, trackURL;
         // Load tracks
         $.each(trackList, function (i, data) {
             if (data.title && data.creator) {
-                var trackDoc = {
+                trackDoc = {
                     name: data.title,
                     artist: data.creator,
-                    album: data.album,
-                    duration: Math.round(data.duration/1000)
+                    album: data.album
                 };
+                if (data.duration) {
+                    trackDoc.duration = Math.round(data.duration/1000);
+                }
                 if (data.location) {
-                    trackDoc.url = data.location;
+                    trackURL = data.location;
+                    // Check for a relative URL and an absolute http root URL
+                    if (!trackURL.match(/^https?:\/\//) && url.match(/^https?:\/\//)) {
+                        // Strip off the last part of the root and add the relative URL
+                        trackURL = url.replace(/(\/[^\/]*)$/, '') + '/' + trackURL;
+                    }
+                    trackDoc.url = trackURL;
                 }
                 playlist.add_track(new MODELS.Track(trackDoc));
             }

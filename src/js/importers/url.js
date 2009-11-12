@@ -55,7 +55,7 @@ Url.xspf = function (url, callback, exceptionHandler) {
             throw exception('Invalid XSPF', json.query.results);
         }
         var metadata = {};
-        var playlist = IMPORTERS.createPlaylistFromJspf(jspf, metadata, callback, exception);
+        var playlist = IMPORTERS.createPlaylistFromJspf(url, jspf, metadata, callback, exception);
     }, exception, exceptionHandler);
 };
 /**
