@@ -52,11 +52,7 @@ var PLAYLICK = {
             PLAYLICK.fetchLastFmAlbum(hash_parts.artist, hash_parts.album);
         }
         if (hash_parts.lastfm_you && hash_parts.lastfm_they) {
-            // Show a loading icon
-            $('#import p.messages').hide();
-            $('#generate_loading_artists').show();
-            // Generate the playlist
-            PLAYLICK.generate_playlist(hash_parts.lastfm_you, hash_parts.lastfm_they, true);
+            PLAYLICK.generateLastFmUsersPlaylist(hash_parts.lastfm_you, hash_parts.lastfm_they, true);
         }
         if (hash_parts.artist && hash_parts.track) {
             // Make a new playlist
@@ -719,11 +715,17 @@ var PLAYLICK = {
     /**
      * Import
     **/
+    importSetup: function (type) {
+        // Hide existing errors
+        $('#import p.messages').hide();
+        // Show a loading message
+        $('#' + type + '_loading').show();
+        // Empty error message
+        $('#' + type + '_error').empty();
+    },
     // Import an XSPF URL playlist
     fetchXspf: function (url) {
-        // Show a loading icon
-        $('#import p.messages').hide();
-        $('#xspf_loading').show();
+        PLAYLICK.importSetup('xspf');
         IMPORTERS.Url.xspf(
             url,
             function callback (playlist) {
@@ -750,9 +752,7 @@ var PLAYLICK = {
     },
     // Import a podcast URL playlist
     fetchPodcast: function (url) {
-        // Show a loading icon
-        $('#import p.messages').hide();
-        $('#podcast_loading').show();
+        PLAYLICK.importSetup('podcast');
         IMPORTERS.Url.podcast(
             url,
             function callback (playlist) {
@@ -779,10 +779,7 @@ var PLAYLICK = {
     },
     // Fetch a Last.fm album playlist as JSON
     fetchLastFmAlbum: function (artist, album) {
-        // Show a loading icon
-        $('#import p.messages').hide();
-        $('#album_loading').show();
-        $('#import_error').empty();
+        PLAYLICK.importSetup('album');
         IMPORTERS.LastFm.album(
             artist, album,
             function callback (playlist) {
@@ -809,10 +806,7 @@ var PLAYLICK = {
     },
     // Fetch a Last.fm user's playlists as JSON
     fetchLastFmUserPlaylists: function (username) {
-        // Show a loading icon
-        $('#import p.messages').hide();
-        $('#import_loading').show();
-        $('#import_error').empty();
+        PLAYLICK.importSetup('import');
         IMPORTERS.LastFm.userPlaylists(
             username,
             function callback (playlists) {
@@ -845,10 +839,7 @@ var PLAYLICK = {
         );
     },
     fetchLastFmLovedTracks: function (username) {
-        // Show a loading icon
-        $('#import p.messages').hide();
-        $('#loved_loading').show();
-        $('#loved_error').empty();
+        PLAYLICK.importSetup('loved');
         IMPORTERS.LastFm.lovedTracks(
             username,
             function callback (playlist) {
@@ -873,111 +864,34 @@ var PLAYLICK = {
             }
         );
     },
-    get_random_top_tracks: function (artists, callback) {
-        PLAYLICK.random_tracks = {};
-        $.each(artists, function (i, artist) {
-            var artist = artist.name;
-            PLAYLICK.random_tracks[artist] = false;
-            $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
-                method: "artist.getTopTracks",
-                artist: artist,
-                api_key: PLAYLICK.lastfm_api_key,
-                format: 'json'
-            }, function (json) {
-                if (json.error) {
-                    // console.warn(json.message);
-                    delete PLAYLICK.random_tracks[artist];
-                } else {
-                    var tracks = PLAYLICK.shuffle(json.toptracks.track);
-                    PLAYLICK.random_tracks[artist] = tracks[0];
-                }
-                var done_loading = true;
-                for (var artist_name in PLAYLICK.random_tracks) {
-                    if (PLAYLICK.random_tracks[artist_name] === false) {
-                        done_loading = false;
-                        break;
-                    }
-                };
-                if (done_loading) {
-                    callback(PLAYLICK.random_tracks);
-                }
-            });
-        });
-    },
-    generate_callback: function (you, they, tracks, auto_switch) {
-        // console.dir(tracks);
-        var title = you + ' and ' + they;
-        // Create the playlist
-        var playlist = PLAYLICK.create_playlist({
-            name: title
-        });
-        // Load tracks
-        for (var artist_name in tracks) {
-            var track_data = tracks[artist_name];
-            if (track_data.name && track_data.artist) {
-                var track_doc = {
-                    name: track_data.name,
-                    artist: track_data.artist.name
-                };
-                playlist.add_track(new MODELS.Track(track_doc));
-            }
-        };
-        if (playlist.tracks.length) {
-            // Save metadata
-            playlist.description = 'A playlist based on your shared artists';
-            playlist.save();
-            if (auto_switch) {
-                PLAYLICK.load_playlist(playlist);
-            }
-            return true;
-        }
-        return false;
-    },
     // Generate a playlist given two Last.fm usernames
-    generate_playlist: function (you, they, auto_switch) {
-        $.getJSON(PLAYLICK.lastfm_ws_url + "/2.0/?callback=?", {
-            method: "tasteometer.compare",
-            type1: 'user',
-            value1: you,
-            type2: 'user',
-            value2: they,
-            limit: 20,
-            api_key: PLAYLICK.lastfm_api_key,
-            format: 'json'
-        }, function (json) {
-            var escapedInput = $('<b>').text('You ' + you + ' They ' + they);
-            var escapedRequest = $('<small>').text(this.url);
-            if (json.error) {
+    generateLastFmUsersPlaylist: function (you, they) {
+        PLAYLICK.importSetup('generate');
+        IMPORTERS.LastFm.generateUsersPlaylist(
+            you,
+            they,
+            function callback (playlist) {
                 $('#import p.messages').hide();
-                var errorMessage = $('<p>').text('Error ' + json.error + ': ' + json.message);
+                $('#generate_done').show();
+                PLAYLICK.load_playlist(playlist);
+            },
+            function exceptionHandler (exception) {
+                // Reset input
+                $("#generate_input_you").val(you);
+                $("#generate_input_they").val(they);
+                // Show error message
+                $('#import p.messages').hide();
+                var escapedInput = $('<b>').text('You: ' + you + ' They: ' + they);
+                var escapedSignature = $('<small>').text(exception.signature);
+                var errorMessage = $('<p>').text(exception.message);
                 errorMessage.append('<br>')
                              .append(escapedInput)
                              .append('<br>')
-                             .append(escapedRequest);
+                             .append(escapedSignature);
                 $('#generate_error').html(errorMessage);
                 $('#generate_error').show();
-            } else {
-                var artists = PLAYLICK.shuffle(json.comparison.result.artists.artist);
-                PLAYLICK.get_random_top_tracks(artists, function (tracks) {
-                    var success = PLAYLICK.generate_callback(you, they, tracks, auto_switch);
-                    if (success) {
-                        $('#import p.messages').hide();
-                        $('#generate_done').show();
-                    } else {
-                        $('#import p.messages').hide();
-                        var errorMessage = $('<p>').text("Couldn't find enough tracks to make a playlist.");
-                        errorMessage.append('<br>')
-                                     .append(escapedInput)
-                                     .append('<br>')
-                                     .append(escapedRequest);
-                        $('#generate_error').html(errorMessage);
-                        $('#generate_error').show();
-                    }
-                });
-                $('#import p.messages').hide();
-                $('#generate_loading_tracks').show();
             }
-        });
+        );
     },
     
     
@@ -1420,11 +1334,8 @@ $('#generate_form').submit(function (e) {
     // Clear the inputs and refocus
     $("#generate_input_they").val('');
     $("#generate_input_you").val('').select();
-    // Show a loading icon
-    $('#import p.messages').hide();
-    $('#generate_loading_artists').show();
     // Generate the playlist
-    PLAYLICK.generate_playlist(params.you, params.they);
+    PLAYLICK.generateLastFmUsersPlaylist(params.you, params.they);
 });
 
 /**

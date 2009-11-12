@@ -244,3 +244,84 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
         LastFm.getPlaylist(url, metadata, callback, exceptionHandler);
     }, exception, exceptionHandler);
 };
+
+LastFm.getTopTracks = function (artist, callback, exceptionHandler) {
+    var method = "artist.getTopTracks";
+    var params = {
+        artist: artist
+    };
+    var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
+    LastFm.getJson(method, params, function (json) {
+        if (!json.toptracks || !json.toptracks.track) {
+            throw exception('No top tracks for ' + artist, json);
+        }
+        callback(json.toptracks.track);
+    }, exception, exceptionHandler);
+};
+
+LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandler) {
+    var method = "tasteometer.compare";
+    var params = {
+        type1: 'user',
+        value1: userA,
+        type2: 'user',
+        value2: userB,
+        limit: 20
+    };
+    var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
+    LastFm.getJson(method, params, function (json) {
+        if (!json.comparison || !json.comparison.result || !json.comparison.result.artists || !json.comparison.result.artists.artist) {
+            throw exception("No shared artists found", json);
+        }
+        var artists = PLAYLICK.shuffle(json.comparison.result.artists.artist);
+        // Create the playlist
+        var playlist = PLAYLICK.create_playlist({
+            name: userA + ' and ' + userB,
+            description: 'A playlist based on your shared artists'
+        });
+        var playlistTracks = {};
+        // Callback to loop through playlistTracks to check if we're still waiting for results
+        // called on LastFm.getTopTracks success and failure
+        function randomTopTrackDone (processedArtist, tracks) {
+            for (artist in playlistTracks) {
+                if (playlistTracks[artist] === false) {
+                    return;
+                }
+            }
+            if (!playlist.tracks.length) {
+                return exceptionHandler(exception("No valid tracks found for artists", playlistTracks));
+            }
+            // Playlist is filled with tracks, save and call the LastFm.generateUsersPlaylist callback
+            playlist.save();
+            if (callback) {
+                callback(playlist);
+            }
+        }
+        // Get a random top track for each in the tasteometer shared artists response
+        // Requires a separate call to LastFm.getTopTracks for each
+        $.each(artists, function (i, artist) {
+            var artist_name = artist.name;
+            playlistTracks[artist_name] = false;
+            LastFm.getTopTracks(
+                artist_name,
+                function callback (tracks) {
+                    // Pick a random track
+                    var tracks = PLAYLICK.shuffle(tracks);
+                    var track = tracks[0];
+                    var trackDoc = {
+                        name: track.name,
+                        artist: track.artist.name
+                    };
+                    // Add to the playlist and callback
+                    playlist.add_track(new MODELS.Track(trackDoc));
+                    playlistTracks[artist_name] = track;
+                    randomTopTrackDone(artist_name, tracks);
+                },
+                function exceptionHandler (exception) {
+                    playlistTracks[artist_name] = exception;
+                    randomTopTrackDone(artist_name, exception);
+                }
+            );
+        });
+    }, exception, exceptionHandler);
+};
