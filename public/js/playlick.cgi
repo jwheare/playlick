@@ -116,11 +116,12 @@ begin
   secretary = Sprockets::Secretary.new(
     :root         => sprockets_root,
     :load_path    => configuration[:load_path],
-    :source_files => configuration[:source_files]
+    :source_files => configuration[:source_files],
+    :minify => configuration[:minify]
   )
   
-  secretary.concatenation.save_to(File.join(sprockets_root, configuration[:output_file])) if generate_output_file?
-  respond_with(:content => secretary.concatenation.to_s, :type => "text/javascript")
+  secretary.save_output_to(File.join(sprockets_root, configuration[:output_file])) if generate_output_file?
+  respond_with(:content => secretary.output(), :type => "text/javascript")
   
 rescue Exception => e
   respond_with(:code => 500, :content => "couldn't generate concatenated javascript: #{e}")

@@ -3,3 +3,4 @@
 :source_files:
   - src/js/playlick.js
 :output_file: public/js/playlick.js
+:minify: true
