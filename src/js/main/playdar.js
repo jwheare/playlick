@@ -3,8 +3,8 @@ var PLAYDAR = {
     soundmanager_ready: function (status) {
         if (status.success) {
             $('#playdar').html(STRINGS.loading_playdar_text);
-            Playdar.setup_player(soundManager); // soundManager is global at this point
-            Playdar.client.init();
+            Playdar.setupPlayer(soundManager); // soundManager is global at this point
+            Playdar.client.go();
         } else {
             $('#playdar').html(STRINGS.loading_flash_error_text);
         }
@@ -231,7 +231,7 @@ var PLAYDAR = {
                 PLAYDAR.load_track_results(playlist_track, track.playdar_response, true);
             } else {
                 var qid = PLAYDAR.track_handler(playlist_track);
-                Playdar.client.resolve(track.artist, track.album, track.name, qid, track.url);
+                Playdar.client.resolve(track.artist, track.name, track.album, qid, track.url);
             }
         }
     },

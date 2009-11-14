@@ -1,3 +1,6 @@
 [submodule "public/lib/playdar"]
 	path = public/lib/playdar
 	url = git://github.com/jwheare/playdar.js.git
+[submodule "public/lib/sm2"]
+	path = public/lib/sm2
+	url = git://github.com/jwheare/soundmanager2.git
