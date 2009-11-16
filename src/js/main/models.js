@@ -5,7 +5,7 @@
         var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
         var item_name = $('<span class="haudio">')
             .append($('<span class="contributor">').text(UTIL.truncateString(this.artist)).attr('title', this.artist))
-            .append($('<strong class="fn">').text(UTIL.truncateString(this.name)).attr('title', this.name));
+            .append($('<strong class="fn">').text(UTIL.truncateString(this.name, (this.artist ? 30 : 50))).attr('title', this.name));
         var elapsed = $('<span class="elapsed">').text(this.get_duration_string());
         var status = $('<span class="status">');
         var item_link   = $('<a href="#" class="item">')

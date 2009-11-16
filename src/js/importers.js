@@ -90,7 +90,7 @@ IMPORTERS = {
         var playlist = new MODELS.Playlist({
             name: title,
             image: metadata.image || jspf.image,
-            description: description + ' ' + url
+            description: description + ' URL: ' + url
         });
         var trackDoc, trackURL;
         // Load tracks
