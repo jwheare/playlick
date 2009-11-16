@@ -31,6 +31,7 @@ var Playlist = function (options) {
     this.image = this.options.image || '';
     this.description = this.options.description || '';
     this.url = this.options.url || '';
+    this.source = this.options.source || '';
     this.addOptions(Playlist.DefaultOptions);
     
     // Create the DOM element
@@ -319,6 +320,7 @@ Playlist.prototype = {
             image: this.image,
             description: this.description,
             url: this.url,
+            source: this.source,
             tracks: $.map(this.tracks, function (playlist_track, i) {
                 return playlist_track.get_doc();
             })
