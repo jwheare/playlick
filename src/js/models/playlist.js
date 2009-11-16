@@ -30,6 +30,7 @@ var Playlist = function (options) {
     this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
     this.image = this.options.image || '';
     this.description = this.options.description || '';
+    this.url = this.options.url || '';
     this.addOptions(Playlist.DefaultOptions);
     
     // Create the DOM element
@@ -81,11 +82,7 @@ Playlist.prototype = {
         return Playdar.Util.mmss(this.duration);
     },
     toString: function () {
-        var duration = this.get_duration();
-        if (duration) {
-            duration = ' (' + duration + ')';
-        }
-        return this.name + duration;
+        return this.name;
     },
     /**
      * Fetch tracks from Couch
@@ -321,6 +318,7 @@ Playlist.prototype = {
             duration: this.duration,
             image: this.image,
             description: this.description,
+            url: this.url,
             tracks: $.map(this.tracks, function (playlist_track, i) {
                 return playlist_track.get_doc();
             })

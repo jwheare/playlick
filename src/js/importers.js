@@ -71,7 +71,7 @@ IMPORTERS = {
      * 
      * Creates a playlist from a JSON representation of an XSPF. A JSPF if you will.
     **/
-    createPlaylistFromJspf: function (url, jspf, metadata, callback, exception) {
+    createPlaylistFromJspf: function (source, jspf, metadata, callback, exception) {
         if (!jspf.trackList || !jspf.trackList.track) {
             throw exception('No tracks in JSPF response', jspf);
         }
@@ -83,14 +83,17 @@ IMPORTERS = {
         }
         // Create the playlist
         var title = jspf.title || jspf.info;
+        var url = metadata.url || jspf.info;
         var description = metadata.description || jspf.annotation || jspf.info;
-        if (title == description) {
+        if (description == title || description == url) {
             description = '';
         }
         var playlist = new MODELS.Playlist({
             name: title,
             image: metadata.image || jspf.image,
-            description: description + ' URL: ' + url
+            description: description,
+            url: url,
+            source: source
         });
         var trackDoc, trackURL;
         // Load tracks
@@ -107,9 +110,9 @@ IMPORTERS = {
                 if (data.location) {
                     trackURL = data.location;
                     // Check for a relative URL and an absolute http root URL
-                    if (!trackURL.match(/^https?:\/\//) && url.match(/^https?:\/\//)) {
+                    if (!trackURL.match(/^https?:\/\//) && source.match(/^https?:\/\//)) {
                         // Strip off the last part of the root and add the relative URL
-                        trackURL = url.replace(/(\/[^\/]*)$/, '') + '/' + trackURL;
+                        trackURL = source.replace(/(\/[^\/]*)$/, '') + '/' + trackURL;
                     }
                     trackDoc.url = trackURL;
                 }
@@ -124,7 +127,7 @@ IMPORTERS = {
         }
         return playlist;
     },
-    createPlaylistFromPodcast: function (podcast, callback, exception) {
+    createPlaylistFromPodcast: function (source, podcast, callback, exception) {
         if (!podcast.item) {
             throw exception('No tracks in Podcast response', podcast);
         }
@@ -134,8 +137,16 @@ IMPORTERS = {
             throw exception('No tracks in Podcast', jspf.trackList);
         }
         // Create the playlist
+        var description = podcast.description;
+        var links = $.makeArray(podcast.link);
+        var link = $.grep(links, function (value, i) {
+            return typeof(value) == 'string';
+        })[0];
         var playlist = new MODELS.Playlist({
-            name: podcast.title
+            name: podcast.title,
+            description: description,
+            url: link,
+            source: source
         });
         // Load tracks
         $.each(trackList, function (i, data) {

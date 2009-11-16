@@ -47,15 +47,15 @@ Url.PodcastException.prototype.name = 'UrlPodcastException';
  * 
  * Creates a playlist from an XSPF URL
 **/
-Url.xspf = function (url, callback, exceptionHandler) {
-    var exception = new Url.XspfException(url);
-    IMPORTERS.getJsonFomXml(url, function (json) {
+Url.xspf = function (source, callback, exceptionHandler) {
+    var exception = new Url.XspfException(source);
+    IMPORTERS.getJsonFomXml(source, function (json) {
         var jspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
         if (!jspf) {
             throw exception('Invalid XSPF', json.query.results);
         }
         var metadata = {};
-        var playlist = IMPORTERS.createPlaylistFromJspf(url, jspf, metadata, callback, exception);
+        var playlist = IMPORTERS.createPlaylistFromJspf(source, jspf, metadata, callback, exception);
     }, exception, exceptionHandler);
 };
 /**
@@ -68,13 +68,13 @@ Url.xspf = function (url, callback, exceptionHandler) {
  * 
  * Creates a playlist from a Podcast URL
 **/
-Url.podcast = function (url, callback, exceptionHandler) {
-    var exception = new Url.XspfException(url);
-    IMPORTERS.getJsonFomXml(url, function (json) {
+Url.podcast = function (source, callback, exceptionHandler) {
+    var exception = new Url.XspfException(source);
+    IMPORTERS.getJsonFomXml(source, function (json) {
         var podcast = json.query.results.rss.channel;
         if (!podcast) {
             throw exception('Invalid Podcast', json.query.results);
         }
-        var playlist = IMPORTERS.createPlaylistFromPodcast(podcast, callback, exception);
+        var playlist = IMPORTERS.createPlaylistFromPodcast(source, podcast, callback, exception);
     }, exception, exceptionHandler);
 };

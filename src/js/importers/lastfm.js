@@ -119,8 +119,8 @@ LastFm.userPlaylists = function (user, callback, finalCallback, exceptionHandler
         // Callback to loop through importedPlaylists to check if we're still waiting for results
         // called on LastFm.getPlaylist success and failure
         function playlistDone (processedUrl, playlist) {
-            for (url in importedPlaylists) {
-                if (importedPlaylists[url] === false) {
+            for (source in importedPlaylists) {
+                if (importedPlaylists[source] === false) {
                     return;
                 }
             }
@@ -130,10 +130,12 @@ LastFm.userPlaylists = function (user, callback, finalCallback, exceptionHandler
         // Create a playlist for each in the API response
         // Requires a separate call to LastFm.getPlaylist for each
         $.each(playlists, function (i, data) {
-            var url = "lastfm://playlist/" + data.id;
-            importedPlaylists[url] = false;
+            var source = "lastfm://playlist/" + data.id;
+            importedPlaylists[source] = false;
             // Extract other metadata from playlist info
-            var metadata = {};
+            var metadata = {
+                url: data.url
+            };
             var image = $.grep(data.image, function (value, i) {
                 return value.size == 'medium';
             });
@@ -142,16 +144,16 @@ LastFm.userPlaylists = function (user, callback, finalCallback, exceptionHandler
             }
             // Fetch the tracklist
             LastFm.getPlaylist(
-                url,
+                source,
                 metadata,
                 function playlistCallback (playlist) {
-                    importedPlaylists[url] = playlist;
+                    importedPlaylists[source] = playlist;
                     callback(playlist);
-                    playlistDone(url, playlist);
+                    playlistDone(source, playlist);
                 },
                 function playlistExceptionHandler (exception) {
-                    importedPlaylists[url] = exception;
-                    playlistDone(url, exception);
+                    importedPlaylists[source] = exception;
+                    playlistDone(source, exception);
                 }
             );
         });
@@ -226,14 +228,15 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
         if (!json.album) {
             throw exception('No album data', json);
         }
-        var url = "lastfm://playlist/album/" + json.album.id;
+        var source = "lastfm://playlist/album/" + json.album.id;
         // Extract other metadata from album info
-        var description = json.album.url;
+        var description = '';
         if (json.album.wiki) {
-            description += " " + $('<div/>').html(json.album.wiki.summary).text();
+            description = $('<div/>').html(json.album.wiki.summary).text() + '';
         }
         var metadata = {
-            description: description
+            description: description,
+            url: json.album.url
         };
         var image = $.grep(json.album.image, function (value, i) {
             return value.size == 'medium';
@@ -242,7 +245,7 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
             metadata.image = image[0]['#text'];
         }
         // Fetch the album tracklist
-        LastFm.getPlaylist(url, metadata, callback, exceptionHandler);
+        LastFm.getPlaylist(source, metadata, callback, exceptionHandler);
     }, exception, exceptionHandler);
 };
 

@@ -39,25 +39,53 @@
             .html();
     };
     var autolink_regexp = /((https?\:\/\/)|spotify:)[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g;
+    function autoLink (word) {
+        if (word.match(autolink_regexp)) {
+            return $('<a>')
+                .attr('href', word)
+                .text(UTIL.truncateString(
+                    word.replace(/^https?:\/\//, '').replace(/\/$/, ''),
+                    60
+                ));
+        } else {
+                return word;
+        }
+    }
     function playlistTitleHtml () {
         var wrapper = $('<div>');
         // Add an image
         if (this.image) {
             wrapper.append($('<img>').attr('src', this.image));
         }
-        wrapper.append(this.toString());
+        
+        var title = this.toString();
+        if (this.url) {
+            wrapper.append($('<a>')
+                .attr('href', this.url)
+                .text(title));
+        } else {
+            wrapper.append(title);
+        }
+        var duration = this.get_duration();
+        if (duration) {
+            wrapper.append(' (' + duration + ')');
+        }
         // Autolink description
+        var description = $('<small>');
         if (this.description) {
-            var description = $('<small>');
             $.each(this.description.split(/[ \n]/), function (i, word) {
-                if (word.match(autolink_regexp)) {
-                    description.append($('<a>').attr('href', word).text(word));
-                } else {
-                    description.append(' '+word+' ');
-                }
+                description.append(' ').append(autoLink(word)).append(' ');
             });
-            wrapper.append('<br>')
-                .append(description);
+        }
+        if (this.source) {
+            if (this.description) {
+                description.append('<br>');
+            }
+            description.append(' XSPF: ');
+            description.append(autoLink(this.source));
+        }
+        if (this.description || this.source) {
+            wrapper.append('<br>').append(description);
         }
         return wrapper.html();
     };

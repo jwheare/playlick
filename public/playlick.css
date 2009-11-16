@@ -201,7 +201,7 @@ ul#playlists li input.playlist_name {
     display: block;
     font-weight: normal;
     font-size: 12px;
-    line-height: 20px;
+    line-height: 1.5;
 }
 
 /* Manage */
