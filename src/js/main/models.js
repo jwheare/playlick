@@ -81,8 +81,10 @@
             if (this.description) {
                 description.append('<br>');
             }
-            description.append(' XSPF: ');
-            description.append(autoLink(this.source));
+            description.append($('<span>')
+                .append('Source: ')
+                .append(autoLink(this.source))
+            );
         }
         if (this.description || this.source) {
             wrapper.append('<br>').append(description);

@@ -203,6 +203,12 @@ ul#playlists li input.playlist_name {
     font-size: 12px;
     line-height: 1.5;
 }
+#main h1 small span {
+    color: #999;
+}
+#main h1 small span a {
+    color: #4c7a0f;
+}
 
 /* Manage */
 #manage {
