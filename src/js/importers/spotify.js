@@ -88,12 +88,12 @@ Spotify.album = function (url, callback, exceptionHandler) {
                 playlist.add_track(new MODELS.Track(trackDoc));
             }
         });
+        // Save
+        playlist.save();
         // Call the Spotify.album callback
         if (callback) {
             callback(playlist);
         }
-        // Save
-        playlist.save();
     }, exception, exceptionHandler);
 };
 /**
@@ -130,11 +130,11 @@ Spotify.track = function (url, callback, exceptionHandler) {
             trackDoc.url = track.href;
         }
         playlist.add_track(new MODELS.Track(trackDoc));
+        // Save
+        playlist.save();
         // Call the Spotify.track callback
         if (callback) {
             callback(playlist);
         }
-        // Save
-        playlist.save();
     }, exception, exceptionHandler);
 };

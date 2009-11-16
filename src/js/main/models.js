@@ -5,7 +5,6 @@
         var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
         var item_name = $('<span class="haudio">')
             .append($('<span class="contributor">').text(UTIL.truncateString(this.artist)).attr('title', this.artist))
-            // .append(' ')
             .append($('<strong class="fn">').text(UTIL.truncateString(this.name)).attr('title', this.name));
         var elapsed = $('<span class="elapsed">').text(this.get_duration_string());
         var status = $('<span class="status">');
@@ -91,6 +90,28 @@
     MODELS.Track.prototype.toHTML = trackToHtml;
     MODELS.Playlist.prototype.toHTML = playlistToHtml;
     MODELS.Playlist.prototype.titleHTML = playlistTitleHtml;
+    MODELS.Playlist.DefaultOptions = {
+        onSave: function () {
+            if (this == PLAYLICK.current_playlist) {
+                PLAYLICK.update_playlist_title(this.titleHTML());
+                PLAYLICK.update_playlist_applescript(this);
+            }
+        },
+        onCreate: function () {
+            // Add to sidebar
+            $('#playlists').append(this.element);
+        },
+        onDelete: function () {
+            if (this == PLAYLICK.current_playlist) {
+                PLAYLICK.show_import();
+            }
+        },
+        onSetDuration: function () {
+            if (this == PLAYLICK.current_playlist) {
+                PLAYLICK.update_playlist_title(this.titleHTML());
+            }
+        }
+    };
     MODELS.couch_down_handler = couchDownHandler;
     MODELS.couch_up_handler = couchUpHandler;
 })();

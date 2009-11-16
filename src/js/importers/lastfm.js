@@ -195,11 +195,12 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
             };
             playlist.add_track(new MODELS.Track(trackDoc));
         });
+        // Save
+        playlist.save();
+        // Call the LastFm.lovedtracks callback
         if (callback) {
             callback(playlist);
         }
-        // Save
-        playlist.save();
     }, exception, exceptionHandler);
 };
 /**
@@ -292,12 +293,12 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
             if (!playlist.tracks.length) {
                 return exceptionHandler(exception("No valid tracks found for artists", playlistTracks));
             }
+            // Save
+            playlist.save();
             // Call the LastFm.generateUsersPlaylist callback
             if (callback) {
                 callback(playlist);
             }
-            // Save
-            playlist.save();
         }
         // Get a random top track for each in the tasteometer shared artists response
         // Requires a separate call to LastFm.getTopTracks for each

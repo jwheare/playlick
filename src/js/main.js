@@ -63,28 +63,6 @@ var PLAYLICK = {
     
     current_playlist: null,
     registerPlaylist: function (playlist) {
-        playlist.addOptions({
-            onSave: function () {
-                if (this == PLAYLICK.current_playlist) {
-                    PLAYLICK.update_playlist_title(this.titleHTML());
-                    PLAYLICK.update_playlist_applescript(this);
-                }
-            },
-            onCreate: function () {
-                // Add to sidebar
-                $('#playlists').append(this.element);
-            },
-            onDelete: function () {
-                if (this == PLAYLICK.current_playlist) {
-                    PLAYLICK.show_import();
-                }
-            },
-            onSetDuration: function () {
-                if (this == PLAYLICK.current_playlist) {
-                    PLAYLICK.update_playlist_title(this.titleHTML());
-                }
-            }
-        });
         PLAYLICK.last_playlist = playlist;
     },
     createPlaylist: function (data) {

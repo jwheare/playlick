@@ -30,10 +30,13 @@ var Playlist = function (options) {
     this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
     this.image = this.options.image || '';
     this.description = this.options.description || '';
+    this.addOptions(Playlist.DefaultOptions);
     
     // Create the DOM element
     this.set_element(this.options.dom_element);
 };
+// Override this
+Playlist.DefaultOptions = {};
 Playlist.prototype = {
     addOptions: function (options) {
         $.extend(this.options, options);

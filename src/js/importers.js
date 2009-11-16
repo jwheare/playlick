@@ -56,7 +56,7 @@ IMPORTERS = {
             format: 'json'
         }, function (json) {
             if (!json.query || !json.query.results) {
-                throw exception('Invalid URL');
+                throw exception('Invalid URL', json);
             }
             callback.call(this, json);
         }, exception, exceptionHandler);
@@ -82,15 +82,20 @@ IMPORTERS = {
             throw exception('No tracks in JSPF', jspf.trackList);
         }
         // Create the playlist
+        var title = jspf.title || jspf.info;
+        var description = metadata.description || jspf.annotation || jspf.info;
+        if (title == description) {
+            description = '';
+        }
         var playlist = new MODELS.Playlist({
-            name: jspf.title,
+            name: title,
             image: metadata.image || jspf.image,
-            description: metadata.description || jspf.annotation || jspf.info
+            description: description + ' ' + url
         });
         var trackDoc, trackURL;
         // Load tracks
         $.each(trackList, function (i, data) {
-            if (data.title && data.creator) {
+            if (data.title) {
                 trackDoc = {
                     name: data.title,
                     artist: data.creator,
@@ -111,12 +116,12 @@ IMPORTERS = {
                 playlist.add_track(new MODELS.Track(trackDoc));
             }
         });
+        // Save
+        playlist.save();
         // Call the IMPORTERS.createPlaylistFromJspf callback
         if (callback) {
             callback(playlist);
         }
-        // Save
-        playlist.save();
         return playlist;
     },
     createPlaylistFromPodcast: function (podcast, callback, exception) {
@@ -143,12 +148,12 @@ IMPORTERS = {
             }
             playlist.add_track(new MODELS.Track(trackDoc));
         });
+        // Save
+        playlist.save();
         // Call the IMPORTERS.createPlaylistFromPodcast callback
         if (callback) {
             callback(playlist);
         }
-        // Save
-        playlist.save();
         return playlist;
     },
     defaultExceptionHandler: function (exception) {
