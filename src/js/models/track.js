@@ -9,6 +9,9 @@ var Track = function (doc) {
     this.album = doc.album || '';
     this.url = doc.url || '';
     this.duration = doc.duration;
+    this.size = doc.size;
+    this.bitrate = doc.bitrate;
+    this.type = doc.type;
     
     this.playdar_qid = null;
     this.playdar_sid = null;

@@ -231,20 +231,21 @@ var PLAYDAR = {
                 PLAYDAR.load_track_results(playlist_track, track.playdar_response, true);
             } else {
                 var qid = PLAYDAR.track_handler(playlist_track);
-                var resultObject;
+                var results;
                 if (track.url) {
-                    resultObject = {
+                    results = [{
                         artist: track.artist,
                         track: track.name,
                         album: track.album,
                         url: track.url,
+                        duration: track.duration,
+                        size: track.size,
+                        bitrate: track.bitrate,
+                        type: track.type,
                         source: Playdar.Util.location_from_url(track.url).host
-                    };
-                    if (track.duration) {
-                        resultObject.duration = track.duration;
-                    }
+                    }];
                 }
-                Playdar.client.resolve(track.artist, track.name, track.album, qid, [resultObject]);
+                Playdar.client.resolve(track.artist, track.name, track.album, qid, results);
             }
         }
     },
