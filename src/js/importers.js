@@ -156,6 +156,8 @@ IMPORTERS = {
             };
             if (data.enclosure && data.enclosure.url) {
                 trackDoc.url = data.enclosure.url;
+                trackDoc.size = data.enclosure['length'];
+                trackDoc.type = data.enclosure.type;
             }
             playlist.add_track(new MODELS.Track(trackDoc));
         });
