@@ -24,6 +24,7 @@ You can import playlists into Playlick by using URL hash parameters that map to 
 TODO
 ----
 
+* Seeded result objects from non stream sources http://pastie.org/pastes/704659/
 * Setup CouchDB/persistance/sessions/URLs on playlick.com
 * Tag playlist/personal tags/loved tracks import from Last.fm
 * Error handling for streaming
