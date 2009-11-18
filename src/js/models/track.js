@@ -7,8 +7,8 @@ var Track = function (doc) {
     this.name = doc.name;
     this.artist = doc.artist || '';
     this.album = doc.album || '';
-    this.duration = doc.duration;
     this.url = doc.url || '';
+    this.duration = doc.duration;
     
     this.playdar_qid = null;
     this.playdar_sid = null;

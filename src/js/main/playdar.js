@@ -231,7 +231,20 @@ var PLAYDAR = {
                 PLAYDAR.load_track_results(playlist_track, track.playdar_response, true);
             } else {
                 var qid = PLAYDAR.track_handler(playlist_track);
-                Playdar.client.resolve(track.artist, track.name, track.album, qid, track.url);
+                var resultObject;
+                if (track.url) {
+                    resultObject = {
+                        artist: track.artist,
+                        track: track.name,
+                        album: track.album,
+                        url: track.url,
+                        source: Playdar.Util.location_from_url(track.url).host
+                    };
+                    if (track.duration) {
+                        resultObject.duration = track.duration;
+                    }
+                }
+                Playdar.client.resolve(track.artist, track.name, track.album, qid, [resultObject]);
             }
         }
     },
