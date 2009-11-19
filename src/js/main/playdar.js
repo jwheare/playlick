@@ -3,7 +3,6 @@ var PLAYDAR = {
     soundmanager_ready: function (status) {
         if (status.success) {
             $('#playdar').html(STRINGS.loading_playdar_text);
-            Playdar.setupPlayer(soundManager); // soundManager is global at this point
             Playdar.client.go();
         } else {
             $('#playdar').html(STRINGS.loading_flash_error_text);
