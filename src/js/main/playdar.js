@@ -138,7 +138,7 @@ var PLAYDAR = {
             }
             info_row = $('<tr class="info">')
                 .append(score_cell)
-                .append($('<td class="source">').text(result.source + ' (' + result.preference + ')'))
+                .append($('<td class="source">').text((result.source ? result.source : '')/* + (result.preference ? ' (' + result.preference + ')' : '')*/))
                 .append($('<td class="time">').text(duration))
                 .append($('<td class="size">').text(size))
                 .append($('<td class="bitrate">').text(bitrate));
@@ -157,9 +157,9 @@ var PLAYDAR = {
     // Load playdar resolution results
     load_track_results: function (playlist_track, response, final_answer) {
         var list_item = playlist_track.element;
-        list_item.removeClass('scanning noMatch match perfectMatch');
         playlist_track.track.playdar_qid = response.qid;
         if (final_answer) {
+            list_item.removeClass('scanning');
             if (response.results.length) {
                 playlist_track.track.playdar_response = response;
                 list_item.addClass('match');
@@ -177,8 +177,6 @@ var PLAYDAR = {
             } else {
                 list_item.addClass('noMatch');
             }
-        } else {
-            list_item.addClass('scanning');
         }
     },
     splice_url_result: function (playlist_track, response) {
@@ -220,12 +218,15 @@ var PLAYDAR = {
     },
     recheck_track: function (playlist_track) {
         if (playlist_track.track.playdar_qid) {
+            playlist_track.element.addClass('scanning');
             Playdar.client.recheck_results(playlist_track.track.playdar_qid);
         }
     },
     resolve_track: function (playlist_track, force) {
         if (Playdar.client && Playdar.client.is_authed()) {
             var track = playlist_track.track;
+            playlist_track.element.removeClass('noMatch match perfectMatch');
+            playlist_track.element.addClass('scanning');
             if (!force && track.playdar_response) {
                 PLAYDAR.load_track_results(playlist_track, track.playdar_response, true);
             } else {
