@@ -283,10 +283,10 @@ a#playlistApplescript img {
 }
 #content p.messages {
     display: none;
-    margin: 20px 0 20px 40px;
+    margin: 20px 0;
 }
-#sidebar p.messages {
-    margin-left: 0;
+#main p {
+    margin-left: 40px;
 }
 #content p.messages img {
     margin: -3px 5px 0 0;
