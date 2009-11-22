@@ -81,39 +81,30 @@
                     </div>
                     
                     <div id="import">
-                        <h1>Import a playlist from Last.fm</h1>
+                        <h1>Import your playlists</h1>
                         
-                        <form id="import_playlist_form">
-                            <label for="import_playlist_input">Username:</label>
-                            <input type="text" name="username" id="import_playlist_input" />
-                            <input type="submit" id="import_playlist_button" value="Get Playlists" />
+                        <form id="lastfm_form">
+                            <label for="lastfm_input">Last.fm Username:</label>
+                            <br>
+                            <input type="text" name="username" id="lastfm_input" />
+                            <input type="submit" id="lastfm_button" value="Get Playlists" />
                         </form>
                         
-                        <p class="messages" id="import_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
-                        <p class="messages" id="import_done">Done! Playlists imported: <span id="import_count"></span></p>
-                        <p class="messages" id="import_error_no_playlists">No playlists found</p>
-                        <p class="messages" id="import_error"></p>
+                        <p class="messages" id="lastfm_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
+                        <p class="messages" id="lastfm_done">Done! Playlists imported: <span id="lastfm_count"></span></p>
+                        <p class="messages" id="lastfm_error_no_playlists">No playlists found</p>
+                        <p class="messages" id="lastfm_error"></p>
                         
-                        <h1>Import loved tracks from Last.fm</h1>
-                        
-                        <form id="loved_form">
-                            <label for="loved_input">Username:</label>
-                            <input type="text" name="username" id="loved_input" />
-                            <input type="submit" id="loved_button" value="Get Loved Tracks" />
-                        </form>
-                        
-                        <p class="messages" id="loved_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading loved tracks…</p>
-                        <p class="messages" id="loved_done">Done! Loved tracks imported</p>
-                        <p class="messages" id="loved_error"></p>
+                        <ul id="lastfm_playlists"></ul>
                         
                         <h1>The Last.fm Battle</h1>
-                        <p>Generate a playlist based on the shared artists between two Last.fm users.</p>
+                        <p>Generate a playlist based on shared artists between two Last.fm users.</p>
                         
-                        <form id="generate_form">
-                            <input type="text" name="you" id="generate_input_you" />
-                            <label for="generate_input_they">VS</label>
-                            <input type="text" name="they" id="generate_input_they" />
-                            <input type="submit" id="generate_button" value="Generate!" />
+                        <form id="lastfm_battle_form">
+                            <input type="text" name="you" id="lastfm_battle_input_you" />
+                            <label for="lastfm_battle_input_they">VS</label>
+                            <input type="text" name="they" id="lastfm_battle_input_they" />
+                            <input type="submit" id="lastfm_battle_button" value="Fight!" />
                         </form>
                         
                         <p class="messages" id="generate_loading"><img src="/track_scanning.gif" width="16" height="16"> Fetching tracks…</p>

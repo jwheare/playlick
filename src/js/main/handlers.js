@@ -176,21 +176,13 @@ $('#playlists').click(function (e) {
 /* Import handlers */
 
 // Import Last.fm playlist form
-$('#import_playlist_form').submit(function (e) {
+$('#lastfm_form').submit(function (e) {
     e.preventDefault();
     // Parse the form
     var params = UTIL.serializeForm(this);
     // Clear the input and refocus
-    $('#import_playlist_input').val('').select();
+    $('#lastfm_input').val('').select();
     PLAYLICK.fetchLastFmUserPlaylists(params.username);
-});
-// Import Last.fm playlist form
-$('#loved_form').submit(function (e) {
-    e.preventDefault();
-    // Parse the form
-    var params = UTIL.serializeForm(this);
-    // Clear the input and refocus
-    $('#loved_input').val('').select();
     PLAYLICK.fetchLastFmLovedTracks(params.username);
 });
 
@@ -256,14 +248,14 @@ $('#url_form').submit(function (e) {
     PLAYLICK.fetchUrl(params.url);
 });
 
-// Generate playlist form submit
-$('#generate_form').submit(function (e) {
+// Last.fm Battle form submit
+$('#lastfm_battle_form').submit(function (e) {
     e.preventDefault();
     // Parse the form
     var params = UTIL.serializeForm(this);
     // Clear the inputs and refocus
-    $("#generate_input_they").val('');
-    $("#generate_input_you").val('').select();
+    $("#lastfm_battle_input_they").val('');
+    $("#lastfm_battle_input_you").val('').select();
     // Generate the playlist
     PLAYLICK.generateLastFmUsersPlaylist(params.you, params.they);
 });

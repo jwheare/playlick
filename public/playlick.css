@@ -295,20 +295,20 @@ a#playlistApplescript img {
 
 /* Add track form */
 form#add_to_playlist,
-form#import_playlist_form,
-form#loved_form,
-form#generate_form {
+form#lastfm_form,
+form#lastfm_battle_form {
     margin: 20px 0 20px 40px;
     line-height: 25px;
 }
 form#add_to_playlist input#add_track_input,
-form#import_playlist_form input#import_playlist_input,
-form#loved_form input#loved_input {
-    margin: 0 10px;
+form#lastfm_form input#lastfm_input {
+    margin: 0 10px 0 0;
     width: 250px;
 }
-form#generate_form input#generate_input_you,
-form#generate_form input#generate_input_they {
+form#lastfm_battle_form input#lastfm_battle_input_you {
+    margin: 0 10px 0 0;
+}
+form#lastfm_battle_form input#lastfm_battle_input_they {
     margin: 0 10px;
 }
 

@@ -144,7 +144,7 @@ var PLAYLICK = {
         $('#import').show();
         // Select input
         setTimeout(function () {
-            $('#import_playlist_input').select();
+            $('#lastfm_input').select();
         }, 1);
     },
     add_track: function (artist, track) {
@@ -339,7 +339,7 @@ var PLAYLICK = {
     },
     // Fetch a Last.fm user's playlists as JSON
     fetchLastFmUserPlaylists: function (username) {
-        PLAYLICK.importSetup('import');
+        PLAYLICK.importSetup('lastfm');
         IMPORTERS.LastFm.userPlaylists(
             username,
             function callback (playlist) {
@@ -349,12 +349,12 @@ var PLAYLICK = {
             function finalCallback (playlists) {
                 // Update messages
                 $('p.messages').hide();
-                $('#import_count').text(playlists.length);
-                $('#import_done').show();
+                $('#lastfm_count').text(playlists.length);
+                $('#lastfm_done').show();
             },
             function exceptionHandler (exception) {
                 // Reset input
-                $('#import_playlist_input').val(username);
+                $('#lastfm_input').val(username);
                 // Show error message
                 $('p.messages').hide();
                 var escapedName = $('<b>').text('Username: ' + username);
@@ -364,15 +364,15 @@ var PLAYLICK = {
                              .append(escapedName)
                              .append('<br>')
                              .append(escapedSignature);
-                $('#import_error').html(errorMessage);
-                $('#import_error').show();
+                $('#lastfm_error').html(errorMessage);
+                $('#lastfm_error').show();
             },
             function noPlaylistHandler () {
                 // Reset input
-                $('#import_playlist_input').val(username);
+                $('#lastfm_input').val(username);
                 // No playlists
                 $('p.messages').hide();
-                $('#import_error_no_playlists').show();
+                $('#lastfm_error_no_playlists').show();
             }
         );
     },
