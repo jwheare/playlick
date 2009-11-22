@@ -24,19 +24,7 @@ $('#playlist').click(function (e) {
         // Clicks to playdar results
         var tbody = target.closest('tbody.result');
         if (tbody.size()) {
-            // Check radio button
-            var radio = tbody.find('input[name=choice]');
-            radio.attr('checked', true);
-            // Highlight result
-            tbody.siblings().removeClass('choice');
-            tbody.addClass('choice');
-            // Update track with result data
-            var result = tbody.data('result');
-            PLAYLICK.update_track(playlist_track, result);
-            if (!Playdar.player.is_now_playing()) {
-                PLAYDAR.playTrack(playlist_track);
-            }
-            track_item.addClass('perfectMatch');
+            PLAYLICK.selectSource(playlist_track, tbody);
         }
         
         // Remove track from playlist

@@ -160,6 +160,21 @@ var PLAYLICK = {
         }
         PLAYDAR.resolve_track(playlist_track);
     },
+    selectSource: function (playlist_track, tbody) {
+        // Check radio button
+        var radio = tbody.find('input[name=choice]');
+        radio.attr('checked', true);
+        // Highlight result
+        tbody.siblings().removeClass('choice');
+        tbody.addClass('choice');
+        // Update track with result data
+        var result = tbody.data('result');
+        PLAYLICK.update_track(playlist_track, result);
+        if (!Playdar.player.is_now_playing()) {
+            PLAYDAR.playTrack(playlist_track);
+        }
+        playlist_track.element.addClass('perfectMatch');
+    },
     // Update a track's data and persist
     update_track: function (playlist_track, result, batch) {
         var track  = playlist_track.track;

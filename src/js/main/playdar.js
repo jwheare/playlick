@@ -267,12 +267,20 @@ var PLAYDAR = {
     
     // Not called when served from cache
     onResultLoad: function () {
-        var track_item = $('#' + this.sID).data('track_item');
+        var trackSource = $('#' + this.sID);
+        var track_item = trackSource.data('track_item');
+        var playlist_track = track_item.data('playlist_track');
         if (track_item) {
             if (this.readyState == 2) { // failed/error
-                // Switch track highlight in the playlist
                 PLAYDAR.resetResult.call(this);
-                track_item.addClass('error');
+                // Try the next available source
+                var nextSource = trackSource.next('tbody');
+                if (nextSource.size()) {
+                    PLAYLICK.selectSource(playlist_track, nextSource);
+                } else {
+                    // Add an error highlight in the playlist
+                    track_item.addClass('error');
+                }
             }
         }
         return track_item;
