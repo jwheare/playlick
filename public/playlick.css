@@ -50,6 +50,13 @@ form {
     line-height: 25px;
 }
 
+#content h1#title {
+    color: #335507;
+}
+#content h1#title span {
+    color: #6ea31e;
+}
+
 /* Sidebar */
 #sidebar {
     float: right;
@@ -62,14 +69,15 @@ form {
 .sidebar_list {
     margin: 15px 0;
 }
-.sidebar_list p#loading_playlists {
+/* Playlists */
+p#loading_playlists {
     margin: 0;
     padding: 5px 10px;
     font-size: 13px;
     line-height: 1.5;
     background: #d2f380;
 }
-.sidebar_list p#loading_playlists.unavailable {
+p#loading_playlists.unavailable {
     background: #f37d70;
 }
 ul#playlists {
@@ -175,6 +183,28 @@ ul#playlists li input.playlist_name {
     width: 180px;
 }
 
+/* Sidebar importers */
+ul#importers {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    font-size: 14px;
+}
+ul#importers li {
+    margin: 0 -24px;
+    padding: 5px 0 10px 0;
+    border-right: 24px solid #fff;
+    border-left: 24px solid #fff;
+    border-bottom: 1px solid #d2f380;
+    line-height: 24px;
+}
+ul#importers li input {
+    margin-right: 5px;
+}
+ul#importers li input.importer_input {
+    width: 200px;
+}
+
 #playdar {
     vertical-align: middle;
 }
@@ -251,11 +281,14 @@ a#playlistApplescript img {
 #import {
     
 }
-#import p.messages {
+#content p.messages {
     display: none;
     margin: 20px 0 20px 40px;
 }
-#import p.messages img {
+#sidebar p.messages {
+    margin-left: 0;
+}
+#content p.messages img {
     margin: -3px 5px 0 0;
     vertical-align: middle;
 }
@@ -264,19 +297,13 @@ a#playlistApplescript img {
 form#add_to_playlist,
 form#import_playlist_form,
 form#loved_form,
-form#xspf_form,
-form#podcast_form,
-form#album_form,
 form#generate_form {
     margin: 20px 0 20px 40px;
     line-height: 25px;
 }
 form#add_to_playlist input#add_track_input,
 form#import_playlist_form input#import_playlist_input,
-form#loved_form input#loved_input,
-form#album_form input#album_import_input,
-form#xspf_form input#xspf_input,
-form#podcast_form input#podcast_input {
+form#loved_form input#loved_input {
     margin: 0 10px;
     width: 250px;
 }

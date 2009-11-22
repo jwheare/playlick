@@ -17,13 +17,43 @@
                             <li><a href="#new" id="create_playlist" class="playlist">+ Create</a></li>
                             <li class="current"><a href="#import" id="import_playlist" class="playlist">+ Import</a></li>
                         </ul>
+                        
                         <p id="loading_playlists">Loading playlists…</p>
+                    </div>
+                    <div class="sidebar_list">
+                        <ul id="importers">
+                            <li>
+                                <form id="album_form">
+                                    <label for="album_import_input">Add an Album</label>
+                                    <br>
+                                    <input type="text" name="album" id="album_import_input" class="importer_input" />
+                                    <input type="hidden" name="artist_name" id="album_import_artist" />
+                                    <input type="hidden" name="album_name" id="album_import_name" />
+                                    <input type="submit" id="album_button" value="Go" />
+                                </form>
+                                <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
+                                <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
+                                <p class="messages" id="album_error"></p>
+                            </li>
+                            <li>
+                                <form id="url_form">
+                                    <label for="url_input">Import an XSPF or Podcast</label>
+                                    <br>
+                                    <input type="text" name="url" id="url_input" class="importer_input" />
+                                    <input type="submit" id="url_button" value="Go" />
+                                </form>
+                                <p class="messages" id="url_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
+                                <p class="messages" id="url_done">Done! Imported “<span id="url_title"></span>” (<span id="url_count"></span>)</p>
+                                <p class="messages" id="url_error"></p>
+                            </li>
+                        </ul>
                     </div>
                     <div id="playdar">Loading flash player…</div>
                     <div id="sm2-container"></div>
                 </div>
                 
                 <div id="main">
+                    <h1 id="title">Play<span>lick</span></h1>
                     <div id="manage">
                         <h1 id="playlistTitle">Create a new playlist</h1>
                         
@@ -75,44 +105,6 @@
                         <p class="messages" id="loved_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading loved tracks…</p>
                         <p class="messages" id="loved_done">Done! Loved tracks imported</p>
                         <p class="messages" id="loved_error"></p>
-                        
-                        <h1>Import an album</h1>
-                        
-                        <form id="album_form">
-                            <label for="album_import_input">Album:</label>
-                            <input type="text" name="album" id="album_import_input" />
-                            <input type="hidden" name="artist_name" id="album_import_artist" />
-                            <input type="hidden" name="album_name" id="album_import_name" />
-                            <input type="submit" id="album_button" value="Add album" />
-                        </form>
-                        
-                        <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
-                        <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
-                        <p class="messages" id="album_error"></p>
-                        
-                        <h1>Import a playlist from XSPF</h1>
-                        
-                        <form id="xspf_form">
-                            <label for="xspf_input">XSPF URL:</label>
-                            <input type="text" name="xspf" id="xspf_input" />
-                            <input type="submit" id="xspf_button" value="Load XSPF" />
-                        </form>
-                        
-                        <p class="messages" id="xspf_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading XSPF…</p>
-                        <p class="messages" id="xspf_done">Done! Imported “<span id="xspf_title"></span>” (<span id="xspf_count"></span>)</p>
-                        <p class="messages" id="xspf_error"></p>
-                        
-                        <h1>Import a podcast</h1>
-                        
-                        <form id="podcast_form">
-                            <label for="podcast_input">Podcast URL:</label>
-                            <input type="text" name="podcast" id="podcast_input" />
-                            <input type="submit" id="podcast_button" value="Load Podcast" />
-                        </form>
-                        
-                        <p class="messages" id="podcast_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading podcast…</p>
-                        <p class="messages" id="podcast_done">Done! Imported “<span id="podcast_title"></span>” (<span id="podcast_count"></span>)</p>
-                        <p class="messages" id="podcast_error"></p>
                         
                         <h1>Generate a playlist from Last.fm users</h1>
                         

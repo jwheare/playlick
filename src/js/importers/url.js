@@ -38,43 +38,39 @@ Url.XspfException.prototype.name = 'UrlXspfException';
 Url.PodcastException = Url.Exception;
 Url.PodcastException.prototype.name = 'UrlPodcastException';
 /**
- * Url.xspf(url[, callback][, exceptionHandler])
+ * Url.url(url[, callback][, exceptionHandler])
  * - url (String): URL to import the playlist from
  * - callback(playlist) (Function): Function to be called if a playlist is successfully created
  *      Takes the playlist object as the only argument
  * - exceptionHandler(exception) (Function): Function to be called in case of an import exception
  *      Takes the exception object as the only argument
  * 
- * Creates a playlist from an XSPF URL
+ * Creates a playlist from a Podcast or XSPF URL
 **/
-Url.xspf = function (source, callback, exceptionHandler) {
+Url.url = function (source, callback, exceptionHandler) {
     var exception = new Url.XspfException(source);
     IMPORTERS.getJsonFomXml(source, function (json) {
+        var podcast = json.query.results.rss ? json.query.results.rss : '';
         var jspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
-        if (!jspf) {
-            throw exception('Invalid XSPF', json.query.results);
+        if (!podcast && !jspf) {
+            throw exception('Invalid Podcast/XSPF', json.query.results);
         }
-        var metadata = {};
-        var playlist = IMPORTERS.createPlaylistFromJspf(source, jspf, metadata, callback, exception);
-    }, exception, exceptionHandler);
-};
-/**
- * Url.podcast(url[, callback][, exceptionHandler])
- * - url (String): URL to import the playlist from
- * - callback(playlist) (Function): Function to be called if a playlist is successfully created
- *      Takes the playlist object as the only argument
- * - exceptionHandler(exception) (Function): Function to be called in case of an import exception
- *      Takes the exception object as the only argument
- * 
- * Creates a playlist from a Podcast URL
-**/
-Url.podcast = function (source, callback, exceptionHandler) {
-    var exception = new Url.XspfException(source);
-    IMPORTERS.getJsonFomXml(source, function (json) {
-        var podcast = json.query.results.rss.channel;
-        if (!podcast) {
-            throw exception('Invalid Podcast', json.query.results);
+        if (podcast) {
+            var playlist = IMPORTERS.createPlaylistFromPodcast(
+                source,
+                podcast,
+                callback,
+                new Url.PodcastException(source)
+            );
+        } else if (jspf) {
+            var metadata = {};
+            var playlist = IMPORTERS.createPlaylistFromJspf(
+                source,
+                jspf,
+                metadata,
+                callback,
+                new Url.XspfException(source)
+            );
         }
-        var playlist = IMPORTERS.createPlaylistFromPodcast(source, podcast, callback, exception);
     }, exception, exceptionHandler);
 };

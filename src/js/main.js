@@ -25,11 +25,9 @@ var PLAYLICK = {
     
     check_url_params: function () {
         var hash_parts = UTIL.getHashParts();
-        if (hash_parts.xspf) {
-            PLAYLICK.fetchXspf(hash_parts.xspf);
-        }
-        if (hash_parts.podcast) {
-            PLAYLICK.fetchPodcast(hash_parts.podcast);
+        var url = hash_parts.url || hash_parts.xspf || hash_parts.podcast;
+        if (url) {
+            PLAYLICK.fetchUrl(url);
         }
         if (hash_parts.lastfm_playlists) {
             PLAYLICK.fetchLastFmUserPlaylists(hash_parts.lastfm_playlists);
@@ -142,7 +140,7 @@ var PLAYLICK = {
         PLAYLICK.set_current_playlist_item($('#import_playlist').parent('li'));
         // Show Import screen
         $('#manage').hide();
-        $('#import p.messages').hide();
+        $('p.messages').hide();
         $('#import').show();
         // Select input
         setTimeout(function () {
@@ -257,69 +255,39 @@ var PLAYLICK = {
     **/
     importSetup: function (type) {
         // Hide existing errors
-        $('#import p.messages').hide();
+        $('p.messages').hide();
         // Show a loading message
         $('#' + type + '_loading').show();
         // Empty error message
         $('#' + type + '_error').empty();
     },
-    // Import an XSPF URL playlist
-    fetchXspf: function (url) {
-        PLAYLICK.importSetup('xspf');
-        IMPORTERS.Url.xspf(
+    // Import a playlist from an XSPF or Podcast URL
+    fetchUrl: function (url) {
+        PLAYLICK.importSetup('url');
+        IMPORTERS.Url.url(
             url,
             function callback (playlist) {
                 // Register playlist
                 PLAYLICK.registerPlaylist(playlist);
                 // Update messages
-                $('#import p.messages').hide();
-                $('#xspf_title').text(playlist.name);
-                $('#xspf_count').text(playlist.tracks.length);
-                $('#xspf_done').show();
+                $('p.messages').hide();
+                $('#url_title').text(playlist.name);
+                $('#url_count').text(playlist.tracks.length);
+                $('#url_done').show();
                 // Load playlist
                 PLAYLICK.load_playlist(playlist);
             },
             function exceptionHandler (exception) {
                 // Reset input
-                $('#xspf_input').val(url);
+                $('#url_input').val(url);
                 // Show error message
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 var escapedUrl = $('<b>').text('URL: ' + url);
                 var errorMessage = $('<p>').text(exception.message);
                 errorMessage.append('<br>')
                              .append(escapedUrl);
-                $('#xspf_error').html(errorMessage);
-                $('#xspf_error').show();
-            }
-        );
-    },
-    // Import a podcast URL playlist
-    fetchPodcast: function (url) {
-        PLAYLICK.importSetup('podcast');
-        IMPORTERS.Url.podcast(
-            url,
-            function callback (playlist) {
-                // Register playlist
-                PLAYLICK.registerPlaylist(playlist);
-                // Update messages
-                $('#import p.messages').hide();
-                $('#podcast_title').text(playlist.name);
-                $('#podcast_count').text(playlist.tracks.length);
-                $('#podcast_done').show();
-                // Load playlist
-                PLAYLICK.load_playlist(playlist);
-            },
-            function exceptionHandler (exception) {
-                // Reset input
-                $('#podcast_input').val(url);
-                // Show error message
-                $('#import p.messages').hide();
-                var escapedUrl = $('<b>').text('URL: ' + url);
-                var errorMessage = $('<p>').text(exception.message);
-                errorMessage.append('<br>')
-                             .append(escapedUrl);
-                $('#podcast_error').html(errorMessage);
-                $('#podcast_error').show();
+                $('#url_error').html(errorMessage);
+                $('#url_error').show();
             }
         );
     },
@@ -332,7 +300,7 @@ var PLAYLICK = {
                 // Register playlist
                 PLAYLICK.registerPlaylist(playlist);
                 // Update messages
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 var escapedAlbum = $('<b>').text(playlist.name);
                 $('#album_name').html(escapedAlbum);
                 $('#album_done').show();
@@ -341,7 +309,7 @@ var PLAYLICK = {
             },
             function exceptionHandler (exception) {
                 // Show error message
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 var escapedAlbum = $('<b>').text('Artist: ' + artist + ' Album: ' + album);
                 var escapedSignature = $('<small>').text(exception.signature);
                 var errorMessage = $('<p>').text(exception.message);
@@ -365,7 +333,7 @@ var PLAYLICK = {
             },
             function finalCallback (playlists) {
                 // Update messages
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 $('#import_count').text(playlists.length);
                 $('#import_done').show();
             },
@@ -373,7 +341,7 @@ var PLAYLICK = {
                 // Reset input
                 $('#import_playlist_input').val(username);
                 // Show error message
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 var escapedName = $('<b>').text('Username: ' + username);
                 var escapedSignature = $('<small>').text(exception.signature);
                 var errorMessage = $('<p>').text(exception.message);
@@ -388,7 +356,7 @@ var PLAYLICK = {
                 // Reset input
                 $('#import_playlist_input').val(username);
                 // No playlists
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 $('#import_error_no_playlists').show();
             }
         );
@@ -401,7 +369,7 @@ var PLAYLICK = {
                 // Register playlist
                 PLAYLICK.registerPlaylist(playlist);
                 // Update messages
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 $('#loved_done').show();
                 // Load playlist
                 PLAYLICK.load_playlist(playlist);
@@ -410,7 +378,7 @@ var PLAYLICK = {
                 // Reset input
                 $('#loved_input').val(username);
                 // Show error message
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 var escapedName = $('<b>').text('Username: ' + username);
                 var escapedSignature = $('<small>').text(exception.signature);
                 var errorMessage = $('<p>').text(exception.message);
@@ -433,7 +401,7 @@ var PLAYLICK = {
                 // Register playlist
                 PLAYLICK.registerPlaylist(playlist);
                 // Update messages
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 $('#generate_done').show();
                 // Load playlist
                 PLAYLICK.load_playlist(playlist);
@@ -443,7 +411,7 @@ var PLAYLICK = {
                 $("#generate_input_you").val(you);
                 $("#generate_input_they").val(they);
                 // Show error message
-                $('#import p.messages').hide();
+                $('p.messages').hide();
                 var escapedInput = $('<b>').text('You: ' + you + ' They: ' + they);
                 var escapedSignature = $('<small>').text(exception.signature);
                 var errorMessage = $('<p>').text(exception.message);

@@ -258,24 +258,14 @@ $('#album_form').submit(function (e) {
     PLAYLICK.fetchLastFmAlbum(params.artist_name, params.album_name);
 });
 
-// Import XSPF form
-$('#xspf_form').submit(function (e) {
+// XSPF/Podcast URL import form
+$('#url_form').submit(function (e) {
     e.preventDefault();
     // Parse the form
     var params = UTIL.serializeForm(this);
     // Clear the input and refocus
-    $('#xspf_input').val('').select();
-    PLAYLICK.fetchXspf(params.xspf);
-});
-
-// Import Podcast form
-$('#podcast_form').submit(function (e) {
-    e.preventDefault();
-    // Parse the form
-    var params = UTIL.serializeForm(this);
-    // Clear the input and refocus
-    $('#podcast_input').val('').select();
-    PLAYLICK.fetchPodcast(params.podcast);
+    $('#url_input').val('').select();
+    PLAYLICK.fetchUrl(params.url);
 });
 
 // Generate playlist form submit
