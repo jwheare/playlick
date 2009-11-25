@@ -61,39 +61,26 @@ var PLAYDAR = {
         
         $.each(response.results, function (i, result) {
             // Register sound
-            if (result.sid) {
-                Playdar.player.register_stream(result, {
-                    chained: true,
-                    onload: PLAYDAR.onResultLoad,
-                    onplay: PLAYDAR.onResultStart,
-                    onpause: PLAYDAR.onResultPause,
-                    onresume: PLAYDAR.onResultPlay,
-                    onstop: PLAYDAR.onResultStop,
-                    onfinish: PLAYDAR.onResultFinish,
-                    whileplaying: PLAYDAR.updatePlaybackProgress
-                });
-            } else if (result.url) {
-                // HACK: Handle non playdar streams separately
-                result.sid = Playdar.Util.generate_uuid();
-                Playdar.player.soundmanager.createSound({
-                    id: 's_' + result.sid,
-                    url: result.url,
-                    onload: PLAYDAR.onResultLoad,
-                    onplay: PLAYDAR.onResultStart,
-                    onpause: PLAYDAR.onResultPause,
-                    onresume: PLAYDAR.onResultPlay,
-                    onstop: PLAYDAR.onResultStop,
-                    onfinish: PLAYDAR.onResultFinish,
-                    whileplaying: PLAYDAR.updatePlaybackProgress,
-                    whileloading: function () {
+            Playdar.player.register_stream(result, {
+                chained: true,
+                onload: PLAYDAR.onResultLoad,
+                onplay: PLAYDAR.onResultStart,
+                onpause: PLAYDAR.onResultPause,
+                onresume: PLAYDAR.onResultPlay,
+                onstop: PLAYDAR.onResultStop,
+                onfinish: PLAYDAR.onResultFinish,
+                whileplaying: PLAYDAR.updatePlaybackProgress,
+                whileloading: function () {
+                    if (this.options.external) {
                         PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate);
-                    },
-                    onload: function () {
+                    }
+                },
+                onload: function () {
+                    if (this.options.external) {
                         PLAYDAR.updateStreamDuration(this.sID, this.duration);
                     }
-                });
-                // ENDHACK
-            }
+                }
+            });
             // Build result table item
             tbody_class = 'result';
             score_cell = $('<td class="score">');
