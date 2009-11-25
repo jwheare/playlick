@@ -49,6 +49,10 @@ form {
     font-size: 18px;
     line-height: 25px;
 }
+#content h2 {
+    font-size: 16px;
+    line-height: 23px;
+}
 
 #content h1#title {
     color: #335507;
@@ -222,6 +226,9 @@ ul#importers li input.importer_input {
 #main h1 {
     margin: 0 0 15px 40px;
 }
+#main h2 {
+    margin: 0 0 0 40px;
+}
 #main h1 img {
     float: right;
     margin: 0 24px 24px 0;
@@ -285,7 +292,7 @@ a#playlistApplescript img {
     display: none;
     margin: 20px 0;
 }
-#main p {
+#content #main p {
     margin-left: 40px;
 }
 #content p.messages img {
@@ -295,21 +302,53 @@ a#playlistApplescript img {
 
 /* Add track form */
 form#add_to_playlist,
-form#import_playlist_form,
-form#loved_form,
-form#generate_form {
-    margin: 20px 0 20px 40px;
+form#lastfm_form,
+form#lastfm_battle_form {
+    margin: 10px 0 20px 40px;
     line-height: 25px;
 }
 form#add_to_playlist input#add_track_input,
-form#import_playlist_form input#import_playlist_input,
-form#loved_form input#loved_input {
-    margin: 0 10px;
+form#lastfm_form input#lastfm_input {
+    margin: 0 10px 0 0;
     width: 250px;
 }
-form#generate_form input#generate_input_you,
-form#generate_form input#generate_input_they {
+form#lastfm_battle_form input#lastfm_battle_input_you {
+    margin: 0 10px 0 0;
+}
+form#lastfm_battle_form input#lastfm_battle_input_they {
     margin: 0 10px;
+}
+
+form#lastfm_playlists_form {
+    display: none;
+}
+p#lastfm_done input {
+}
+ul#lastfm_playlists {
+    margin-top: -35px;
+    list-style-type: none;
+}
+ul#lastfm_playlists li {
+    padding: 5px;
+    color: #335507;
+}
+ul#lastfm_playlists li.playlist {
+    background: #e8f9bb;
+    border-bottom: 1px solid #c0e95b;
+}
+ul#lastfm_playlists li.playlist:hover {
+    cursor: pointer;
+}
+ul#lastfm_playlists li.selected {
+    background: #d2f380;
+}
+ul#lastfm_playlists li span,
+ul#lastfm_playlists li small {
+    float: right;
+}
+ul#lastfm_playlists img {
+    margin: -4px 3px 0 3px;
+    vertical-align: middle;
 }
 
 /* Track list */

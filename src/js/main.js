@@ -33,7 +33,13 @@ var PLAYLICK = {
             PLAYLICK.fetchLastFmUserPlaylists(hash_parts.lastfm_playlists);
         }
         if (hash_parts.lastfm_loved) {
-            PLAYLICK.fetchLastFmLovedTracks(hash_parts.lastfm_loved);
+            PLAYLICK.fetchLastFmLovedTracks(
+                hash_parts.lastfm_loved,
+                function callback (playlistId, playlist) {
+                    // Load playlist
+                    PLAYLICK.load_playlist(playlist);
+                }
+            );
         }
         if (hash_parts.artist && hash_parts.album) {
             PLAYLICK.fetchLastFmAlbum(hash_parts.artist, hash_parts.album);
@@ -140,11 +146,10 @@ var PLAYLICK = {
         PLAYLICK.set_current_playlist_item($('#import_playlist').parent('li'));
         // Show Import screen
         $('#manage').hide();
-        $('p.messages').hide();
         $('#import').show();
         // Select input
         setTimeout(function () {
-            $('#import_playlist_input').select();
+            $('#lastfm_input').select();
         }, 1);
     },
     add_track: function (artist, track) {
@@ -337,72 +342,108 @@ var PLAYLICK = {
             }
         );
     },
-    // Fetch a Last.fm user's playlists as JSON
-    fetchLastFmUserPlaylists: function (username) {
-        PLAYLICK.importSetup('import');
-        IMPORTERS.LastFm.userPlaylists(
+    lastFmImportDone: function (processedUrl, playlist) {
+        // TODO - message exceptions. One example is if the user has no loved tracks
+        // Probably better to check this first I guess.
+        for (playlistUrl in PLAYLICK.importedPlaylists) {
+            if (PLAYLICK.importedPlaylists[playlistUrl] === false) {
+                return;
+            }
+        }
+        // All playlists are processed
+        $('p.messages').hide();
+        $('#lastfm_imported').show();
+    },
+    fetchLastFmLovedTracks: function (username, callback) {
+        var playlistId = 'loved_' + username;
+        PLAYLICK.importedPlaylists[playlistId] = false;
+        IMPORTERS.LastFm.lovedTracks(
             username,
-            function callback (playlist) {
-                // Register playlist
+            function lovedTracksCallback (playlist) {
+                PLAYLICK.importedPlaylists[playlistId] = playlist;
                 PLAYLICK.registerPlaylist(playlist);
-            },
-            function finalCallback (playlists) {
-                // Update messages
-                $('p.messages').hide();
-                $('#import_count').text(playlists.length);
-                $('#import_done').show();
+                callback(playlistId, playlist);
             },
             function exceptionHandler (exception) {
-                // Reset input
-                $('#import_playlist_input').val(username);
-                // Show error message
-                $('p.messages').hide();
-                var escapedName = $('<b>').text('Username: ' + username);
-                var escapedSignature = $('<small>').text(exception.signature);
-                var errorMessage = $('<p>').text(exception.message);
-                errorMessage.append('<br>')
-                             .append(escapedName)
-                             .append('<br>')
-                             .append(escapedSignature);
-                $('#import_error').html(errorMessage);
-                $('#import_error').show();
-            },
-            function noPlaylistHandler () {
-                // Reset input
-                $('#import_playlist_input').val(username);
-                // No playlists
-                $('p.messages').hide();
-                $('#import_error_no_playlists').show();
+                PLAYLICK.importedPlaylists[playlistId] = exception;
+                callback(playlistId, exception);
             }
         );
     },
-    fetchLastFmLovedTracks: function (username) {
-        PLAYLICK.importSetup('loved');
-        IMPORTERS.LastFm.lovedTracks(
-            username,
-            function callback (playlist) {
-                // Register playlist
+    importLastfmUserPlaylists: function (data, callback) {
+        var playlistId = data.id;
+        PLAYLICK.importedPlaylists[playlistId] = false;
+        IMPORTERS.LastFm.getUserPlaylist(
+            data,
+            function playlistCallback (playlist) {
+                PLAYLICK.importedPlaylists[playlistId] = playlist;
                 PLAYLICK.registerPlaylist(playlist);
+                callback(playlistId, playlist);
+            },
+            function playlistExceptionHandler (exception) {
+                PLAYLICK.importedPlaylists[playlistId] = exception;
+                callback(playlistId, exception);
+            }
+        );
+    },
+    // Fetch a Last.fm user's playlists as JSON
+    fetchLastFmUserPlaylists: function (username) {
+        PLAYLICK.importSetup('lastfm');
+        // Remove existing playlists
+        $('#lastfm_playlists li.playlist').remove();
+        PLAYLICK.playlistsToImport = {};
+        function addPlaylist (title, tracks, name) {
+            var listItem = $('<li>')
+                .append($('<input>').attr('type', 'checkbox').attr('checked', true).attr('name', name))
+                .append(' ')
+                .append($('<span>').append(tracks))
+                .append(title)
+                .addClass('playlist selected');
+            $('#lastfm_playlists').append(listItem);
+        }
+        function addLovedTracks () {
+            addPlaylist('Loved Tracks', '<img src="lastfm_loved.png" width="11" height="9">', 'loved_' + username);
+        }
+        IMPORTERS.LastFm.userPlaylists(
+            username,
+            function callback (playlists) {
                 // Update messages
                 $('p.messages').hide();
-                $('#loved_done').show();
-                // Load playlist
-                PLAYLICK.load_playlist(playlist);
+                $('#lastfm_done').show();
+                var s = (playlists.length === 1) ? '' : 's';
+                $('#lastfm_playlists_count').text(playlists.length + ' Playlist' + s + ' found');
+                // Add loved tracks and playlists to the checkbox list and show
+                addLovedTracks();
+                $.each(playlists, function (i, data) {
+                    PLAYLICK.playlistsToImport[data.id] = data;
+                    addPlaylist(data.title, data.size, data.id);
+                });
+                $('#lastfm_playlists_form').show();
+            },
+            function noPlaylistHandler () {
+                // Show message
+                $('p.messages').hide();
+                $('#lastfm_error_no_playlists').show();
+                // Add loved tracks to the checkbox list and show
+                addLovedTracks();
+                $('#lastfm_playlists_form').show();
             },
             function exceptionHandler (exception) {
                 // Reset input
-                $('#loved_input').val(username);
+                $('#lastfm_input').val(username);
                 // Show error message
                 $('p.messages').hide();
                 var escapedName = $('<b>').text('Username: ' + username);
                 var escapedSignature = $('<small>').text(exception.signature);
-                var errorMessage = $('<p>').text(exception.message);
+                var errorMessage = $('<span>').text(exception.message);
                 errorMessage.append('<br>')
-                             .append(escapedName)
-                             .append('<br>')
-                             .append(escapedSignature);
-                $('#loved_error').html(errorMessage);
-                $('#loved_error').show();
+                             .append(escapedName);
+                if (PLAYLICK.debug) {
+                    errorMessage.append('<br>')
+                                .append(escapedSignature);
+                }
+                $('#lastfm_error').html(errorMessage);
+                $('#lastfm_error').show();
             }
         );
     },
