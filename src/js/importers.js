@@ -180,7 +180,7 @@ IMPORTERS = {
             throw exception('No JSON', this.url);
         }
         if (json.error) {
-            throw exception(json.error.description, json);
+            throw exception(json.error.description || json.error.message || json.message, json);
         }
     }
 };

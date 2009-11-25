@@ -81,23 +81,35 @@
                     </div>
                     
                     <div id="import">
-                        <h1>Import your playlists</h1>
+                        <h2>Import your Last.fm playlists and Loved Tracks</h2>
                         
                         <form id="lastfm_form">
-                            <label for="lastfm_input">Last.fm Username:</label>
+                            <label for="lastfm_input">Username:</label>
                             <br>
                             <input type="text" name="username" id="lastfm_input" />
                             <input type="submit" id="lastfm_button" value="Get Playlists" />
                         </form>
                         
                         <p class="messages" id="lastfm_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
-                        <p class="messages" id="lastfm_done">Done! Playlists imported: <span id="lastfm_count"></span></p>
-                        <p class="messages" id="lastfm_error_no_playlists">No playlists found</p>
                         <p class="messages" id="lastfm_error"></p>
+                        <p class="messages" id="lastfm_import_error"></p>
+                        <p class="messages" id="lastfm_imported">Done!</p>
                         
-                        <ul id="lastfm_playlists"></ul>
+                        <form id="lastfm_playlists_form">
+                            <p class="messages" id="lastfm_done">
+                                <input type="submit" value="Import Playlists">
+                                <small id="lastfm_playlists_count"></small>
+                            </p>
+                            <p class="messages" id="lastfm_error_no_playlists">
+                                <input type="submit" value="Import Loved Tracks">
+                                <small>No playlists found</small>
+                            </p>
+                            <ul id="lastfm_playlists">
+                                <li class="header">&nbsp;<small>Tracks</small></li>
+                            </ul>
+                        </form>
                         
-                        <h1>The Last.fm Battle</h1>
+                        <h2>The Last.fm Battle</h2>
                         <p>Generate a playlist based on shared artists between two Last.fm users.</p>
                         
                         <form id="lastfm_battle_form">

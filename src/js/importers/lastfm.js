@@ -86,20 +86,38 @@ LastFm.getPlaylist = function (url, metadata, callback, exceptionHandler) {
     }, exception, exceptionHandler);
 };
 /**
- * LastFm.userPlaylists(user[, callback][, finalCallback][, exceptionHandler][, noPlaylistHandler])
- * - user (String): Last.fm username to fetch playlists for
- * - callback(playlist) (Function): Function to be called for each playlist that's successfully created
- *      Takes the playlist object as the only argument
- * - finalCallback(playlists) (Function): Function to be called after all playlists have been successfully created
- *      Takes an array of playlist objects as the only argument
- * - exceptionHandler(exception) (Function): Function to be called in case of an import exception
- *      Takes the exception object as the only argument
- * - noPlaylistHandler() (Function): Function to be called when the user has no playlists
+ * LastFm.getUserPlaylist(data[, callback][, exceptionHandler])
  * 
- * Imports user playlists from Last.fm
+ * Imports a Last.fm User playlist with a data object fetched from LastFm.userPlaylists
+**/
+LastFm.getUserPlaylist = function (data, callback, exceptionHandler) {
+    var url = "lastfm://playlist/" + data.id;
+    // Extract other metadata from playlist info
+    var metadata = {
+        url: data.url
+    };
+    var image = $.grep(data.image, function (value, i) {
+        return value.size == 'medium';
+    });
+    if (image[0]) {
+        metadata.image = image[0]['#text'];
+    }
+    // Fetch the tracklist
+    LastFm.getPlaylist(url, metadata, callback, exceptionHandler);
+};
+/**
+ * LastFm.userPlaylists(user[, callback][, noPlaylistHandler][, exceptionHandler])
+ * - user (String): Last.fm username to fetch playlists for
+ * - callback(playlist) (Function): Function to be called for after fetching playlists
+ *      Takes an array of playlist objects as the only argument
+ * - noPlaylistHandler() (Function): Function to be called when the user has no playlists
+ * - exceptionHandler(exception) (Function): Function to be called in case of an exception
+ *      Takes the exception object as the only argument
+ * 
+ * Fetch user playlist data from Last.fm
  * http://www.last.fm/api/show?service=313
 **/
-LastFm.userPlaylists = function (user, callback, finalCallback, exceptionHandler, noPlaylistHandler) {
+LastFm.userPlaylists = function (user, callback, noPlaylistHandler, exceptionHandler) {
     var method = "user.getplaylists";
     var params = {
         user: user
@@ -115,48 +133,7 @@ LastFm.userPlaylists = function (user, callback, finalCallback, exceptionHandler
         
         // Last.fm APIs return single item lists as single items
         var playlists = $.makeArray(json.playlists.playlist);
-        var importedPlaylists = {};
-        // Callback to loop through importedPlaylists to check if we're still waiting for results
-        // called on LastFm.getPlaylist success and failure
-        function playlistDone (processedUrl, playlist) {
-            for (source in importedPlaylists) {
-                if (importedPlaylists[source] === false) {
-                    return;
-                }
-            }
-            // All playlists are processed, call the LastFm.userPlaylists finalCallback
-            finalCallback(importedPlaylists);
-        }
-        // Create a playlist for each in the API response
-        // Requires a separate call to LastFm.getPlaylist for each
-        $.each(playlists, function (i, data) {
-            var source = "lastfm://playlist/" + data.id;
-            importedPlaylists[source] = false;
-            // Extract other metadata from playlist info
-            var metadata = {
-                url: data.url
-            };
-            var image = $.grep(data.image, function (value, i) {
-                return value.size == 'medium';
-            });
-            if (image[0]) {
-                metadata.image = image[0]['#text'];
-            }
-            // Fetch the tracklist
-            LastFm.getPlaylist(
-                source,
-                metadata,
-                function playlistCallback (playlist) {
-                    importedPlaylists[source] = playlist;
-                    callback(playlist);
-                    playlistDone(source, playlist);
-                },
-                function playlistExceptionHandler (exception) {
-                    importedPlaylists[source] = exception;
-                    playlistDone(source, exception);
-                }
-            );
-        });
+        callback(playlists);
     }, exception, exceptionHandler);
 };
 /**
@@ -228,7 +205,7 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
         if (!json.album) {
             throw exception('No album data', json);
         }
-        var source = "lastfm://playlist/album/" + json.album.id;
+        var albumUrl = "lastfm://playlist/album/" + json.album.id;
         // Extract other metadata from album info
         var description = '';
         if (json.album.wiki) {
@@ -245,7 +222,7 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
             metadata.image = image[0]['#text'];
         }
         // Fetch the album tracklist
-        LastFm.getPlaylist(source, metadata, callback, exceptionHandler);
+        LastFm.getPlaylist(albumUrl, metadata, callback, exceptionHandler);
     }, exception, exceptionHandler);
 };
 

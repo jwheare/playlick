@@ -183,7 +183,32 @@ $('#lastfm_form').submit(function (e) {
     // Clear the input and refocus
     $('#lastfm_input').val('').select();
     PLAYLICK.fetchLastFmUserPlaylists(params.username);
-    PLAYLICK.fetchLastFmLovedTracks(params.username);
+});
+$('#lastfm_playlists').click(function (e) {
+    var target = $(e.target);
+    var playlist_item = target.closest('li.playlist');
+    var checkbox = playlist_item.children('input[type=checkbox]');
+    if (playlist_item.size()) {
+        playlist_item.toggleClass('selected');
+        if (!target.is('input[type=checkbox]')) {
+            checkbox.attr('checked', !checkbox.attr('checked'));
+        }
+    }
+});
+$('#lastfm_playlists_form').submit(function (e) {
+    e.preventDefault();
+    PLAYLICK.importSetup('lastfm');
+    PLAYLICK.importedPlaylists = {};
+    // Parse the form
+    var params = UTIL.serializeForm(this);
+    for (var k in params) {
+        var lovedMatches = k.match(/loved_(.*)/);
+        if (lovedMatches) {
+            PLAYLICK.fetchLastFmLovedTracks(lovedMatches[1], PLAYLICK.lastFmImportDone);
+        } else {
+            PLAYLICK.importLastfmUserPlaylists(PLAYLICK.playlistsToImport[k], PLAYLICK.lastFmImportDone);
+        }
+    }
 });
 
 // Add album autocomplete
