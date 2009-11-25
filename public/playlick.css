@@ -60,6 +60,15 @@ form {
 #content h1#title span {
     color: #6ea31e;
 }
+#content a#titleLink {
+    text-decoration: none;
+}
+#content a#titleLink:hover {
+    color: #4c7a0f;
+}
+#content a#titleLink:hover span {
+    color: #92c137;
+}
 
 /* Sidebar */
 #sidebar {
@@ -288,6 +297,11 @@ a#playlistApplescript img {
 #import {
     
 }
+#import img.favicon {
+    margin: 5px 10px 0 -26px;
+    float: left;
+}
+
 #content p.messages {
     display: none;
     margin: 20px 0;
