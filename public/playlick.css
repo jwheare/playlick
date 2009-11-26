@@ -499,6 +499,12 @@ ul#lastfm_playlists img {
     cursor: pointer;
     background: #a8d840;
 }
+.sources table tbody.error td {
+    background: #FFAF59;
+}
+.sources table tbody.error:hover td {
+    background: #FF9E29;
+}
 .sources table td {
     padding: 8px 0 0 8px;
     border-top: 1px solid #c0e95b;

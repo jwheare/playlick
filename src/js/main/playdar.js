@@ -74,11 +74,6 @@ var PLAYDAR = {
                     if (this.options.external) {
                         PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate);
                     }
-                },
-                onload: function () {
-                    if (this.options.external) {
-                        PLAYDAR.updateStreamDuration(this.sID, this.duration);
-                    }
                 }
             });
             // Build result table item
@@ -254,11 +249,15 @@ var PLAYDAR = {
     
     // Not called when served from cache
     onResultLoad: function () {
+        if (this.options.external) {
+            PLAYDAR.updateStreamDuration(this.sID, this.duration);
+        }
         var trackSource = $('#' + this.sID);
         var track_item = trackSource.data('track_item');
         var playlist_track = track_item.data('playlist_track');
         if (track_item) {
             if (this.readyState == 2) { // failed/error
+                trackSource.addClass('error');
                 PLAYDAR.resetResult.call(this);
                 // Try the next available source
                 var nextSource = trackSource.next('tbody');
@@ -267,6 +266,13 @@ var PLAYDAR = {
                 } else {
                     // Add an error highlight in the playlist
                     track_item.addClass('error');
+                    // Advance to next track
+                    var next_playlist_track = track_item.nextAll('li.perfectMatch').data('playlist_track');
+                    if (next_playlist_track) {
+                        PLAYDAR.playTrack(next_playlist_track);
+                    } else {
+                        PLAYLICK.stopPlaySession();
+                    }
                 }
             }
         }
@@ -335,10 +341,14 @@ var PLAYDAR = {
                 return true;
             }
         }
-        // Otherwise hard stop play session and remove the playlist highlight from the sidebar
-        Playdar.player.stop_current(true);
-        PLAYLICK.set_playing_playlist_item();
+        // Otherwise hard stop play session
+        PLAYLICK.stopPlaySession();
         return track_item;
+    },
+    stopPlaySession: function () {
+        Playdar.player.stop_current(true);
+        // Remove the playlist highlight from the sidebar
+        PLAYLICK.set_playing_playlist_item();
     },
     updatePlaybackProgress: function () {
         var track_item = $('#' + this.sID).data('track_item');
