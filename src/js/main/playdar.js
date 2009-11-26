@@ -260,7 +260,7 @@ var PLAYDAR = {
                 trackSource.addClass('error');
                 PLAYDAR.resetResult.call(this);
                 // Try the next available source
-                var nextSource = trackSource.next('tbody');
+                var nextSource = trackSource.next('tbody:not(.error)');
                 if (nextSource.size()) {
                     PLAYLICK.selectSource(playlist_track, nextSource);
                 } else {
