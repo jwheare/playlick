@@ -205,34 +205,75 @@ var PLAYDAR = {
         }
     },
     resolve_track: function (playlist_track, force) {
-        if (Playdar.client && Playdar.client.is_authed()) {
-            var track = playlist_track.track;
-            playlist_track.element.removeClass('noMatch match perfectMatch');
-            playlist_track.element.addClass('scanning');
-            if (!force && track.playdar_response) {
-                PLAYDAR.load_track_results(playlist_track, track.playdar_response, true);
-            } else {
-                var qid = PLAYDAR.track_handler(playlist_track);
-                var results;
-                if (track.url) {
-                    results = [{
-                        artist: track.artist,
-                        track: track.name,
-                        album: track.album,
-                        url: track.url,
-                        duration: track.duration,
-                        size: track.size,
-                        bitrate: track.bitrate,
-                        type: track.type,
-                        source: Playdar.Util.location_from_url(track.url).host
-                    }];
-                }
+        var track = playlist_track.track;
+        playlist_track.element.removeClass('noMatch match perfectMatch');
+        playlist_track.element.addClass('scanning');
+        if (!force && track.playdar_response) {
+            PLAYDAR.load_track_results(playlist_track, track.playdar_response, true);
+        } else {
+            var qid = PLAYDAR.track_handler(playlist_track);
+            var results;
+            if (track.url) {
+                results = [{
+                    artist: track.artist,
+                    track: track.name,
+                    album: track.album,
+                    url: track.url,
+                    duration: track.duration,
+                    size: track.size,
+                    bitrate: track.bitrate,
+                    type: track.type,
+                    source: Playdar.Util.location_from_url(track.url).host
+                }];
+            }
+            if (Playdar.client && Playdar.client.is_authed()) {
                 Playdar.client.resolve(track.artist, track.name, track.album, qid, results);
+            } else {
+                PLAYDAR.aolResolve(track.artist, track.name, track.album, qid);
             }
         }
     },
+    aolResolve: function (artist, track, album, qid) {
+        var aolUrl = 'http://music.aol.com/api/audio/search?c=?';
+        $.getJSON(aolUrl, {
+            start: 0,
+            count: 20,
+            artistName: artist,
+            songTitle: track
+        }, function (json) {
+            var solved = false;
+            var response = {
+                qid: qid,
+                query: {
+                    artist: artist,
+                    track: track,
+                    album: album
+                },
+                results: $.map(json.response.data.assets, function (result, i) {
+                    var score = 0.8;
+                    if (UTIL.compareString(result.artistname, artist)
+                     && UTIL.compareString(result.songtitle, track)) {
+                         score = 1;
+                         solved = true;
+                    }
+                    return {
+                        artist: result.artistname,
+                        track: result.songtitle,
+                        album: result.albumname,
+                        duration: result.duration - 0,
+                        url: result.enclosure,
+                        source: Playdar.Util.location_from_url(result.enclosure).host,
+                        score: score,
+                        preference: 80
+                    };
+                })
+            };
+            response.solved = solved;
+            Playdar.client.handleResultsCallback(response, true);
+        });
+    },
     resolve_current_playlist: function () {
-        if (Playdar.client && Playdar.client.is_authed() && PLAYLICK.current_playlist) {
+        if (PLAYLICK.current_playlist) {
             $.each(PLAYLICK.current_playlist.tracks, function (i, playlist_track) {
                 PLAYDAR.resolve_track(playlist_track);
             });
