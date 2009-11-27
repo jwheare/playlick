@@ -463,6 +463,9 @@ ul#lastfm_playlists img {
     color: #335507;
     font-size: 11px;
 }
+.trackList span.estimate {
+    color: #6ea31e;
+}
 .trackList li.perfectMatch span.elapsed {
     visibility: visible;
 }

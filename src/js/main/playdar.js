@@ -422,12 +422,18 @@ var PLAYDAR = {
     },
     updateLoadProgress: function () {
         if (this.options.external) {
-            PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate);
+            PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, true);
         }
     },
-    updateStreamDuration: function (sid, duration) {
+    updateStreamDuration: function (sid, duration, estimate) {
         var track_item = $('#' + sid).data('track_item');
         if (track_item) {
+            var progress = track_item.find('.elapsed');
+            if (estimate) {
+                progress.addClass('estimate');
+            } else {
+                progress.removeClass('estimate');
+            }
             var playlist_track = track_item.data('playlist_track');
             // Update the track duration
             playlist_track.set_track_duration(Math.round(duration/1000));
