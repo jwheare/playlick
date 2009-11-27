@@ -247,7 +247,7 @@ var PLAYDAR = {
                     track: track,
                     album: album
                 },
-                results: $.map(json.response.data.assets, function (result, i) {
+                results: $.map(json.response.data.assets.slice(0, 5), function (result, i) {
                     var score = 0.8;
                     if (UTIL.compareString(result.artistname, artist)
                      && UTIL.compareString(result.songtitle, track)) {
