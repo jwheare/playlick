@@ -232,6 +232,21 @@ var PLAYDAR = {
         }
     },
     aolResolve: function (artist, track, album, qid) {
+        var response = {
+            qid: qid,
+            query: {
+                artist: artist,
+                track: track,
+                album: album
+            },
+            solved: false,
+            results: []
+        };
+        
+        if (!artist || !track) {
+            Playdar.client.handleResultsCallback(response, true);
+            return;
+        }
         var aolUrl = 'http://music.aol.com/api/audio/search?c=?';
         $.getJSON(aolUrl, {
             start: 0,
@@ -239,20 +254,13 @@ var PLAYDAR = {
             artistName: artist,
             songTitle: track
         }, function (json) {
-            var solved = false;
-            var response = {
-                qid: qid,
-                query: {
-                    artist: artist,
-                    track: track,
-                    album: album
-                },
-                results: $.map(json.response.data.assets.slice(0, 5), function (result, i) {
+            if (json.response.data) {
+                response.results = $.map(json.response.data.assets.slice(0, 5), function (result, i) {
                     var score = 0.8;
                     if (UTIL.compareString(result.artistname, artist)
                      && UTIL.compareString(result.songtitle, track)) {
                          score = 1;
-                         solved = true;
+                         response.solved = true;
                     }
                     return {
                         artist: result.artistname,
@@ -264,9 +272,8 @@ var PLAYDAR = {
                         score: score,
                         preference: 80
                     };
-                })
-            };
-            response.solved = solved;
+                });
+            }
             Playdar.client.handleResultsCallback(response, true);
         });
     },
