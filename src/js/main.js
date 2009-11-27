@@ -260,6 +260,13 @@ var PLAYLICK = {
         if (elements) {
             // Add to the DOM
             $('#playlist').append(elements);
+            setTimeout(function () {
+                var nowPlayingSound = Playdar.player.getNowPlaying();
+                if (nowPlayingSound) {
+                    PLAYDAR.updatePlaybackProgress.call(nowPlayingSound);
+                    PLAYDAR.updateLoadProgress.call(nowPlayingSound);
+                }
+            });
             // Resolve tracks with Playdar
             PLAYDAR.resolve_current_playlist();
         } else {

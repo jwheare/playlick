@@ -350,7 +350,6 @@ var PLAYDAR = {
             // Highlight the track in the playlist
             track_item.removeClass('paused');
             track_item.removeClass('error');
-            track_item.addClass('playing');
         }
         return track_item;
     },
