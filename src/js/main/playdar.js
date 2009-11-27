@@ -410,6 +410,7 @@ var PLAYDAR = {
             }
             var portion_played = this.position / duration;
             track_item.css('background-position', Math.round(portion_played * track_item.width()) + 'px 0');
+            track_item.addClass('playing');
         }
         return track_item;
     },
