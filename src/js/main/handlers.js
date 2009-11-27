@@ -48,7 +48,6 @@ $('#playlist').click(function (e) {
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
             } else if (playlist_track.track.playdar_qid) {
-                playlist_track.element.addClass('scanning');
                 PLAYDAR.recheck_track(playlist_track);
             } else {
                 PLAYDAR.resolve_track(playlist_track, true);

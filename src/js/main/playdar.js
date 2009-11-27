@@ -70,11 +70,7 @@ var PLAYDAR = {
                 onstop: PLAYDAR.onResultStop,
                 onfinish: PLAYDAR.onResultFinish,
                 whileplaying: PLAYDAR.updatePlaybackProgress,
-                whileloading: function () {
-                    if (this.options.external) {
-                        PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate);
-                    }
-                }
+                whileloading: PLAYDAR.updateLoadProgress
             });
             // Build result table item
             tbody_class = 'result';
@@ -199,9 +195,11 @@ var PLAYDAR = {
         return uuid;
     },
     recheck_track: function (playlist_track) {
-        if (playlist_track.track.playdar_qid) {
-            playlist_track.element.addClass('scanning');
-            Playdar.client.recheck_results(playlist_track.track.playdar_qid);
+        if (Playdar.client && Playdar.client.is_authed()) {
+            if (playlist_track.track.playdar_qid) {
+                playlist_track.element.addClass('scanning');
+                Playdar.client.recheck_results(playlist_track.track.playdar_qid);
+            }
         }
     },
     resolve_track: function (playlist_track, force) {
@@ -297,9 +295,10 @@ var PLAYDAR = {
         var track_item = trackSource.data('track_item');
         var playlist_track = track_item.data('playlist_track');
         if (track_item) {
-            if (this.readyState == 2) { // failed/error
+            if (this.readyState == 2 || !this.duration) { // failed/error or not a valid sound file
                 trackSource.addClass('error');
                 PLAYDAR.resetResult.call(this);
+                this.unload();
                 // Try the next available source
                 var nextSource = trackSource.next('tbody:not(.error)');
                 if (nextSource.size()) {
@@ -413,6 +412,11 @@ var PLAYDAR = {
             track_item.css('background-position', Math.round(portion_played * track_item.width()) + 'px 0');
         }
         return track_item;
+    },
+    updateLoadProgress: function () {
+        if (this.options.external) {
+            PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate);
+        }
     },
     updateStreamDuration: function (sid, duration) {
         var track_item = $('#' + sid).data('track_item');
