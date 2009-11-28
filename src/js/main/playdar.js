@@ -195,7 +195,7 @@ var PLAYDAR = {
         return uuid;
     },
     recheck_track: function (playlist_track) {
-        if (Playdar.client && Playdar.client.is_authed()) {
+        if (Playdar.client && Playdar.client.isAvailable() && Playdar.client.is_authed()) {
             if (playlist_track.track.playdar_qid) {
                 playlist_track.element.addClass('scanning');
                 Playdar.client.recheck_results(playlist_track.track.playdar_qid);
@@ -224,7 +224,7 @@ var PLAYDAR = {
                     source: Playdar.Util.location_from_url(track.url).host
                 }];
             }
-            if (Playdar.client && Playdar.client.is_authed()) {
+            if (Playdar.client && Playdar.client.isAvailable() && Playdar.client.is_authed()) {
                 Playdar.client.resolve(track.artist, track.name, track.album, qid, results);
             } else {
                 PLAYDAR.aolResolve(track.artist, track.name, track.album, qid);
