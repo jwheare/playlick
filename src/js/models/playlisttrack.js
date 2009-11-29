@@ -32,15 +32,8 @@ PlaylistTrack.prototype = {
     **/
     set_track_duration: function (duration) {
         if (duration) {
-            var playlist_duration = this.playlist.duration;
-            // Subtract the old duration
-            if (playlist_duration && this.track.duration) {
-                playlist_duration -= this.track.duration;
-            }
             this.track.duration = duration;
-            // Add the new duration
-            playlist_duration += this.track.duration;
-            this.playlist.set_duration(playlist_duration);
+            this.playlist.update_duration();
         }
     },
     /**

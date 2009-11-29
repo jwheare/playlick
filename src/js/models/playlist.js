@@ -73,6 +73,13 @@ Playlist.prototype = {
         // AUTOSAVE
         this.save(onSave);
     },
+    update_duration: function () {
+        var duration = 0;
+        $.each(this.tracks, function (i, playlist_track) {
+            duration += playlist_track.track.duration;
+        });
+        this.set_duration(duration);
+    },
     set_duration: function (duration) {
         this.duration = duration;
         if (this.options.onSetDuration) {
