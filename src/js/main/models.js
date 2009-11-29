@@ -38,18 +38,17 @@
             .append(edit_form)
             .html();
     };
-    var autolink_regexp = /((https?\:\/\/)|spotify:)[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g;
+    // Based on http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
+    var autolink_regexp = /\b([\w-]+:\/+|www[.])[^\s()<>]+(?:\([\w\d]+\)|(?:[^.,;'">\:\s\<\>\)\]\!]|\/))/g;
     function autoLink (word) {
-        if (word.match(autolink_regexp)) {
-            return $('<a>')
-                .attr('href', word)
-                .text(UTIL.truncateString(
-                    word.replace(/^https?:\/\//, '').replace(/\/$/, ''),
-                    60
-                ));
-        } else {
-                return word;
-        }
+        return word.replace(autolink_regexp, function (match, protocol, index, full) {
+            var url = match;
+            if (protocol == 'www.') {
+                url = 'http://' + url;
+            }
+            var text = match.replace(/^http:\/\//, '').replace(/\/$/, '');
+            return '<a href="' + url + '">' + text + '</a>';
+        });
     }
     function playlistTitleHtml () {
         var wrapper = $('<div>');
@@ -73,9 +72,7 @@
         // Autolink description
         var description = $('<small>');
         if (this.description) {
-            $.each(this.description.split(/[ \n]/), function (i, word) {
-                description.append(' ').append(autoLink(word)).append(' ');
-            });
+            description.append(autoLink($('<div>').html(this.description).text()));
         }
         if (this.source) {
             if (this.description) {
