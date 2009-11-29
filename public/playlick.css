@@ -36,7 +36,7 @@ form {
 
 h1#title {
     margin: 0;
-    padding: 10px 10px 9px 50px;
+    padding: 7px 10px 5px 50px;
     background: #d2f380;
     color: #335507;
     font-size: 18px;
@@ -45,8 +45,13 @@ a#titleLink {
     text-decoration: none;
 }
 a#titleLink img {
-    margin: -3px 5px 0 -37px;
     vertical-align: middle;
+}
+a#titleLink img.logo {
+    margin: 0 5px 1px -37px;
+}
+a#titleLink img.logo2 {
+    margin: 0 4px 0 -35px;
 }
 a#titleLink:hover {
     color: #4c7a0f;
