@@ -209,6 +209,16 @@ $('#lastfm_playlists_form').submit(function (e) {
         }
     }
 });
+$('#lastfm_playlists_all').click(function (e) {
+    e.preventDefault();
+    $('#lastfm_playlists li.playlist').addClass('selected');
+    $('#lastfm_playlists input[type=checkbox]').attr('checked', true);
+});
+$('#lastfm_playlists_none').click(function (e) {
+    e.preventDefault();
+    $('#lastfm_playlists li.playlist').removeClass('selected');
+    $('#lastfm_playlists input[type=checkbox]').attr('checked', false);
+});
 
 // Add album autocomplete
 $("#album_import_input").autocomplete(IMPORTERS.LastFm.WS_ROOT + "/2.0/?callback=?", {
