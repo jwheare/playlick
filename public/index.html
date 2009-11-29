@@ -9,6 +9,14 @@
     </head>
     <body>
         <div id="viewport">
+            <h1 id="title">
+                <a href="/" id="titleLink">
+                    <img src="/logo.png" width="16" height="16">
+                    Play<span>lick</span>
+                </a>
+                <small>Build and import playlists, albums and podcasts, then play them back with <a href="http://www.playdar.org/">Playdar</a>.</small>
+            </h1>
+            
             <div id="content">
                 <div id="sidebar">
                     <h1>Your playlists</h1>
@@ -53,10 +61,6 @@
                 </div>
                 
                 <div id="main">
-                    <h1 id="title">
-                        <a href="/" id="titleLink">Play<span>lick</span></a>
-                        <small>Build and import playlists, albums and podcasts, then play them back with <a href="http://www.playdar.org/">Playdar</a>.</small>
-                    </h1>
                     <div id="manage">
                         <h1 id="playlistTitle">Create a new playlist</h1>
                         
@@ -68,6 +72,11 @@
                             <input type="submit" id="add_track_button" value="Start a Playlist" />
                         </form>
                         
+                        <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>
+                        <p id="tracksError">Failed to load tracks. Please try again later.</p>
+                        
+                        <ol class="trackList" id="playlist"></ol>
+                        
                         <a id="playlistApplescript" href="#">
                             <img src="/itunes.png" width="16" height="16">
                             Export to iTunes
@@ -76,11 +85,6 @@
                         </a>
                         
                         <p id="shortcuts"><small>Keyboard shortcuts: &nbsp;&nbsp; <b>p</b> - play &nbsp;&nbsp; <b>]</b> - next track &nbsp;&nbsp; <b>[</b> - previous track</small></p>
-                        
-                        <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>
-                        <p id="tracksError">Failed to load tracks. Please try again later.</p>
-                        
-                        <ol class="trackList" id="playlist"></ol>
                     </div>
                     
                     <div id="import">

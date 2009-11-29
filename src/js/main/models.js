@@ -59,9 +59,9 @@
         
         var title = this.toString();
         if (this.url) {
-            wrapper.append($('<a>')
-                .attr('href', this.url)
-                .text(title));
+            wrapper.append(
+                $('<a>').attr('href', this.url).text(title)
+            );
         } else {
             wrapper.append(title);
         }
@@ -75,12 +75,10 @@
             description.append(autoLink($('<div>').html(this.description).text()));
         }
         if (this.source) {
-            if (this.description) {
-                description.append('<br>');
-            }
-            description.append($('<span>')
-                .append('Source: ')
-                .append(autoLink(this.source))
+            description.append($('<span class="source">')
+                .append(' [')
+                .append($('<a>').attr('href', this.source).text('Original Source'))
+                .append(']')
             );
         }
         if (this.description || this.source) {

@@ -32,7 +32,33 @@ form {
 #viewport {
     width: 970px;
     margin: 0 auto;
-    border-top: 15px solid #d2f380;
+}
+
+h1#title {
+    margin: 0;
+    padding: 10px 10px 10px 55px;
+    background: #d2f380;
+    color: #335507;
+    font-size: 18px;
+}
+a#titleLink {
+    text-decoration: none;
+}
+a#titleLink img {
+    float: left;
+    margin-left: -26px;
+}
+a#titleLink:hover {
+    color: #4c7a0f;
+}
+a#titleLink span {
+    color: #6ea31e;
+}
+a#titleLink:hover span {
+    color: #92c137;
+}
+h1#title small {
+    font-size: 12px;
 }
 
 #content {
@@ -52,22 +78,6 @@ form {
 #content h2 {
     font-size: 16px;
     line-height: 23px;
-}
-
-#content h1#title {
-    color: #335507;
-}
-#content h1#title span {
-    color: #6ea31e;
-}
-#content a#titleLink {
-    text-decoration: none;
-}
-#content a#titleLink:hover {
-    color: #4c7a0f;
-}
-#content a#titleLink:hover span {
-    color: #92c137;
 }
 
 /* Sidebar */
@@ -246,10 +256,10 @@ ul#importers li input.importer_input {
 #main h1 small {
     display: block;
     font-weight: normal;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.5;
 }
-#main h1 small span {
+#main h1 small span.source {
     color: #999;
 }
 #main h1 small span a {
@@ -259,10 +269,6 @@ ul#importers li input.importer_input {
 /* Manage */
 #manage {
     display: none;
-}
-
-p#shortcuts {
-    margin: 0 0 20px 40px;
 }
 
 p#tracksLoading {
@@ -281,8 +287,14 @@ p#tracksError {
     line-height: 39px;
     color: #B0252B;
 }
+
+p#shortcuts {
+    float: left;
+    margin: 20px 0 0 40px;
+}
 a#playlistApplescript {
     float: right;
+    margin: 20px 20px 0 0;
     font-size: 13px;
 }
 a#playlistApplescript:hover {
