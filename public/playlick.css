@@ -290,12 +290,13 @@ p#tracksError {
 
 p#shortcuts {
     float: left;
-    margin: 20px 0 0 40px;
+    margin-top: 20px;
 }
 a#playlistApplescript {
     float: right;
-    margin: 20px 20px 0 0;
+    margin: 20px 24px 0 0;
     font-size: 13px;
+    text-align: right;
 }
 a#playlistApplescript:hover {
     color: #4c7a0f;
