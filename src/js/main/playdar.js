@@ -366,7 +366,7 @@ var PLAYDAR = {
         }
         return track_item;
     },
-    onResultStop: function (hard) {
+    onResultStop: function () {
         // Reset the track
         var track_item = PLAYDAR.resetResult.call(this);
         return track_item;
