@@ -45,8 +45,8 @@ a#titleLink {
     text-decoration: none;
 }
 a#titleLink img {
-    float: left;
-    margin-left: -26px;
+    margin: -3px 3px 0 -26px;
+    vertical-align: middle;
 }
 a#titleLink:hover {
     color: #4c7a0f;
