@@ -295,33 +295,30 @@ var PLAYDAR = {
     
     // Not called when served from cache
     onResultLoad: function () {
-        if (this.options.external) {
+        if (this.options.external && this.duration) {
             PLAYDAR.updateStreamDuration(this.sID, this.duration);
         }
         var trackSource = $('#' + this.sID);
         var track_item = trackSource.data('track_item');
-        var playlist_track = track_item.data('playlist_track');
-        if (track_item) {
-            if (this.readyState == 2 || !this.duration) { // failed/error or not a valid sound file
+        if (this.readyState == 2 || !this.duration) {
+            // Loading failed
+            if (track_item) {
+                // Playlist currently loaded
+                // Mark the source as an error and try the next available source
                 trackSource.addClass('error');
-                PLAYDAR.resetResult.call(this);
-                this.unload();
-                // Try the next available source
-                var nextSource = trackSource.next('tbody:not(.error)');
-                if (nextSource.size()) {
-                    PLAYLICK.selectSource(playlist_track, nextSource);
-                } else {
-                    // Add an error highlight in the playlist
-                    track_item.addClass('error');
-                    // Advance to next track
-                    var next_playlist_track = track_item.nextAll('li.perfectMatch').data('playlist_track');
-                    if (next_playlist_track) {
-                        PLAYDAR.playTrack(next_playlist_track);
-                    } else {
-                        PLAYLICK.stopPlaySession();
-                    }
+                if (PLAYDAR.playNextSource(trackSource)) {
+                    return track_item;
+                }
+                // No sources remaining
+                // Mark the track as an error and try the next available track
+                track_item.addClass('error');
+                if (PLAYDAR.playNextTrack(track_item)) {
+                    return track_item;
                 }
             }
+            // No tracks remain to play in the currently loaded playlist.
+            // Stop the session
+            PLAYDAR.stopPlaySession.call(this, true);
         }
         return track_item;
     },
@@ -333,6 +330,8 @@ var PLAYDAR = {
             PLAYLICK.now_playing = playlist_track;
             // Highlight the playlist in the sidebar
             PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
+            // Update the playback meter
+            PLAYDAR.updatePlaybackProgress.call(this);
         }
     },
     onResultPause: function () {
@@ -358,7 +357,7 @@ var PLAYDAR = {
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
             // Remove track highlight in the playlist
-            track_item.removeClass('playing');
+            track_item.removeClass('playing').removeClass('paused');
             // Reset progress bar
             track_item.css('background-position', '0 0');
             // Reset elapsed counter
@@ -367,34 +366,31 @@ var PLAYDAR = {
         }
         return track_item;
     },
-    onResultStop: function () {
+    onResultStop: function (hard) {
+        // Reset the track
         var track_item = PLAYDAR.resetResult.call(this);
-        if (track_item) {
-            track_item.removeClass('paused');
-        }
-        // Clear the now playing track
-        PLAYLICK.now_playing = null;
-        Playdar.player.stop_current();
         return track_item;
     },
+    stopPlaySession: function () {
+        // Stop the player
+        Playdar.player.stop_current(true);
+        // Clear the now playing track
+        PLAYLICK.now_playing = null;
+        // Remove the playlist highlight from the sidebar
+        PLAYLICK.set_playing_playlist_item();
+    },
     onResultFinish: function () {
-        var track_item = PLAYDAR.onResultStop.call(this);
+        // Reset the track
+        var track_item = PLAYDAR.resetResult.call(this);
         // Chain playback to the next perfect match
         if (track_item) {
-            var next_playlist_track = track_item.nextAll('li.perfectMatch').data('playlist_track');
-            if (next_playlist_track) {
-                PLAYDAR.playTrack(next_playlist_track);
+            if (PLAYDAR.playNextTrack(track_item)) {
                 return true;
             }
         }
         // Otherwise hard stop play session
-        PLAYLICK.stopPlaySession();
+        PLAYDAR.stopPlaySession.call(this, true);
         return track_item;
-    },
-    stopPlaySession: function () {
-        Playdar.player.stop_current(true);
-        // Remove the playlist highlight from the sidebar
-        PLAYLICK.set_playing_playlist_item();
     },
     updatePlaybackProgress: function () {
         var track_item = $('#' + this.sID).data('track_item');
@@ -402,9 +398,15 @@ var PLAYDAR = {
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
             var progress = track_item.find('.elapsed');
-            var elapsed = '<strong>' + Playdar.Util.mmss(Math.round(this.position/1000)) + '</strong>';
+            var elapsed = '';
+            if (this.position) {
+                elapsed += '<strong>' + Playdar.Util.mmss(Math.round(this.position/1000)) + '</strong>';
+                if (playlist_track.track.duration) {
+                    elapsed += ' / ';
+                }
+            }
             if (playlist_track.track.duration) {
-                elapsed += ' / ' + playlist_track.track.get_duration_string();
+                elapsed += playlist_track.track.get_duration_string();
             }
             progress.html(elapsed);
             // Update the playback progress bar
@@ -444,5 +446,22 @@ var PLAYDAR = {
         if (playlist_track && playlist_track.track.playdar_sid) {
             Playdar.player.play_stream(playlist_track.track.playdar_sid);
         }
+    },
+    playNextTrack: function (track_item) {
+        var next_playlist_track = track_item.nextAll('li.perfectMatch').data('playlist_track');
+        if (next_playlist_track) {
+            PLAYDAR.playTrack(next_playlist_track);
+            return true;
+        }
+        return false;
+    },
+    playNextSource: function (trackSource) {
+        var track_item = trackSource.data('track_item');
+        var nextSource = trackSource.next('tbody:not(.error)');
+        if (nextSource.size()) {
+            PLAYLICK.selectSource(track_item.data('playlist_track'), nextSource);
+            return true;
+        }
+        return false;
     }
 };
