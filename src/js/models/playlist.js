@@ -76,7 +76,9 @@ Playlist.prototype = {
     update_duration: function () {
         var duration = 0;
         $.each(this.tracks, function (i, playlist_track) {
-            duration += playlist_track.track.duration;
+            if (playlist_track.track.duration) {
+                duration += playlist_track.track.duration;
+            }
         });
         this.set_duration(duration);
     },
