@@ -39,9 +39,9 @@
                         <ul id="importers">
                             <li class="importer">
                                 <form id="album_form">
-                                    <label for="album_import_input">Add an Album</label>
+                                    <label for="album_import_input">Add an Album (Search)</label>
                                     <br>
-                                    <input type="text" name="album" id="album_import_input" class="importer_input" />
+                                    <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album" />
                                     <input type="hidden" name="artist_name" id="album_import_artist" />
                                     <input type="hidden" name="album_name" id="album_import_name" />
                                     <input type="submit" id="album_button" value="Go" />
@@ -56,7 +56,7 @@
                                     <label for="lastfm_input">Import your Last.fm playlists and Loved Tracks</label>
                                     <br>
                                     <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="username" id="lastfm_input" class="importer_input" />
+                                    <input type="text" name="username" id="lastfm_input" class="importer_input" placeholder="Last.fm username" />
                                     <input type="submit" id="lastfm_button" value="Get ’em" />
                                 </form>
                                 
@@ -86,10 +86,10 @@
                             
                             <li class="importer">
                                 <form id="spotify_form">
-                                    <label for="spotify_input">Spotify Track/Album URL</label>
+                                    <label for="spotify_input">Add a Spotify Track/Album by URL</label>
                                     <br>
                                     <img src="spotify_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="url" id="spotify_input" class="importer_input">
+                                    <input type="text" name="url" id="spotify_input" class="importer_input" placeholder="Paste a URL">
                                     <input type="submit" id="url_button" value="Go">
                                 </form>
                                 <p class="messages" id="spotify_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
@@ -102,7 +102,7 @@
                                     <label for="url_input">Import an XSPF or Podcast</label>
                                     <br>
                                     <img src="podcast_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="url" id="url_input" class="importer_input">
+                                    <input type="text" name="url" id="url_input" class="importer_input" placeholder="Paste a URL">
                                     <input type="submit" id="url_button" value="Go">
                                 </form>
                                 <p class="messages" id="url_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
