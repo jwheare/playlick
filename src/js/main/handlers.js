@@ -282,6 +282,16 @@ $('#url_form').submit(function (e) {
     PLAYLICK.fetchUrl(params.url);
 });
 
+// Spotify URL import form
+$('#spotify_form').submit(function (e) {
+    e.preventDefault();
+    // Parse the form
+    var params = UTIL.serializeForm(this);
+    // Clear the input and refocus
+    $('#spotify_input').val('').select();
+    PLAYLICK.fetchSpotify(params.url);
+});
+
 // Last.fm Battle form submit
 $('#lastfm_battle_form').submit(function (e) {
     e.preventDefault();

@@ -10,12 +10,18 @@
     <body>
         <div id="viewport">
             <h1 id="title">
+                <span id="powered">
+                    <a href="http://www.playdar.org/">
+                        <img src="/playdar_logo_16x16" width="16" height="16">
+                        <small>Playback powered by Playdar</small>
+                    </a>
+                </span>
                 <a href="/" id="titleLink">
                     <img src="/logo.gif" width="32" height="32" class="logo">
                     <!-- <img src="/logo2.png" width="31" height="33" class="logo2"> -->
                     Play<span>lick</span>
                 </a>
-                <small>Build and import playlists, albums and podcasts, then play them back with <a href="http://www.playdar.org/">Playdar</a>.</small>
+                <small>Build and import playlists, albums and podcasts.</small>
             </h1>
             
             <div id="content">
@@ -31,7 +37,7 @@
                     </div>
                     <div class="sidebar_list">
                         <ul id="importers">
-                            <li>
+                            <li class="importer">
                                 <form id="album_form">
                                     <label for="album_import_input">Add an Album</label>
                                     <br>
@@ -44,12 +50,59 @@
                                 <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
                                 <p class="messages" id="album_error"></p>
                             </li>
-                            <li>
+                            
+                            <li class="importer">
+                                <form id="lastfm_form">
+                                    <label for="lastfm_input">Import your Last.fm playlists and Loved Tracks</label>
+                                    <br>
+                                    <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
+                                    <input type="text" name="username" id="lastfm_input" class="importer_input" />
+                                    <input type="submit" id="lastfm_button" value="Get ’em" />
+                                </form>
+                                
+                                <p class="messages" id="lastfm_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
+                                <p class="messages" id="lastfm_error"></p>
+                                <p class="messages" id="lastfm_import_error"></p>
+                                <p class="messages" id="lastfm_imported">Done!</p>
+                                
+                                <form id="lastfm_playlists_form">
+                                    <p class="messages" id="lastfm_done">
+                                        <small id="lastfm_playlists_count"></small>
+                                        <small>
+                                            <a href="#" id="lastfm_playlists_all">All</a>
+                                            <a href="#" id="lastfm_playlists_none">None</a>
+                                        </small>
+                                    </p>
+                                    <p class="messages" id="lastfm_error_no_playlists">
+                                        <input type="submit" value="Import Loved Tracks">
+                                        <small>No playlists found</small>
+                                    </p>
+                                    <ul id="lastfm_playlists">
+                                        <li class="header">&nbsp;<small>Tracks</small></li>
+                                    </ul>
+                                    <input type="submit" value="Import Playlists" class="submit">
+                                </form>
+                            </li>
+                            
+                            <li class="importer">
+                                <form id="spotify_form">
+                                    <label for="spotify_input">Spotify Track/Album URL</label>
+                                    <br>
+                                    <img src="spotify_icon.gif" width="16" height="16" class="favicon">
+                                    <input type="text" name="url" id="spotify_input" class="importer_input">
+                                    <input type="submit" id="url_button" value="Go">
+                                </form>
+                                <p class="messages" id="spotify_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
+                                <p class="messages" id="spotify_done">Done! Imported “<span id="spotify_title"></span>”</p>
+                                <p class="messages" id="spotify_error"></p>
+                            </li>
+                            
+                            <li class="importer">
                                 <form id="url_form">
                                     <label for="url_input">Import an XSPF or Podcast</label>
                                     <br>
-                                    <input type="text" name="url" id="url_input" class="importer_input" />
-                                    <input type="submit" id="url_button" value="Go" />
+                                    <input type="text" name="url" id="url_input" class="importer_input">
+                                    <input type="submit" id="url_button" value="Go">
                                 </form>
                                 <p class="messages" id="url_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
                                 <p class="messages" id="url_done">Done! Imported “<span id="url_title"></span>” (<span id="url_count"></span>)</p>
@@ -89,39 +142,6 @@
                     </div>
                     
                     <div id="import">
-                        <h2>Import your Last.fm playlists and Loved Tracks</h2>
-                        
-                        <form id="lastfm_form">
-                            <label for="lastfm_input">Username:</label>
-                            <br>
-                            <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                            <input type="text" name="username" id="lastfm_input" />
-                            <input type="submit" id="lastfm_button" value="Get Playlists" />
-                        </form>
-                        
-                        <p class="messages" id="lastfm_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
-                        <p class="messages" id="lastfm_error"></p>
-                        <p class="messages" id="lastfm_import_error"></p>
-                        <p class="messages" id="lastfm_imported">Done!</p>
-                        
-                        <form id="lastfm_playlists_form">
-                            <p class="messages" id="lastfm_done">
-                                <input type="submit" value="Import Playlists">
-                                <small id="lastfm_playlists_count"></small>
-                                <small>
-                                    <a href="#" id="lastfm_playlists_all">All</a>
-                                    <a href="#" id="lastfm_playlists_none">None</a>
-                                </small>
-                            </p>
-                            <p class="messages" id="lastfm_error_no_playlists">
-                                <input type="submit" value="Import Loved Tracks">
-                                <small>No playlists found</small>
-                            </p>
-                            <ul id="lastfm_playlists">
-                                <li class="header">&nbsp;<small>Tracks</small></li>
-                            </ul>
-                        </form>
-                        
                         <h2>The Last.fm Battle</h2>
                         <p>Generate a playlist based on shared artists between two Last.fm users.</p>
                         

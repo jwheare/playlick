@@ -317,6 +317,35 @@ var PLAYLICK = {
             }
         );
     },
+    // Fetch the metadata from a Spotify Album or Track URL
+    fetchSpotify: function (url) {
+        PLAYLICK.importSetup('spotify');
+        IMPORTERS.Spotify.url(
+            url,
+            function callback (playlist) {
+                // Register playlist
+                PLAYLICK.registerPlaylist(playlist);
+                // Update messages
+                $('p.messages').hide();
+                $('#spotify_title').text(playlist.name);
+                $('#spotify_done').show();
+                // Load playlist
+                PLAYLICK.load_playlist(playlist);
+            },
+            function exceptionHandler (exception) {
+                // Reset input
+                $('#spotify_input').val(url);
+                // Show error message
+                $('p.messages').hide();
+                var escapedUrl = $('<b>').text('URL: ' + url);
+                var errorMessage = $('<p>').text(exception.message);
+                errorMessage.append('<br>')
+                             .append(escapedUrl);
+                $('#spotify_error').html(errorMessage);
+                $('#spotify_error').show();
+            }
+        );
+    },
     // Fetch a Last.fm album playlist as JSON
     fetchLastFmAlbum: function (artist, album) {
         PLAYLICK.importSetup('album');
@@ -403,8 +432,9 @@ var PLAYLICK = {
                 .append($('<input>').attr('type', 'checkbox').attr('checked', true).attr('name', name))
                 .append(' ')
                 .append($('<span>').append(tracks))
-                .append(title)
-                .addClass('playlist selected');
+                .append(UTIL.truncateString(title))
+                .addClass('playlist selected')
+                .attr('title', title);
             $('#lastfm_playlists').append(listItem);
         }
         function addLovedTracks () {

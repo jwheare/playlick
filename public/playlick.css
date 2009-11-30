@@ -24,7 +24,7 @@ a {
     color: #335507;
 }
 
-form {
+form, ul, li {
     margin: 0;
     padding: 0;
 }
@@ -40,6 +40,23 @@ h1#title {
     background: #d2f380;
     color: #335507;
     font-size: 18px;
+}
+h1#title span#powered {
+    margin-top: 3px;
+    float: right;
+    vertical-align: middle;
+}
+h1#title span#powered a {
+    text-decoration: none;
+}
+h1#title span#powered a small {
+    text-decoration: underline;
+}
+h1#title span#powered a:hover small {
+    color: #4c7a0f;
+}
+h1#title span#powered img {
+    margin: 0 0 -3px 0;
 }
 a#titleLink {
     text-decoration: none;
@@ -218,9 +235,11 @@ ul#importers {
     list-style-type: none;
     font-size: 14px;
 }
-ul#importers li {
+ul#importers li.importer {
+    float: left;
     margin: 0 -24px;
     padding: 5px 0 10px 0;
+    width: 300px;
     border-right: 24px solid #fff;
     border-left: 24px solid #fff;
     border-bottom: 1px solid #d2f380;
@@ -234,6 +253,8 @@ ul#importers li input.importer_input {
 }
 
 #playdar {
+    clear: both;
+    padding-top: 10px;
     vertical-align: middle;
 }
 #playdar img {
@@ -315,14 +336,16 @@ a#playlistApplescript img {
 #import {
     
 }
-#import img.favicon {
+img.favicon {
     margin: 5px 10px 0 -26px;
     float: left;
 }
 
 #content p.messages {
     display: none;
-    margin: 20px 0;
+    margin: 10px 0;
+    font-size: 13px;
+    line-height: 1.5;
 }
 #content #main p {
     margin-left: 40px;
@@ -334,13 +357,11 @@ a#playlistApplescript img {
 
 /* Add track form */
 form#add_to_playlist,
-form#lastfm_form,
 form#lastfm_battle_form {
     margin: 10px 0 20px 40px;
     line-height: 25px;
 }
-form#add_to_playlist input#add_track_input,
-form#lastfm_form input#lastfm_input {
+form#add_to_playlist input#add_track_input {
     margin: 0 10px 0 0;
     width: 250px;
 }
@@ -351,13 +372,21 @@ form#lastfm_battle_form input#lastfm_battle_input_they {
     margin: 0 10px;
 }
 
+/* Import playlists form */
 form#lastfm_playlists_form {
     display: none;
+}
+form#lastfm_playlists_form p.messages {
+    margin: 5px 0 0 0;
+}
+form#lastfm_playlists_form input.submit {
+    margin-top: 10px;
+    float: right;
 }
 p#lastfm_done input {
 }
 ul#lastfm_playlists {
-    margin-top: -35px;
+    margin-top: -29px;
     list-style-type: none;
 }
 ul#lastfm_playlists li {
