@@ -34,6 +34,35 @@ form, ul, li {
     margin: 0 auto;
 }
 
+/* Playdar powered */
+#powered {
+    margin: 5px 10px;
+    float: right;
+    text-align: right;
+}
+#powered p {
+    margin: 0;
+    padding: 0;
+}
+#powered a.icon {
+    font-weight: bold;
+    text-decoration: none;
+}
+#powered a.icon small {
+    text-decoration: underline;
+}
+#powered a:hover {
+    color: #4c7a0f;
+}
+#powered img {
+    margin: 0 0 -3px 0;
+}
+#playdarStatus {
+    font-weight: normal;
+}
+
+/* Title */
+
 h1#title {
     margin: 0;
     padding: 7px 10px 5px 50px;
@@ -41,22 +70,7 @@ h1#title {
     color: #335507;
     font-size: 18px;
 }
-h1#title span#powered {
-    margin-top: 3px;
-    float: right;
-}
-h1#title span#powered a {
-    text-decoration: none;
-}
-h1#title span#powered a small {
-    text-decoration: underline;
-}
-h1#title span#powered a:hover small {
-    color: #4c7a0f;
-}
-h1#title span#powered img {
-    margin: 0 0 -3px 0;
-}
+
 a#titleLink {
     text-decoration: none;
 }
@@ -83,6 +97,7 @@ h1#title small {
 }
 
 #content {
+    position: relative;
     clear: both;
     padding: 40px 0 0 0;
     border-top: 1px solid #c0e95b;
@@ -249,15 +264,6 @@ ul#importers li input {
 }
 ul#importers li input.importer_input {
     width: 200px;
-}
-
-#playdar {
-    clear: both;
-    padding-top: 10px;
-    vertical-align: middle;
-}
-#playdar img {
-    margin-right: 3px;
 }
 
 /* Main */
@@ -657,6 +663,8 @@ ul#lastfm_playlists img {
 **/
 
 #sm2-container {
-    height: 40px;
-    margin-top: 10px;
+    position: absolute;
+    top: 10px;
+    right: 30px;
+    height: 20px;
 }

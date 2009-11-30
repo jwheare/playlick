@@ -2,39 +2,38 @@
 var PLAYDAR = {
     soundmanager_ready: function (status) {
         if (status.success) {
-            $('#playdar').html(STRINGS.loading_playdar_text);
             Playdar.client.go();
         } else {
-            $('#playdar').html(STRINGS.loading_flash_error_text);
+            PLAYDAR.update_status(STRINGS.loading_flash_error_text);
         }
     },
     
     playdar_listeners: {
+        onStartStat: function () {
+            PLAYDAR.update_status(STRINGS.loading_playdar_text);
+        },
         onStat: function (detected) {
             if (detected) {
                 if (!detected.authenticated) {
                     var connect_link = Playdar.client.get_auth_link_html(
                         STRINGS.connect_to_playdar_text
                     );
-                    PLAYDAR.update_status(connect_link);
+                    PLAYDAR.update_status('<strong>' + connect_link + '</strong>');
                 }
             } else {
-                PLAYDAR.update_status(STRINGS.playdar_unavailable_text);
+                PLAYDAR.update_status(
+                    STRINGS.playdar_unavailable_text
+                  + ' ' + Playdar.client.get_stat_link_html()
+                  + ' ' + STRINGS.download_playdar_text
+                );
             }
         },
         onAuth: function () {
             var disconnect_link = Playdar.client.get_disconnect_link_html(
                 STRINGS.disconnect_from_playdar_text
             );
-            PLAYDAR.update_status(disconnect_link);
+            PLAYDAR.update_status('<strong>' + STRINGS.connected_to_playdar_text + '</strong> ' + disconnect_link);
             PLAYDAR.resolve_current_playlist();
-        },
-        onAuthClear: function () {
-            var connect_link = Playdar.client.get_auth_link_html(
-                STRINGS.connect_to_playdar_text
-            );
-            PLAYDAR.update_status(connect_link);
-            PLAYDAR.cancel_playdar_resolve();
         },
         onResolveIdle: function () {
             if (PLAYLICK.current_playlist && PLAYLICK.batch_save) {
@@ -44,10 +43,7 @@ var PLAYDAR = {
         }
     },
     update_status: function (message) {
-        $('#playdar').html(
-            '<img src="/playdar_logo_16x16.png" width="16" height="16"> '
-            + message
-        );
+        $('#playdarStatus').html(message);
     },
     // Render playdar results table
     build_results_table: function (response, list_item) {

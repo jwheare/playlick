@@ -9,13 +9,18 @@
     </head>
     <body>
         <div id="viewport">
-            <h1 id="title">
-                <span id="powered">
-                    <a href="http://www.playdar.org/">
+            <div id="powered">
+                <p>
+                    <a href="http://www.playdar.org/" class="icon">
                         <img src="/playdar_logo_16x16.png" width="16" height="16">
                         <small>Playback powered by Playdar</small>
                     </a>
-                </span>
+                </p>
+                <p>
+                    <small id="playdarStatus">Loading flash player…</small>
+                </p>
+            </div>
+            <h1 id="title">
                 <a href="/" id="titleLink">
                     <img src="/logo.gif" width="32" height="32" class="logo">
                     <!-- <img src="/logo2.png" width="31" height="33" class="logo2"> -->
@@ -25,6 +30,8 @@
             </h1>
             
             <div id="content">
+                <div id="sm2-container"></div>
+                
                 <div id="sidebar">
                     <h1>Your playlists</h1>
                     <div class="sidebar_list">
@@ -119,8 +126,6 @@
                             </li>
                         </ul>
                     </div>
-                    <div id="playdar">Loading flash player…</div>
-                    <div id="sm2-container"></div>
                 </div>
                 
                 <div id="main">
