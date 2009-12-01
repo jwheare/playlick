@@ -23,6 +23,8 @@ var UTIL = {
         return params;
     },
     compareString: function (a, b) {
+        a = a || '';
+        b = b || '';
         return a.toUpperCase() == b.toUpperCase();
     },
     getHashParts: function () {
