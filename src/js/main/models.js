@@ -72,10 +72,6 @@
         } else {
             wrapper.append(title);
         }
-        var duration = this.get_duration();
-        if (duration) {
-            wrapper.append(' (' + duration + ')');
-        }
         // Autolink description
         var description = $('<small>');
         if (this.description) {
@@ -136,11 +132,6 @@
         onDelete: function () {
             if (this == PLAYLICK.current_playlist) {
                 PLAYLICK.show_import();
-            }
-        },
-        onSetDuration: function () {
-            if (this == PLAYLICK.current_playlist) {
-                PLAYLICK.update_playlist_title(this.titleHTML());
             }
         }
     };
