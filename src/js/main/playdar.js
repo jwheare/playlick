@@ -321,6 +321,7 @@ var PLAYDAR = {
     onResultStart: function () {
         var track_item = PLAYDAR.onResultPlay.call(this);
         if (track_item) {
+            track_item.addClass('loading');
             var playlist_track = track_item.data('playlist_track');
             // Update the now playing track
             PLAYLICK.now_playing = playlist_track;
@@ -352,10 +353,13 @@ var PLAYDAR = {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
-            // Remove track highlight in the playlist
-            track_item.removeClass('playing').removeClass('paused');
-            // Reset progress bar
-            track_item.css('background-position', '0 0');
+            // Remove track status classes
+            track_item
+                .removeClass('playing')
+                .removeClass('paused')
+                .removeClass('loading')
+                // Reset progress bar
+                .css('background-position', '0 0');
             // Reset elapsed counter
             var progress = track_item.find('.elapsed');
             progress.text(playlist_track.track.get_duration_string());
@@ -424,6 +428,7 @@ var PLAYDAR = {
     updateLoadProgress: function () {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
+            track_item.removeClass('loading');
             var loading = track_item.find('.loading');
             var loaded = this.bytesLoaded/this.bytesTotal * 100;
             loading.css('width', loaded + "%");

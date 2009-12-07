@@ -453,6 +453,9 @@ ul#lastfm_playlists img {
 .trackList li.paused span.status {
     background-image: url('track_play.gif');
 }
+.trackList li.loading span.status {
+    background-image: url('track_loading.gif');
+}
 .trackList li span.status span {
     display: none;
 }
