@@ -359,6 +359,9 @@ var PLAYDAR = {
             // Reset elapsed counter
             var progress = track_item.find('.elapsed');
             progress.text(playlist_track.track.get_duration_string());
+            // Reset loading bar
+            var loading = track_item.find('.loading');
+            loading.css('width', 0);
         }
         return track_item;
     },
