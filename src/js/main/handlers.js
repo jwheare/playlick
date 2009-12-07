@@ -24,6 +24,7 @@ $('#playlist').click(function (e) {
         // Clicks to playdar results
         var tbody = target.closest('tbody.result');
         if (tbody.size()) {
+            track_item.removeClass('open');
             PLAYLICK.selectSource(playlist_track, tbody);
         }
         
@@ -43,7 +44,9 @@ $('#playlist').click(function (e) {
         var track_link = target.closest('li.p_t a.item');
         if (track_link.size()) {
             e.preventDefault();
-            if (track_item.is('li.perfectMatch') && playlist_track.track.playdar_sid) {
+            if (track_item.is('li.open')) {
+                track_item.removeClass('open');
+            } else if (track_item.is('li.perfectMatch') && playlist_track.track.playdar_sid) {
                 PLAYDAR.playTrack(playlist_track);
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
