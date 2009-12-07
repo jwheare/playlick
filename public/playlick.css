@@ -489,12 +489,17 @@ ul#lastfm_playlists img {
 .trackList li.error:hover {
     background: #FF9E29;
 }
-.trackList div.loading {
+.trackList li.playing div.loading,
+.trackList li.paused div.loading {
     position: absolute;
     top: 0;
     left: 0;
     width: 0;
     height: 3px;
+    background: #c0e95b;
+}
+.trackList li.playing:hover div.loading,
+.trackList li.paused:hover div.loading {
     background: #a8d840;
 }
 .trackList a.remove {
