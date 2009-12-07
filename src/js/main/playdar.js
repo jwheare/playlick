@@ -469,11 +469,28 @@ var PLAYDAR = {
         }
         return false;
     },
+    playPreviousTrack: function (track_item) {
+        var next_playlist_track = track_item.prevAll('li.perfectMatch').data('playlist_track');
+        if (next_playlist_track) {
+            PLAYDAR.playTrack(next_playlist_track);
+            return true;
+        }
+        return false;
+    },
     playNextSource: function (trackSource) {
         var track_item = trackSource.data('track_item');
-        var nextSource = trackSource.next('tbody:not(.error)');
+        var nextSource = trackSource.nextAll('tbody:not(.error):first');
         if (nextSource.size()) {
             PLAYLICK.selectSource(track_item.data('playlist_track'), nextSource);
+            return true;
+        }
+        return false;
+    },
+    playPreviousSource: function (trackSource) {
+        var track_item = trackSource.data('track_item');
+        var previousSource = trackSource.prevAll('tbody:not(.error):first');
+        if (previousSource.size()) {
+            PLAYLICK.selectSource(track_item.data('playlist_track'), previousSource);
             return true;
         }
         return false;

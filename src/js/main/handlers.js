@@ -361,7 +361,7 @@ $(document).keydown(function (e) {
         return true;
     }
     // Don't capture with any modifiers
-    if (e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) {
+    if (e.metaKey || e.altKey || e.ctrlKey) {
         return true;
     }
     var current_track, previous_track, next_track;
@@ -375,20 +375,28 @@ $(document).keydown(function (e) {
         }
         PLAYDAR.playTrack(current_track);
         break;
-    case 219: // [
-        // Back a track
+    case 219: // [ / {
         e.preventDefault();
         if (PLAYLICK.now_playing) {
-            previous_track = PLAYLICK.now_playing.element.prevAll('li.perfectMatch');
-            PLAYDAR.playTrack(previous_track.data('playlist_track'));
+            if (e.shiftKey) {
+                // Back a source
+                PLAYDAR.playPreviousSource(PLAYLICK.now_playing.element.find('tbody.choice'));
+            } else {
+                // Back a track
+                PLAYDAR.playPreviousTrack(PLAYLICK.now_playing.element);
+            }
         }
         break;
-    case 221: // ]
-        // Skip track
+    case 221: // ] / }
         e.preventDefault();
         if (PLAYLICK.now_playing) {
-            next_track = PLAYLICK.now_playing.element.nextAll('li.perfectMatch');
-            PLAYDAR.playTrack(next_track.data('playlist_track'));
+            if (e.shiftKey) {
+                // Next source
+                PLAYDAR.playNextSource(PLAYLICK.now_playing.element.find('tbody.choice'));
+            } else {
+                // Next track
+                PLAYDAR.playNextTrack(PLAYLICK.now_playing.element);
+            }
         }
         break;
     }
