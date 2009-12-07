@@ -62,6 +62,22 @@ IMPORTERS = {
         }, exception, exceptionHandler);
     },
     /**
+     * getAbsoluteUrl(url[, root=window.location.href]) -> String
+     * - url (String): URL to make absolute
+     * - root (String): Root that the URL is relative to
+     * 
+     * Convert a relative URL to absolute with a given root.
+    **/
+    getAbsoluteUrl: function (url, root) {
+        root = root || window.location.href;
+        // Check for a relative URL and an absolute http root URL
+        if (url && !url.match(/^https?:\/\//) && root.match(/^https?:\/\//)) {
+            // Strip off the last part of the root and add the relative URL
+            url = root.replace(/(\/[^\/]*)$/, '') + '/' + url.replace(/^\//, '');
+        }
+        return url;
+    },
+    /**
      * createPlaylistFromJspf(url, jspf, metadata, callback, exception) -> MODELS.Playlist
      * - url (String): URL from which the XSPF was fetched
      * - jspf (Object): JSON object representation of an XSPF
@@ -90,7 +106,7 @@ IMPORTERS = {
         }
         var playlist = new MODELS.Playlist({
             name: title,
-            image: metadata.image || jspf.image,
+            image: IMPORTERS.getAbsoluteUrl(metadata.image || jspf.image, source),
             description: description,
             url: url,
             source: source
@@ -108,13 +124,7 @@ IMPORTERS = {
                     trackDoc.duration = Math.round(data.duration/1000);
                 }
                 if (data.location) {
-                    trackURL = data.location;
-                    // Check for a relative URL and an absolute http root URL
-                    if (!trackURL.match(/^https?:\/\//) && source.match(/^https?:\/\//)) {
-                        // Strip off the last part of the root and add the relative URL
-                        trackURL = source.replace(/(\/[^\/]*)$/, '') + '/' + trackURL;
-                    }
-                    trackDoc.url = trackURL;
+                    trackDoc.url = IMPORTERS.getAbsoluteUrl(data.location, source);
                 }
                 playlist.add_track(new MODELS.Track(trackDoc));
             }
