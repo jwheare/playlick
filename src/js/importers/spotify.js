@@ -4,7 +4,8 @@
  * http://developer.spotify.com/en/metadata-api/lookup/
 **/
 var Spotify = {
-    LOOKUP_ROOT: "http://ws.spotify.com/lookup/1/"
+    LOOKUP_ROOT: "http://ws.spotify.com/lookup/1/",
+    SEARCH_ROOT: "http://ws.spotify.com/search/1/"
 };
 /**
  * class Spotify.Exception < Exception
@@ -127,8 +128,13 @@ Spotify.album = function (url, callback, exceptionHandler) {
         if (!album.artist || !album.name) {
             throw exception('Invalid album', album);
         }
+        var trackList = album.tracks.track;
         // XML to JSON converters often return single item lists as single items
-        var trackList = $.makeArray(album.tracks.track);
+        // We need this hacky check that this isn't an array because a single track object can contain
+        // the 'length' property that screws up $.makeArray.
+        if (trackList.href) {
+            trackList = [trackList];
+        }
         if (!trackList.length) {
             throw exception('No tracks', album);
         }

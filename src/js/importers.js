@@ -61,6 +61,26 @@ IMPORTERS = {
             callback.call(this, json);
         }, exception, exceptionHandler);
     },
+    autocompleteFromXml: function (element, url, params, parse, formatItem) {
+        element.autocomplete("http://query.yahooapis.com/v1/public/yql?callback=?", {
+            multiple: false,
+            delay: 200,
+            dataType: "jsonp",
+            extraParams: {
+                q: function () {
+                    var queryUrl = url;
+                    if (params) {
+                        queryUrl += '?' + Playdar.Util.toQueryString(params());
+                    }
+                    return 'select * from xml where url="' + queryUrl + '"';
+                },
+                format: 'json'
+            },
+            cacheLength: 1,
+            parse: parse,
+            formatItem: formatItem
+        });
+    },
     /**
      * getAbsoluteUrl(url[, root=window.location.href]) -> String
      * - url (String): URL to make absolute

@@ -327,6 +327,37 @@ var PLAYLICK = {
             }
         );
     },
+    // Fetch the metadata from a Spotify Album URL retrieved from autocomplete
+    fetchSpotifyAlbum: function (url) {
+        PLAYLICK.importSetup('spotify_album');
+        IMPORTERS.Spotify.url(
+            url,
+            function callback (playlist) {
+                // Register playlist
+                PLAYLICK.registerPlaylist(playlist);
+                // Update messages
+                $('p.messages').hide();
+                var escapedAlbum = $('<b>').text(playlist.name);
+                $('#spotify_album_name').html(escapedAlbum);
+                $('#spotify_album_done').show();
+                // Load playlist
+                PLAYLICK.load_playlist(playlist);
+            },
+            function exceptionHandler (exception) {
+                // Show error message
+                $('p.messages').hide();
+                var escapedAlbum = $('<b>').text('URL: ' + url);
+                var escapedSignature = $('<small>').text(exception.signature);
+                var errorMessage = $('<p>').text(exception.message);
+                errorMessage.append('<br>')
+                             .append(escapedAlbum)
+                             .append('<br>')
+                             .append(escapedSignature);
+                $('#spotify_album_error').html(errorMessage);
+                $('#spotify_album_error').show();
+            }
+        );
+    },
     // Fetch the metadata from a Spotify Album or Track URL
     fetchSpotify: function (url) {
         PLAYLICK.importSetup('spotify');

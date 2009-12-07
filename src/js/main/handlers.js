@@ -220,7 +220,9 @@ $('#lastfm_playlists_none').click(function (e) {
     $('#lastfm_playlists input[type=checkbox]').attr('checked', false);
 });
 
-// Add album autocomplete
+/**
+ * Last.fm add album autocomplete
+**/
 $("#album_import_input").autocomplete(IMPORTERS.LastFm.WS_ROOT + "/2.0/?callback=?", {
     multiple: false,
     delay: 200,
@@ -270,6 +272,54 @@ $('#album_form').submit(function (e) {
     $("#album_import_input").val('').select();
     // Load the XSPF
     PLAYLICK.fetchLastFmAlbum(params.artist_name, params.album_name);
+});
+
+/**
+ * Spotify Add album autocomplete
+**/
+
+IMPORTERS.autocompleteFromXml(
+    $("#spotify_album_import_input"),
+    IMPORTERS.Spotify.SEARCH_ROOT + "album",
+    function () {
+        return {
+            q: $("#spotify_album_import_input").val()
+        };
+    },
+    function parse (json) {
+        var parsed = [];
+        if (json && json.query.results && json.query.results.albums && json.query.results.albums.album) {
+            // YQL APIs return single item lists as single items
+            var albums = $.makeArray(json.query.results.albums.album);
+            $.each(albums, function (i, album) {
+                parsed.push({
+                    data: album,
+                    value: album.name,
+                    result: (album.artist.name || album.artist[0].name) + " - " + album.name
+                });
+            });
+        }
+        return parsed;
+    },
+    function formatItem (album, position, length, value) {
+        return (album.artist.name || album.artist[0].name) + " - " + album.name;
+    }
+);
+// Add spotify album autocomplete select
+$("#spotify_album_import_input").result(function (e, album, formatted) {
+    $("#spotify_album_import_url").val(album.href);
+    $('#spotify_album_import_input').submit();
+});
+// Import spotify album playlist form submit
+$('#spotify_album_form').submit(function (e) {
+    e.preventDefault();
+    // Parse the form
+    var params = UTIL.serializeForm(this);
+    // Clear the inputs and refocus
+    $("#spotify_album_import_url").val('');
+    $("#spotify_album_import_input").val('').select();
+    // Load the Album URL
+    PLAYLICK.fetchSpotifyAlbum(params.spotifyUrl);
 });
 
 // XSPF/Podcast URL import form

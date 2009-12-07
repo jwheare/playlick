@@ -49,6 +49,7 @@
                                     <label for="album_import_input">
                                         Add an Album (Last.fm Search)
                                         <br>
+                                        <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
                                     </label>
                                     <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…" />
                                     <input type="hidden" name="artist_name" id="album_import_artist" />
@@ -58,6 +59,22 @@
                                 <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
                                 <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
                                 <p class="messages" id="album_error"></p>
+                            </li>
+                            
+                            <li class="importer">
+                                <form id="spotify_album_form">
+                                    <label for="spotify_album_import_input">
+                                        Add an Album (Spotify Search)
+                                        <br>
+                                        <img src="spotify_icon.gif" width="16" height="16" class="favicon">
+                                    </label>
+                                    <input type="text" name="album" id="spotify_album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…" />
+                                    <input type="hidden" name="spotifyUrl" id="spotify_album_import_url" />
+                                    <input type="submit" id="spotify_album_button" value="Go" />
+                                </form>
+                                <p class="messages" id="spotify_album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
+                                <p class="messages" id="spotify_album_done">Done! Album imported: <span id="spotify_album_name"></span></p>
+                                <p class="messages" id="spotify_album_error"></p>
                             </li>
                             
                             <li class="importer">
