@@ -1,4 +1,8 @@
 IMPORTERS = {
+    YQL_URL: "http://query.yahooapis.com/v1/public/yql?callback=?",
+    yqlSelectXML: function (url) {
+        return 'select * from xml where url="' + url + '"';
+    },
     /**
      * getJson(url, params, callback, exception[, exceptionHandler])
      * - url (String): URL to a JSON document
@@ -51,8 +55,8 @@ IMPORTERS = {
      * http://developer.yahoo.com/yql/
     **/
     getJsonFomXml: function (url, callback, exception, exceptionHandler) {
-        IMPORTERS.getJson("http://query.yahooapis.com/v1/public/yql?callback=?", {
-            q: 'select * from xml where url="' + url + '"',
+        IMPORTERS.getJson(IMPORTERS.YQL_URL, {
+            q: IMPORTERS.yqlSelectXML(url),
             format: 'json'
         }, function (json) {
             if (!json.query || !json.query.results) {
@@ -62,7 +66,7 @@ IMPORTERS = {
         }, exception, exceptionHandler);
     },
     autocompleteFromXml: function (element, url, params, parse, formatItem) {
-        element.autocomplete("http://query.yahooapis.com/v1/public/yql?callback=?", {
+        element.autocomplete(IMPORTERS.YQL_URL, {
             multiple: false,
             delay: 200,
             dataType: "jsonp",
@@ -72,7 +76,7 @@ IMPORTERS = {
                     if (params) {
                         queryUrl += '?' + Playdar.Util.toQueryString(params());
                     }
-                    return 'select * from xml where url="' + queryUrl + '"';
+                    return IMPORTERS.yqlSelectXML(queryUrl);
                 },
                 format: 'json'
             },
