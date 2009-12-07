@@ -309,12 +309,13 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
     }, exception, exceptionHandler);
 };
 
-LastFm.getAlbumArt = function (artist, album) {
+LastFm.getAlbumArt = function (artist, album, size) {
+    size = size || 'small';
     return LastFm.WS_ROOT + "/2.0/?" + $.param({
         artist: artist,
         album: album,
         method: "album.imageredirect",
-        size: "small",
+        size: size,
         api_key: LastFm.API_KEY
     });
 };

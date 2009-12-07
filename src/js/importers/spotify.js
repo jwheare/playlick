@@ -136,7 +136,8 @@ Spotify.album = function (url, callback, exceptionHandler) {
         var playlist = new MODELS.Playlist({
             name: (album.artist.name || album.artist[0].name) + ' - ' + album.name,
             url: url,
-            source: albumLookupUrl
+            source: albumLookupUrl,
+            image: LastFm.getAlbumArt(album.artist.name || album.artist[0].name, album.name, 'large')
         });
         // Load tracks
         $.each(trackList, function (i, trackData) {
