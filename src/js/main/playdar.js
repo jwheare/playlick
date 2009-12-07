@@ -419,6 +419,12 @@ var PLAYDAR = {
         return track_item;
     },
     updateLoadProgress: function () {
+        var track_item = $('#' + this.sID).data('track_item');
+        if (track_item) {
+            var loading = track_item.find('.loading');
+            var loaded = this.bytesLoaded/this.bytesTotal * 100;
+            loading.css('width', loaded + "%");
+        }
         if (this.options.external) {
             PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, true);
         }

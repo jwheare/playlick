@@ -1,6 +1,7 @@
 /* Model customisation */
 (function () {
     function trackToHtml () {
+        var loading = $('<div class="loading">');
         var remove_link = $('<a href="#" class="remove" title="Remove from playlist">').text('╳');
         var source_link = $('<a href="#" class="show_sources" title="Show track sources">').text('sources');
         var item_name = $('<span class="haudio">')
@@ -15,6 +16,7 @@
         var sources = $('<div class="sources">');
         // Wrap in a div so we can return its innerHTML as a string
         var wrapper = $('<div>')
+            .append(loading)
             .append(remove_link);
         if (this.spotifyUrl) {
             var spotifyLink = $('<a class="spotifyLink">')

@@ -425,6 +425,7 @@ ul#lastfm_playlists img {
     list-style: none;
 }
 .trackList li {
+    position: relative;
     border-bottom: 1px solid #c0e95b;
     border-right: 24px solid #fff;
     font-size: 14px;
@@ -487,6 +488,14 @@ ul#lastfm_playlists img {
 }
 .trackList li.error:hover {
     background: #FF9E29;
+}
+.trackList div.loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: #a8d840;
 }
 .trackList a.remove {
     float: right;
