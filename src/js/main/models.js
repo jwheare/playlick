@@ -14,12 +14,19 @@
             .append(item_name);
         var sources = $('<div class="sources">');
         // Wrap in a div so we can return its innerHTML as a string
-        return $('<div>')
-            .append(remove_link)
-            .append(source_link)
-            .append(item_link)
-            .append(sources)
-            .html();
+        var wrapper = $('<div>')
+            .append(remove_link);
+        if (this.spotifyUrl) {
+            var spotifyLink = $('<a class="spotifyLink">')
+                .attr('target', PLAYLICK.appLauncherId)
+                .attr('href', this.spotifyUrl)
+                .append('<img src="/spotify_icon.gif" width="16" height="16">');
+            wrapper.append(spotifyLink);
+        }
+        wrapper.append(source_link)
+               .append(item_link)
+               .append(sources);
+        return wrapper.html();
     };
     function playlistToHtml () {
         var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">');

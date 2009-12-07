@@ -82,6 +82,26 @@ Spotify.url = function (url, callback, exceptionHandler) {
     }
 };
 /**
+ * Spotify.addTrack(playlist, trackData)
+ * - playlist: Playlist object to add the track to
+ * - trackData: Track data object to conver to a Track object
+ * 
+ * Adds a Track to a Playlist based on track data fetched from a Spotify
+ * metadata API lookup
+**/
+Spotify.addTrack = function (playlist, trackData) {
+    var trackDoc = {
+        name: trackData.name,
+        artist: trackData.artist.name || trackData.artist[0].name,
+        album: trackData.album.name,
+        duration: Math.round(trackData.length)
+    };
+    if (trackData.href) {
+        trackDoc.spotifyUrl = Spotify.convertUrlToHttp(trackData.href);
+    }
+    playlist.add_track(new MODELS.Track(trackDoc));
+};
+/**
  * Spotify.album(url[, callback][, exceptionHandler])
  * - url (String): Spotify album URL to lookup metadata for
  * - callback(playlist) (Function): Function to be called if a playlist is successfully created
@@ -115,21 +135,14 @@ Spotify.album = function (url, callback, exceptionHandler) {
         // Create the playlist
         var playlist = new MODELS.Playlist({
             name: (album.artist.name || album.artist[0].name) + ' - ' + album.name,
-            description: url
+            url: url,
+            source: albumLookupUrl
         });
         // Load tracks
         $.each(trackList, function (i, trackData) {
-            if (trackData.name && trackData.artist) {
-                var trackDoc = {
-                    name: trackData.name,
-                    artist: trackData.artist.name || trackData.artist[0].name,
-                    album: album.name,
-                    duration: Math.round(trackData.length)
-                };
-                if (trackData.href) {
-                    trackDoc.url = trackData.href;
-                }
-                playlist.add_track(new MODELS.Track(trackDoc));
+            if (trackData.artist && trackData.name) {
+                trackData.album = album;
+                Spotify.addTrack(playlist, trackData);
             }
         });
         // Save
@@ -161,25 +174,18 @@ Spotify.track = function (url, callback, exceptionHandler) {
         if (!json.query || !json.query.results || !json.query.results.track) {
             throw exception('No track', json);
         }
-        var track = json.query.results.track;
-        if (!track.artist || !track.name) {
+        var trackData = json.query.results.track;
+        if (!trackData.artist || !trackData.name) {
             throw exception('Invalid track', album);
         }
         // Create a playlist
         var playlist = new MODELS.Playlist({
-            name: (track.artist.name || track.artist[0].name) + ' - ' + track.name,
-            description: url
+            name: (trackData.artist.name || trackData.artist[0].name) + ' - ' + trackData.name,
+            url: url,
+            source: trackLookupUrl
         });
-        var trackDoc = {
-            name: track.name,
-            artist: track.artist.name || track.artist[0].name,
-            album: track.album.name,
-            duration: Math.round(track.length)
-        };
-        if (track.href) {
-            trackDoc.url = track.href;
-        }
-        playlist.add_track(new MODELS.Track(trackDoc));
+        trackData.href = url;
+        Spotify.addTrack(playlist, trackData);
         // Save
         playlist.save();
         // Call the Spotify.track callback

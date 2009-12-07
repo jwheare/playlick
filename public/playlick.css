@@ -500,6 +500,19 @@ ul#lastfm_playlists img {
     background: #eee;
 }
 
+.trackList a.spotifyLink {
+    float: right;
+    padding: 0 6px;
+    font-size: 11px;
+    background: #d2f380;
+    text-decoration: none;
+}
+.trackList a.spotifyLink:hover {
+    background: #c0e95b;
+}
+.trackList a.spotifyLink img {
+    vertical-align: middle;
+}
 .trackList a.show_sources {
     float: right;
     padding: 0 6px;
@@ -656,6 +669,14 @@ ul#lastfm_playlists img {
 
 .ac_over {
     background-color: #c0e95b;
+}
+
+/**
+ * App launcher iframe target
+**/
+#appLauncher {
+    display: none;
+    visibility: hidden;
 }
 
 /**

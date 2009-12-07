@@ -8,6 +8,7 @@ var Track = function (doc) {
     this.artist = doc.artist || '';
     this.album = doc.album || '';
     this.url = doc.url || '';
+    this.spotifyUrl = doc.spotifyUrl || '';
     this.duration = doc.duration;
     this.size = doc.size;
     this.bitrate = doc.bitrate;
@@ -48,7 +49,8 @@ Track.prototype = {
             name: this.name,
             artist: this.artist,
             album: this.album,
-            url: this.url
+            url: this.url,
+            spotifyUrl: this.spotifyUrl
         };
         return doc;
     }

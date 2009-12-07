@@ -11,6 +11,16 @@ var PLAYLICK = {
         PLAYLICK.check_url_params();
         // Load playlists
         PLAYLICK.fetchPlaylists();
+        // Create appLauncher iframe
+        PLAYLICK.createAppLauncherFrame();
+    },
+    appLauncherId: 'appLauncher',
+    createAppLauncherFrame: function () {
+        var iframe = $('<iframe width="0" height="0" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" scrolling="no" allowtransparency="true">')
+            .attr('id', PLAYLICK.appLauncherId)
+            .attr('name', PLAYLICK.appLauncherId);
+        $('body').append(iframe);
+        iframe.attr('src', 'about:blank');
     },
     retryCouch: function () {
         $('#loading_playlists').removeClass('unavailable');
