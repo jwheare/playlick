@@ -36,8 +36,7 @@
                     <h1>Your playlists</h1>
                     <div class="sidebar_list">
                         <ul id="playlists">
-                            <li><a href="#new" id="create_playlist" class="playlist">+ Create</a></li>
-                            <li class="current"><a href="#import" id="import_playlist" class="playlist">+ Import</a></li>
+                            <li class="current"><a href="#new" id="create_playlist" class="playlist">+ Create</a></li>
                         </ul>
                         
                         <p id="loading_playlists">Loading playlists…</p>
@@ -46,11 +45,11 @@
                         <ul id="importers">
                             <li class="importer">
                                 <form id="album_form">
-                                    <label for="album_import_input">
-                                        Add an Album (Last.fm Search)
-                                        <br>
-                                        <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    </label>
+                                    <p class="label">
+                                        <label for="album_import_input">Add an Album (Last.fm Search)</label>
+                                    </p>
+                                    
+                                    <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
                                     <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…" />
                                     <input type="hidden" name="artist_name" id="album_import_artist" />
                                     <input type="hidden" name="album_name" id="album_import_name" />
@@ -63,11 +62,11 @@
                             
                             <li class="importer">
                                 <form id="spotify_album_form">
-                                    <label for="spotify_album_import_input">
-                                        Add an Album (Spotify Search)
-                                        <br>
-                                        <img src="spotify_icon.gif" width="16" height="16" class="favicon">
-                                    </label>
+                                    <p class="label">
+                                        <label for="spotify_album_import_input">Add an Album (Spotify Search)</label>
+                                    </p>
+                                    
+                                    <img src="spotify_icon.gif" width="16" height="16" class="favicon">
                                     <input type="text" name="album" id="spotify_album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…" />
                                     <input type="hidden" name="spotifyUrl" id="spotify_album_import_url" />
                                     <input type="submit" id="spotify_album_button" value="Go" />
@@ -79,11 +78,10 @@
                             
                             <li class="importer">
                                 <form id="lastfm_form">
-                                    <label for="lastfm_input">
-                                        Import your Last.fm playlists and Loved Tracks
-                                        <br>
-                                        <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    </label>
+                                    <p class="label">
+                                        <label for="lastfm_input">Import your Last.fm playlists and Loved Tracks</label>
+                                    </p>
+                                    <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
                                     <input type="text" name="username" id="lastfm_input" class="importer_input" placeholder="Last.fm username…" />
                                     <input type="submit" id="lastfm_button" value="Get ’em" />
                                 </form>
@@ -113,12 +111,35 @@
                             </li>
                             
                             <li class="importer">
+                                <form id="lastfm_battle_form">
+                                    <p class="label">
+                                        <label for="lastfm_battle_input_you">
+                                            The Last.fm Battle
+                                            <br>
+                                            <small>Generate a playlist based on shared artists between two Last.fm users.</small>
+                                        </label>
+                                    </p>
+                                    <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
+                                    
+                                    <input type="text" name="you" id="lastfm_battle_input_you" placeholder="You…" />
+                                    <br>
+                                    <label for="lastfm_battle_input_they" class="favicon"><small>VS</small></label>
+                                    <input type="text" name="they" id="lastfm_battle_input_they" placeholder="…Them" />
+                                    <input type="submit" id="lastfm_battle_button" value="Fight!" />
+                                    
+                                    <p class="messages" id="generate_loading"><img src="/track_scanning.gif" width="16" height="16"> Fetching tracks…</p>
+                                    <p class="messages" id="generate_done">Done!</p>
+                                    <p class="messages" id="generate_error"></p>
+                                </form>
+                            </li>
+                            
+                            <li class="importer">
                                 <form id="spotify_form">
-                                    <label for="spotify_input">
-                                        Add a Spotify Track/Album by URL
-                                        <br>
-                                        <img src="spotify_icon.gif" width="16" height="16" class="favicon">
-                                    </label>
+                                    <p class="label">
+                                        <label for="spotify_input">Add a Spotify Track/Album by URL</label>
+                                    </p>
+                                    
+                                    <img src="spotify_icon.gif" width="16" height="16" class="favicon">
                                     <input type="text" name="url" id="spotify_input" class="importer_input" placeholder="Paste a URL…">
                                     <input type="submit" id="url_button" value="Go">
                                 </form>
@@ -129,11 +150,11 @@
                             
                             <li class="importer">
                                 <form id="url_form">
-                                    <label for="url_input">
-                                        Import an XSPF or Podcast
-                                        <br>
-                                        <img src="podcast_icon.gif" width="16" height="16" class="favicon">
-                                    </label>
+                                    <p class="label">
+                                        <label for="url_input">Import an XSPF or Podcast</label>
+                                    </p>
+                                    
+                                    <img src="podcast_icon.gif" width="16" height="16" class="favicon">
                                     <input type="text" name="url" id="url_input" class="importer_input" placeholder="Paste a URL…">
                                     <input type="submit" id="url_button" value="Go">
                                 </form>
@@ -149,6 +170,8 @@
                     <div id="manage">
                         <h1 id="playlistTitle">Create a new playlist</h1>
                         
+                        <ol class="trackList" id="playlist"></ol>
+                        
                         <form id="add_to_playlist">
                             <label for="add_track_input">Add a Track:</label>
                             <input type="text" name="track" id="add_track_input" />
@@ -160,38 +183,23 @@
                         <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>
                         <p id="tracksError">Failed to load tracks. Please try again later.</p>
                         
-                        <ol class="trackList" id="playlist"></ol>
-                        
-                        <a id="playlistApplescript" href="#">
-                            <img src="/itunes.png" width="16" height="16">
-                            Export&nbsp;to&nbsp;iTunes<br>
-                            <small>Mac&nbsp;only&nbsp;applescript</small>
-                        </a>
-                        
-                        <p id="shortcuts"><small>Keyboard shortcuts: &nbsp;&nbsp; <b>p</b> - play &nbsp;&nbsp; <b>]</b> - next track &nbsp;&nbsp; <b>[</b> - previous track</small></p>
-                    </div>
-                    
-                    <div id="import">
-                        <h2>The Last.fm Battle</h2>
-                        <p>Generate a playlist based on shared artists between two Last.fm users.</p>
-                        
-                        <form id="lastfm_battle_form">
-                            <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                            <input type="text" name="you" id="lastfm_battle_input_you" />
-                            <label for="lastfm_battle_input_they">VS</label>
-                            <input type="text" name="they" id="lastfm_battle_input_they" />
-                            <input type="submit" id="lastfm_battle_button" value="Fight!" />
-                        </form>
-                        
-                        <p class="messages" id="generate_loading"><img src="/track_scanning.gif" width="16" height="16"> Fetching tracks…</p>
-                        <p class="messages" id="generate_done">Done!</p>
-                        <p class="messages" id="generate_error"></p>
+                        <div id="listActions">
+                            <a id="playlistApplescript" href="#">
+                                <img src="/itunes.png" width="16" height="16">
+                                Export&nbsp;to&nbsp;iTunes<br>
+                                <small>Mac&nbsp;only&nbsp;applescript</small>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 
                 <div id="footer">
-                    <a href="http://github.com/jwheare/playlick/tree/master">Playlick on github</a> |
-                    Made by <a href="http://james.wheare.org/" rel="author">James Wheare</a>
+                    <p id="shortcuts"><small>Keyboard shortcuts: &nbsp;&nbsp; <b>p</b> - play &nbsp;&nbsp; <b>]</b> - next track &nbsp;&nbsp; <b>[</b> - previous track</small></p>
+                    
+                    <p id="credits">
+                        <a href="http://github.com/jwheare/playlick/tree/master">Playlick on github</a>
+                        | Made by <a href="http://james.wheare.org/" rel="author">James Wheare</a>
+                    </p>
                 </div>
             </div>
         </div>

@@ -133,7 +133,7 @@
         },
         onDelete: function () {
             if (this == PLAYLICK.current_playlist) {
-                PLAYLICK.show_import();
+                PLAYLICK.blank_playlist();
             }
         }
     };

@@ -121,11 +121,6 @@ $('#create_playlist').click(function (e) {
     e.preventDefault();
     PLAYLICK.blank_playlist();
 });
-// Click handler to show import screen
-$('#import_playlist').click(function (e) {
-    e.preventDefault();
-    PLAYLICK.show_import();
-});
 // Capture ESC while toggling playlist editing
 $('#playlists').keydown(function (e) {
     // console.dir(e);

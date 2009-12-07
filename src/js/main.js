@@ -13,6 +13,8 @@ var PLAYLICK = {
         PLAYLICK.fetchPlaylists();
         // Create appLauncher iframe
         PLAYLICK.createAppLauncherFrame();
+        // Start a new playlist
+        PLAYLICK.blank_playlist();
     },
     appLauncherId: 'appLauncher',
     createAppLauncherFrame: function () {
@@ -137,10 +139,11 @@ var PLAYLICK = {
         PLAYLICK.set_current_playlist_item($('#create_playlist').parent('li'));
         // Reset the playlist view
         $('#playlist').empty();
+        // Hide playlist actions
+        $('#listActions').hide();
         PLAYLICK.update_playlist_title(STRINGS.create_playlist_title);
         $('#add_track_button').val(STRINGS.start_button_text);
         // Show manage screen
-        $('#import').hide();
         $('#manage').show();
         // Select input
         setTimeout(function () {
@@ -148,19 +151,6 @@ var PLAYLICK = {
         }, 1);
         // Create the playlist object
         PLAYLICK.current_playlist = PLAYLICK.createPlaylist();
-    },
-    show_import: function () {
-        // Cancel Playdar
-        PLAYDAR.cancel_playdar_resolve();
-        // Update current sidebar item
-        PLAYLICK.set_current_playlist_item($('#import_playlist').parent('li'));
-        // Show Import screen
-        $('#manage').hide();
-        $('#import').show();
-        // Select input
-        setTimeout(function () {
-            $('#lastfm_input').select();
-        }, 1);
     },
     add_track: function (artist, track) {
         var new_track = new MODELS.Track({
@@ -170,9 +160,10 @@ var PLAYLICK = {
         var playlist_track = PLAYLICK.current_playlist.add_track(new_track);
         PLAYLICK.current_playlist.save();
         $('#playlist').append(playlist_track.element);
-        if (playlist_track.position == 1) {
-            $('#add_track_button').val(STRINGS.add_button_text);
-        }
+        // Change the start button to add
+        $('#add_track_button').val(STRINGS.add_button_text);
+        // Show playlist actions
+        $('#listActions').show();
         PLAYDAR.resolve_track(playlist_track);
     },
     selectSource: function (playlist_track, tbody) {
@@ -282,8 +273,9 @@ var PLAYLICK = {
             $('#tracksError').show();
         }
         // Show manage screen
-        $('#import').hide();
         $('#manage').show();
+        // Show playlist actions
+        $('#listActions').show();
     },
     
     /**
