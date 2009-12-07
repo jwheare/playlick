@@ -454,6 +454,10 @@ var PLAYDAR = {
     },
     playTrack: function (playlist_track) {
         if (playlist_track && playlist_track.track.playdar_sid) {
+            var list_item = playlist_track.element;
+            list_item.effect('highlight', {
+                color: '#6ea31e'
+            }, 100);
             Playdar.player.play_stream(playlist_track.track.playdar_sid);
         }
     },

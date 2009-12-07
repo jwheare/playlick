@@ -619,12 +619,14 @@ ul#lastfm_playlists img {
     color: #6ea31e;
     line-height: 12px;
 }
-.sources table td.choice,
-.sources table td.score {
-    width: 18px;
-    padding-right: 3px;
+.sources table tbody td.choice,
+.sources table tbody td.score {
+    width: 20px;
+    padding-right: 7px;
     text-align: center;
     vertical-align: middle;
+    color: #111;
+    background: #e8f9bb;
 }
 .sources table td.score {
     font-size: 11px;
