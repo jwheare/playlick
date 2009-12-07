@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <playlist version="1" xmlns="http://xspf.org/ns/0/">
     <title>Sounds and Music of Earth</title>
+    <image>http://upload.wikimedia.org/wikipedia/commons/6/6c/GPN-2000-001976.jpg</image>
     <info>http://goldenrecord.org/</info>
     <annotation>http://en.wikipedia.org/wiki/Voyager_Golden_Record</annotation>
     <trackList>
