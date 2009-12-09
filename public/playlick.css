@@ -536,8 +536,10 @@ ul#lastfm_playlists img {
 }
 .trackList a.show_sources {
     float: right;
-    padding: 0 6px;
+    margin: 4px 0 0 0;
+    padding: 0 6px 5px 6px;
     font-size: 11px;
+    line-height: 30px;
     visibility: hidden;
     background: #d2f380;
     text-decoration: none;
