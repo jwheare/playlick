@@ -50,7 +50,7 @@ Url.PodcastException.prototype.name = 'UrlPodcastException';
 Url.url = function (source, callback, exceptionHandler) {
     var exception = new Url.XspfException(source);
     IMPORTERS.getJsonFomXml(source, function (json) {
-        var podcast = json.query.results.rss ? json.query.results.rss : '';
+        var podcast = json.query.results.rss ? json.query.results.rss.channel : '';
         var jspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
         if (!podcast && !jspf) {
             throw exception('Invalid Podcast/XSPF', json.query.results);

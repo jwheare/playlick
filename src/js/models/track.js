@@ -50,7 +50,11 @@ Track.prototype = {
             artist: this.artist,
             album: this.album,
             url: this.url,
-            spotifyUrl: this.spotifyUrl
+            spotifyUrl: this.spotifyUrl,
+            duration: this.duration,
+            size: this.size,
+            bitrate: this.bitrate,
+            type: this.type
         };
         return doc;
     }

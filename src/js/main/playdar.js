@@ -162,7 +162,9 @@ var PLAYDAR = {
             album: playlist_track.track.album,
             track: playlist_track.track.name,
             source: Playdar.Util.location_from_url(playlist_track.track.url).host,
-            duration: playlist_track.track.duration
+            duration: playlist_track.track.duration,
+            size: playlist_track.track.size,
+            type: playlist_track.track.type
         };
         var highest_non_perfect;
         $.each(response.results, function (i, result) {
