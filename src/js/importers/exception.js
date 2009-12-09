@@ -13,7 +13,7 @@ Exception.prototype = {
     **/
     diagnose: function () {
         if (this.diagnostics) {
-            if (typeof(this.diagnostics) == 'string') {
+            if (typeof this.diagnostics == 'string') {
                 console.log(this.diagnostics);
             } else {
                 console.dir(this.diagnostics);

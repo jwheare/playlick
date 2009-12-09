@@ -227,7 +227,7 @@ var PLAYLICK = {
             elements.push(playlist.element.get()[0]);
         });
         $('#playlists').append(elements);
-        if (typeof(playlists) !== 'undefined') {
+        if (typeof playlists !== 'undefined') {
             PLAYLICK.fetchPlaylistsDone = true;
         }
     },
