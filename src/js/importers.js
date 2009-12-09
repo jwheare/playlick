@@ -162,11 +162,15 @@ IMPORTERS = {
         return playlist;
     },
     createPlaylistFromPodcast: function (source, podcast, callback, exception) {
+        if (podcast.channel) {
+            podcast = podcast.channel;
+        }
         if (!podcast.item) {
             throw exception('No tracks in Podcast response', podcast);
         }
+        var items = podcast.item;
         // XML to JSON converters often return single item lists as single items
-        var trackList = $.makeArray(podcast.item);
+        var trackList = $.makeArray(items);
         if (!trackList.length) {
             throw exception('No tracks in Podcast', jspf.trackList);
         }
