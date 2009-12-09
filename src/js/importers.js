@@ -172,13 +172,25 @@ IMPORTERS = {
         }
         // Create the playlist
         var description = podcast.description;
+        var copyrights = $.makeArray(podcast.copyright);
+        var copyright = $.grep(copyrights, function (value, i) {
+            return typeof value == 'string';
+        })[0];
+        if (copyright) {
+            description += ' - ' + copyright;
+        }
         var links = $.makeArray(podcast.link);
         var link = $.grep(links, function (value, i) {
-            return typeof(value) == 'string';
+            return typeof value == 'string';
         })[0];
+        var title = podcast.title;
+        if (podcast.subtitle) {
+            title += ': ' + podcast.subtitle;
+        }
         var playlist = new MODELS.Playlist({
-            name: podcast.title,
+            name: title,
             description: description,
+            image: IMPORTERS.getAbsoluteUrl(podcast.image ? podcast.image.href : ''),
             url: link,
             source: source
         });
