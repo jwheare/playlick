@@ -121,10 +121,10 @@
                                     </p>
                                     <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
                                     
-                                    <input type="text" name="you" id="lastfm_battle_input_you" placeholder="You…" />
+                                    <input type="text" name="you" id="lastfm_battle_input_you" class="importer_input" placeholder="You…" />
                                     <br>
                                     <label for="lastfm_battle_input_they" class="favicon"><small>VS</small></label>
-                                    <input type="text" name="they" id="lastfm_battle_input_they" placeholder="…Them" />
+                                    <input type="text" name="they" id="lastfm_battle_input_they" class="importer_input" placeholder="…Them" />
                                     <input type="submit" id="lastfm_battle_button" value="Fight!" />
                                     
                                     <p class="messages" id="generate_loading"><img src="/track_scanning.gif" width="16" height="16"> Fetching tracks…</p>
@@ -167,29 +167,27 @@
                 </div>
                 
                 <div id="main">
-                    <div id="manage">
-                        <h1 id="playlistTitle">Create a new playlist</h1>
-                        
-                        <ol class="trackList" id="playlist"></ol>
-                        
-                        <form id="add_to_playlist">
-                            <label for="add_track_input">Add a Track:</label>
-                            <input type="text" name="track" id="add_track_input" />
-                            <input type="hidden" name="artist_name" id="add_track_artist" />
-                            <input type="hidden" name="track_name" id="add_track_name" />
-                            <input type="submit" id="add_track_button" value="Start a Playlist" />
-                        </form>
-                        
-                        <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>
-                        <p id="tracksError">Failed to load tracks. Please try again later.</p>
-                        
-                        <div id="listActions">
-                            <a id="playlistApplescript" href="#">
-                                <img src="/itunes.png" width="16" height="16">
-                                Export&nbsp;to&nbsp;iTunes<br>
-                                <small>Mac&nbsp;only&nbsp;applescript</small>
-                            </a>
-                        </div>
+                    <h1 id="playlistTitle">Create a new playlist</h1>
+                    
+                    <ol class="trackList" id="playlist"></ol>
+                    
+                    <form id="add_to_playlist">
+                        <label for="add_track_input">Add a Track:</label>
+                        <input type="text" name="track" id="add_track_input" />
+                        <input type="hidden" name="artist_name" id="add_track_artist" />
+                        <input type="hidden" name="track_name" id="add_track_name" />
+                        <input type="submit" id="add_track_button" value="Start a Playlist" />
+                    </form>
+                    
+                    <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>
+                    <p id="tracksError">Failed to load tracks. Please try again later.</p>
+                    
+                    <div id="listActions">
+                        <a id="playlistApplescript" href="#">
+                            <img src="/itunes.png" width="16" height="16">
+                            Export&nbsp;to&nbsp;iTunes<br>
+                            <small>Mac&nbsp;only&nbsp;applescript</small>
+                        </a>
                     </div>
                 </div>
                 

@@ -22,9 +22,9 @@ var MODELS = {
     }
 };
 (function () {
-    //= require "models/track"
-    //= require "models/playlist"
-    //= require "models/playlisttrack"
+    //= require "models/track.model"
+    //= require "models/playlist.model"
+    //= require "models/playlisttrack.model"
     
     // Expose
     MODELS.Track = Track;

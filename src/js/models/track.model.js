@@ -3,7 +3,7 @@
  * Track objects have a name, artist, album and duration
  * and can cache playdar queries and results
 **/
-var Track = function (doc) {
+function Track (doc) {
     this.name = doc.name;
     this.artist = doc.artist || '';
     this.album = doc.album || '';

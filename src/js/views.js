@@ -8,6 +8,6 @@ var VIEWS = {
     //= require "views/playlisttrack.view"
     
     // Expose
-    VIEWS.Playlist = Playlist;
-    VIEWS.PlaylistTrack = PlaylistTrack;
+    // VIEWS.Playlist = Playlist;
+    // VIEWS.PlaylistTrack = PlaylistTrack;
 })();

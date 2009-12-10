@@ -122,9 +122,9 @@
     MODELS.Playlist.prototype.titleHTML = playlistTitleHtml;
     MODELS.Playlist.DefaultOptions = {
         onSave: function () {
-            if (this == PLAYLICK.current_playlist) {
-                PLAYLICK.update_playlist_title(this.titleHTML());
-                PLAYLICK.update_playlist_applescript(this);
+            if (this == CONTROLLERS.Playlist.current) {
+                CONTROLLERS.Playlist.updateTitle();
+                CONTROLLERS.Playlist.updateAppleScript();
             }
         },
         onCreate: function () {
@@ -132,8 +132,8 @@
             $('#playlists').append(this.element);
         },
         onDelete: function () {
-            if (this == PLAYLICK.current_playlist) {
-                PLAYLICK.blank_playlist();
+            if (this == CONTROLLERS.Playlist.current) {
+                CONTROLLERS.Playlist.create();
             }
         }
     };

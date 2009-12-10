@@ -1,4 +1,6 @@
 //= require "models"
+//= require "views"
+//= require "controllers"
 //= require "importers"
 //= require "util"
 //= require "main"

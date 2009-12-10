@@ -11,7 +11,7 @@ $('#playlist').sortable({
         var tracks = $.map($('#playlist li'), function (playlist_item, i) {
             return $(playlist_item).data('playlist_track');
         });
-        PLAYLICK.current_playlist.reset_tracks(tracks);
+        CONTROLLERS.Playlist.current.reset_tracks(tracks);
     }
 });
 // Click handlers for currently loaded playlist
@@ -119,7 +119,7 @@ $('#add_to_playlist').submit(function (e) {
 // Click handler to start a new blank playlist
 $('#create_playlist').click(function (e) {
     e.preventDefault();
-    PLAYLICK.blank_playlist();
+    CONTROLLERS.Playlist.create();
 });
 // Capture ESC while toggling playlist editing
 $('#playlists').keydown(function (e) {

@@ -36,8 +36,8 @@ var PLAYDAR = {
             PLAYDAR.resolve_current_playlist();
         },
         onResolveIdle: function () {
-            if (PLAYLICK.current_playlist && PLAYLICK.batch_save) {
-                PLAYLICK.current_playlist.save();
+            if (CONTROLLERS.Playlist.current && PLAYLICK.batch_save) {
+                CONTROLLERS.Playlist.current.save();
                 PLAYLICK.batch_save = false;
             }
         }
@@ -278,8 +278,8 @@ var PLAYDAR = {
         });
     },
     resolve_current_playlist: function () {
-        if (PLAYLICK.current_playlist) {
-            $.each(PLAYLICK.current_playlist.tracks, function (i, playlist_track) {
+        if (CONTROLLERS.Playlist.current) {
+            $.each(CONTROLLERS.Playlist.current.tracks, function (i, playlist_track) {
                 PLAYDAR.resolve_track(playlist_track);
             });
         }

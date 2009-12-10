@@ -2,7 +2,7 @@
  * class MODELS.Playlist
  * Playlist objects have a name, array of Tracks and duration
 **/
-var Playlist = function (options) {
+function Playlist (options) {
     this.saved = false;
     this.persisted = false;
     this.published = false;

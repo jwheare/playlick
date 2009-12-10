@@ -3,7 +3,7 @@
  * PlaylistTrack objects join a Playlist with a Track
  * and have a position and element
 **/
-var PlaylistTrack = function (playlist, track, options) {
+function PlaylistTrack (playlist, track, options) {
     this.id = MODELS.next_playlist_track_id++;
     this.playlist = playlist;
     this.track = track;

@@ -14,7 +14,7 @@ var PLAYLICK = {
         // Create appLauncher iframe
         PLAYLICK.createAppLauncherFrame();
         // Start a new playlist
-        PLAYLICK.blank_playlist();
+        CONTROLLERS.Playlist.create();
     },
     appLauncherId: 'appLauncher',
     createAppLauncherFrame: function () {
@@ -61,7 +61,7 @@ var PLAYLICK = {
         }
         if (hash_parts.artist && hash_parts.track) {
             // Make a new playlist
-            PLAYLICK.blank_playlist();
+            CONTROLLERS.Playlist.create();
             // Add a track to it
             PLAYLICK.add_track(hash_parts.artist, hash_parts.track);
         }
@@ -77,22 +77,8 @@ var PLAYLICK = {
      * Playlist state
     **/
     
-    current_playlist: null,
     registerPlaylist: function (playlist) {
         PLAYLICK.last_playlist = playlist;
-    },
-    createPlaylist: function (data) {
-        var playlist = new MODELS.Playlist(data);
-        PLAYLICK.registerPlaylist(playlist);
-        return playlist;
-    },
-    // Update the playlist title (when loading a playlist or updating the duration)
-    update_playlist_title: function (title) {
-        $('#playlistTitle').html(title);
-    },
-    // Update the playlist iTunes export AppleScript (when loading a playlist or saving)
-    update_playlist_applescript: function (playlist) {
-        $('#playlistApplescript').attr('href', playlist.toApplescript());
     },
     // Show/hide edit mode for playlist in sidebar
     toggle_playlist_edit: function (playlist_item) {
@@ -131,34 +117,13 @@ var PLAYLICK = {
             playlist_item.addClass('playing');
         }
     },
-    // Create a new empty playlist
-    blank_playlist: function () {
-        // Cancel Playdar
-        PLAYDAR.cancel_playdar_resolve();
-        // Update current sidebar item
-        PLAYLICK.set_current_playlist_item($('#create_playlist').parent('li'));
-        // Reset the playlist view
-        $('#playlist').empty();
-        // Hide playlist actions
-        $('#listActions').hide();
-        PLAYLICK.update_playlist_title(STRINGS.create_playlist_title);
-        $('#add_track_button').val(STRINGS.start_button_text);
-        // Show manage screen
-        $('#manage').show();
-        // Select input
-        setTimeout(function () {
-            $('#add_track_input').select();
-        }, 1);
-        // Create the playlist object
-        PLAYLICK.current_playlist = PLAYLICK.createPlaylist();
-    },
     add_track: function (artist, track) {
         var new_track = new MODELS.Track({
             artist: artist,
             name: track
         });
-        var playlist_track = PLAYLICK.current_playlist.add_track(new_track);
-        PLAYLICK.current_playlist.save();
+        var playlist_track = CONTROLLERS.Playlist.current.add_track(new_track);
+        CONTROLLERS.Playlist.current.save();
         $('#playlist').append(playlist_track.element);
         // Change the start button to add
         $('#add_track_button').val(STRINGS.add_button_text);
@@ -239,24 +204,24 @@ var PLAYLICK = {
         // Cancel Playdar
         PLAYDAR.cancel_playdar_resolve();
         // Unload the current playlist
-        if (PLAYLICK.current_playlist) {
-            PLAYLICK.current_playlist.unload();
+        if (CONTROLLERS.Playlist.current) {
+            CONTROLLERS.Playlist.current.unload();
         }
         // Update current sidebar item
         PLAYLICK.set_current_playlist_item(playlist_item);
         // Update the current playlist object
-        PLAYLICK.current_playlist = playlist_item.data('playlist');
+        CONTROLLERS.Playlist.current = playlist_item.data('playlist');
         // Update the title
-        PLAYLICK.update_playlist_title(PLAYLICK.current_playlist.titleHTML());
+        CONTROLLERS.Playlist.updateTitle();
         // Switch the add track button text
         $('#add_track_button').val(STRINGS.add_button_text);
         $('#tracksLoading').show();
         // Hide error message
         $('#tracksError').hide();
         // Load tracks
-        var elements = PLAYLICK.current_playlist.load();
+        var elements = CONTROLLERS.Playlist.current.load();
         // Update the AppleScript link
-        PLAYLICK.update_playlist_applescript(PLAYLICK.current_playlist);
+        CONTROLLERS.Playlist.updateAppleScript();
         $('#tracksLoading').hide();
         if (elements) {
             // Add to the DOM
@@ -272,8 +237,6 @@ var PLAYLICK = {
         } else {
             $('#tracksError').show();
         }
-        // Show manage screen
-        $('#manage').show();
         // Show playlist actions
         $('#listActions').show();
     },
