@@ -290,6 +290,8 @@ ul#importers li input.importer_input {
     float: right;
     margin: 0 24px 24px 0;
     vertical-align: middle;
+    max-width: 200px;
+    max-height: 200px;
 }
 #main h1 small {
     display: block;

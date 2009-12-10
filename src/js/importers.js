@@ -189,7 +189,7 @@ IMPORTERS = {
         }
         var playlist = new MODELS.Playlist({
             name: title,
-            description: description,
+            description: description[0] || description,
             image: IMPORTERS.getAbsoluteUrl(podcast.image ? podcast.image.href : ''),
             url: link,
             source: source
