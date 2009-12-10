@@ -1,6 +1,5 @@
 /**
  * MODELS
- * Model namespace
 **/
 var MODELS = {
     couch: new CouchDB('playlick'),
