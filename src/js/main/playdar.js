@@ -327,38 +327,8 @@ var PLAYDAR = {
         }
         return track_item;
     },
-    sizeVideoShim: function () {
-        var track_item = $('#' + this.sID).data('track_item');
-        if (track_item && this.width && this.height) {
-            var videoShim = track_item.find('.video');
-            var width = this.width;
-            var height = this.height;
-            if (width > PLAYDAR.maxVideoWidth) {
-                var aspectRatio = height / width;
-                width = PLAYDAR.maxVideoWidth;
-                height = aspectRatio * width;
-            }
-            videoShim
-                .width(width)
-                .height(height)
-                .show();
-            return videoShim;
-        }
-    },
     onResultMetadata: function () {
-        var videoShim = PLAYDAR.sizeVideoShim.call(this);
-        if (videoShim) {
-            var position = videoShim.offset();
-            var contentOffset = $('#content').offset();
-            PLAYDAR.sm2Container
-                .width(videoShim.width())
-                .height(videoShim.height())
-                .css({
-                    top: position.top - contentOffset.top,
-                    left: position.left - contentOffset.left
-                });
-            PLAYDAR.showSM2Container();
-        }
+        PLAYDAR.positionVideo.call(this);
     },
     onResultStart: function () {
         var track_item = PLAYDAR.onResultPlay.call(this);
@@ -397,6 +367,39 @@ var PLAYDAR = {
     hideSM2Container: function () {
         PLAYDAR.sm2Container.css('visibility', 'hidden');
     },
+    positionVideo: function () {
+        if (PLAYDAR.sm2Container.css('visibility') == 'hidden') {
+            var track_item = $('#' + this.sID).data('track_item');
+            if (track_item && this.width && this.height) {
+                var videoShim = track_item.find('.video');
+                var width = this.width;
+                var height = this.height;
+                if (width > PLAYDAR.maxVideoWidth) {
+                    var aspectRatio = height / width;
+                    width = PLAYDAR.maxVideoWidth;
+                    height = aspectRatio * width;
+                }
+                videoShim
+                    .width(width)
+                    .height(height)
+                    .show();
+                PLAYDAR.positionSM2Container(videoShim);
+                return videoShim;
+            }
+        }
+    },
+    positionSM2Container: function (videoShim) {
+        var position = videoShim.offset();
+        var contentOffset = $('#content').offset();
+        PLAYDAR.sm2Container
+            .width(videoShim.width())
+            .height(videoShim.height())
+            .css({
+                top: position.top - contentOffset.top,
+                left: position.left - contentOffset.left
+            });
+        PLAYDAR.showSM2Container();
+    },
     resetSM2Container: function () {
         CONTROLLERS.Playlist.trackListElem.find('.video').hide();
         PLAYDAR.sm2Container
@@ -406,6 +409,7 @@ var PLAYDAR = {
                 top: PLAYDAR.originalSM2Top,
                 left: PLAYDAR.originalSM2Left
             });
+        PLAYDAR.hideSM2Container();
     },
     resetResult: function () {
         this.width = this.height = null;
@@ -459,8 +463,9 @@ var PLAYDAR = {
     updatePlaybackProgress: function () {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
-            PLAYDAR.sizeVideoShim.call(this);
             var playlist_track = track_item.data('playlist_track');
+            // Position video if we can
+            PLAYDAR.positionVideo.call(this);
             // Update the track progress
             var progress = track_item.find('.elapsed');
             var elapsed = '';
