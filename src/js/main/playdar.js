@@ -109,7 +109,14 @@ var PLAYDAR = {
             if (result.size) {
                 size = (result.size/1000000).toFixed(1) + 'MB';
             }
-            var mimetype = result.mimetype || '';
+            var mimetype = '';
+            if (result.mimetype) {
+                mimetype = result.mimetype;
+                if (mimetype.match(/^video/)) {
+                    result.video = true;
+                    tbody_class += ' video';
+                }
+            }
             var bitrate = '';
             if (result.bitrate) {
                 bitrate = result.bitrate + ' kbps';
@@ -152,6 +159,9 @@ var PLAYDAR = {
                 // Highlight the list item
                 if (playlist_track.track.playdar_sid) {
                     list_item.addClass('perfectMatch');
+                }
+                if (playlist_track.track.video) {
+                    list_item.addClass('video');
                 }
             } else {
                 list_item.addClass('noMatch');
@@ -226,11 +236,11 @@ var PLAYDAR = {
                 }];
             }
             if (Playdar.client && Playdar.client.isAvailable() && Playdar.client.is_authed()) {
-                playlist_track.element.removeClass('noMatch match perfectMatch');
+                playlist_track.element.removeClass('noMatch match perfectMatch video');
                 playlist_track.element.addClass('scanning');
                 Playdar.client.resolve(track.artist, track.name, track.album, qid, results);
             } else {
-                playlist_track.element.removeClass('noMatch match perfectMatch');
+                playlist_track.element.removeClass('noMatch match perfectMatch video');
                 playlist_track.element.addClass('scanning');
                 PLAYDAR.aolResolve(track.artist, track.name, track.album, qid);
             }
@@ -371,7 +381,7 @@ var PLAYDAR = {
         if (PLAYDAR.sm2Container.css('visibility') == 'hidden') {
             var track_item = $('#' + this.sID).data('track_item');
             if (track_item && this.width && this.height) {
-                var videoShim = track_item.find('.video');
+                var videoShim = track_item.find('.videoShim');
                 var width = this.width;
                 var height = this.height;
                 if (width > PLAYDAR.maxVideoWidth) {
@@ -401,7 +411,7 @@ var PLAYDAR = {
         PLAYDAR.showSM2Container();
     },
     resetSM2Container: function () {
-        CONTROLLERS.Playlist.trackListElem.find('.video').hide();
+        CONTROLLERS.Playlist.trackListElem.find('.videoShim').hide();
         PLAYDAR.sm2Container
             .width(PLAYDAR.originalSM2Width)
             .height(PLAYDAR.originalSM2Height)

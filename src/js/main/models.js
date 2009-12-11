@@ -13,7 +13,7 @@
             .append(elapsed)
             .append(status)
             .append(item_name);
-        var videoShim = $('<div class="video">').hide();
+        var videoShim = $('<div class="videoShim">').hide();
         var sources = $('<div class="sources">');
         // Wrap in a div so we can return its innerHTML as a string
         var wrapper = $('<div>')

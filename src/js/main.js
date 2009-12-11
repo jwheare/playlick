@@ -176,13 +176,14 @@ var PLAYLICK = {
             playlist_track.element.find('.elapsed').text(track.get_duration_string());
         }
         // If the sid has changed, stop the stream if it's playing
-        if (playlist_track.track.playdar_sid && playlist_track.track.playdar_sid != result.sid) {
-            Playdar.player.stop_stream(playlist_track.track.playdar_sid);
+        if (track.playdar_sid && track.playdar_sid != result.sid) {
+            Playdar.player.stop_stream(track.playdar_sid);
         }
-        playlist_track.track.playdar_sid = result.sid;
+        track.playdar_sid = result.sid;
         // URL to the actual file, for making a local playlist
         // For streaming, construct the url from the sid
-        playlist_track.track.playdar_url = result.url;
+        track.playdar_url = result.url;
+        track.video = result.video;
     },
     // Fetch playlists from Couch
     fetchPlaylists: function () {

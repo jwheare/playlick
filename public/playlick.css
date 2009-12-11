@@ -447,13 +447,21 @@ ul#lastfm_playlists img {
 .trackList li.perfectMatch span.status {
     background: url('track_play.gif') no-repeat 50% 50%;
 }
-.trackList li.playing span.status {
+.trackList li.perfectMatch.video span.status {
+    background-image: url('video_play.gif');
+}
+.trackList li.playing span.status,
+.trackList li.playing.video span.status {
     background-image: url('track_paused.gif');
 }
 .trackList li.paused span.status {
     background-image: url('track_play.gif');
 }
-.trackList li.loading span.status {
+.trackList li.paused.video span.status {
+    background-image: url('video_play.gif');
+}
+.trackList li.loading span.status,
+.trackList li.loading.video span.status {
     background-image: url('track_loading.gif');
 }
 .trackList li span.status span {
