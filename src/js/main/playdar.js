@@ -378,10 +378,10 @@ var PLAYDAR = {
         PLAYDAR.sm2Container.css('visibility', 'hidden');
     },
     positionVideo: function () {
-        if (PLAYDAR.sm2Container.css('visibility') == 'hidden') {
-            var track_item = $('#' + this.sID).data('track_item');
-            if (track_item && this.width && this.height) {
-                var videoShim = track_item.find('.videoShim');
+        var track_item = $('#' + this.sID).data('track_item');
+        if (track_item && this.width && this.height) {
+            var videoShim = track_item.find('.videoShim');
+            if (videoShim.size()) {
                 var width = this.width;
                 var height = this.height;
                 if (width > PLAYDAR.maxVideoWidth) {
@@ -394,21 +394,22 @@ var PLAYDAR = {
                     .height(height)
                     .show();
                 PLAYDAR.positionSM2Container(videoShim);
-                return videoShim;
             }
         }
     },
     positionSM2Container: function (videoShim) {
-        var position = videoShim.offset();
-        var contentOffset = $('#content').offset();
-        PLAYDAR.sm2Container
-            .width(videoShim.width())
-            .height(videoShim.height())
-            .css({
-                top: position.top - contentOffset.top,
-                left: position.left - contentOffset.left
-            });
-        PLAYDAR.showSM2Container();
+        if (PLAYDAR.sm2Container.css('visibility') == 'hidden') {
+            var position = videoShim.offset();
+            var contentOffset = $('#content').offset();
+            PLAYDAR.sm2Container
+                .width(videoShim.width())
+                .height(videoShim.height())
+                .css({
+                    top: position.top - contentOffset.top,
+                    left: position.left - contentOffset.left
+                });
+            PLAYDAR.showSM2Container();
+        }
     },
     resetSM2Container: function () {
         CONTROLLERS.Playlist.trackListElem.find('.videoShim').hide();
