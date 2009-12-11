@@ -408,6 +408,7 @@ var PLAYDAR = {
             });
     },
     resetResult: function () {
+        this.width = this.height = null;
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
