@@ -9,10 +9,11 @@
             .append($('<strong class="fn">').text(UTIL.truncateString(this.name, (this.artist ? 30 : 50))).attr('title', this.name));
         var elapsed = $('<span class="elapsed">').text(this.get_duration_string());
         var status = $('<span class="status">');
-        var item_link   = $('<a href="#" class="item">')
+        var item_link = $('<a href="#" class="item">')
             .append(elapsed)
             .append(status)
             .append(item_name);
+        var videoShim = $('<div class="video">').hide();
         var sources = $('<div class="sources">');
         // Wrap in a div so we can return its innerHTML as a string
         var wrapper = $('<div>')
@@ -27,6 +28,7 @@
         }
         wrapper.append(source_link)
                .append(item_link)
+               .append(videoShim)
                .append(sources);
         return wrapper.html();
     };
@@ -125,15 +127,22 @@
             if (this == CONTROLLERS.Playlist.current) {
                 CONTROLLERS.Playlist.updateTitle();
                 CONTROLLERS.Playlist.updateAppleScript();
+                PLAYDAR.showSM2Container();
             }
         },
         onCreate: function () {
             // Add to sidebar
             $('#playlists').append(this.element);
         },
+        onUnload: function () {
+            PLAYDAR.hideSM2Container();
+        },
         onDelete: function () {
             if (this == CONTROLLERS.Playlist.current) {
                 CONTROLLERS.Playlist.create();
+            }
+            if (CONTROLLERS.Playlist.playingTrack && this === CONTROLLERS.Playlist.playingTrack.playlist) {
+                PLAYDAR.stopPlaySession();
             }
         }
     };

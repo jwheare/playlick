@@ -1,7 +1,7 @@
 /* Current playlist handlers */
 
 // Playlist reordering behaviour
-$('#playlist').sortable({
+CONTROLLERS.Playlist.trackListElem.sortable({
     axis: 'y',
     cursor: 'move',
     opacity: 0.5,
@@ -15,7 +15,7 @@ $('#playlist').sortable({
     }
 });
 // Click handlers for currently loaded playlist
-$('#playlist').click(function (e) {
+CONTROLLERS.Playlist.trackListElem.click(function (e) {
     var target = $(e.target);
     var track_item = target.closest('li.p_t');
     if (track_item.size()) {
@@ -149,7 +149,7 @@ $('#playlists').click(function (e) {
     if (target.is('li.p a.playlist_playing')) {
         e.preventDefault();
         target.blur();
-        PLAYDAR.playTrack(PLAYLICK.now_playing);
+        PLAYDAR.playTrack(CONTROLLERS.Playlist.playingTrack);
     }
     // Toggle playlist name editing
     if (target.is('li.p a.edit_playlist')) {
@@ -368,7 +368,7 @@ $(document).keydown(function (e) {
     switch (e.keyCode) {
     case 80: // p
         e.preventDefault();
-        current_track = PLAYLICK.now_playing;
+        current_track = CONTROLLERS.Playlist.playingTrack;
         if (!current_track) {
             // Get the first perfect match
             current_track = $('#playlist li.perfectMatch').data('playlist_track');
@@ -377,25 +377,25 @@ $(document).keydown(function (e) {
         break;
     case 219: // [ / {
         e.preventDefault();
-        if (PLAYLICK.now_playing) {
+        if (CONTROLLERS.Playlist.playingTrack) {
             if (e.shiftKey) {
                 // Back a source
-                PLAYDAR.playPreviousSource(PLAYLICK.now_playing.element.find('tbody.choice'));
+                PLAYDAR.playPreviousSource(CONTROLLERS.Playlist.playingTrack.element.find('tbody.choice'));
             } else {
                 // Back a track
-                PLAYDAR.playPreviousTrack(PLAYLICK.now_playing.element);
+                PLAYDAR.playPreviousTrack(CONTROLLERS.Playlist.playingTrack.element);
             }
         }
         break;
     case 221: // ] / }
         e.preventDefault();
-        if (PLAYLICK.now_playing) {
+        if (CONTROLLERS.Playlist.playingTrack) {
             if (e.shiftKey) {
                 // Next source
-                PLAYDAR.playNextSource(PLAYLICK.now_playing.element.find('tbody.choice'));
+                PLAYDAR.playNextSource(CONTROLLERS.Playlist.playingTrack.element.find('tbody.choice'));
             } else {
                 // Next track
-                PLAYDAR.playNextTrack(PLAYLICK.now_playing.element);
+                PLAYDAR.playNextTrack(CONTROLLERS.Playlist.playingTrack.element);
             }
         }
         break;

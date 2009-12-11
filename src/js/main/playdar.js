@@ -1,5 +1,7 @@
 /* Playdar */
 var PLAYDAR = {
+    sm2Container: $('#sm2-container'),
+    maxVideoWidth: 556,
     soundmanager_ready: function (status) {
         if (status.success) {
             Playdar.client.go();
@@ -60,6 +62,7 @@ var PLAYDAR = {
             Playdar.player.register_stream(result, {
                 chained: true,
                 onload: PLAYDAR.onResultLoad,
+                onmetadata: PLAYDAR.onResultMetadata,
                 onplay: PLAYDAR.onResultStart,
                 onpause: PLAYDAR.onResultPause,
                 onresume: PLAYDAR.onResultPlay,
@@ -86,7 +89,7 @@ var PLAYDAR = {
             } else {
                 score_cell.html('&nbsp;');
             }
-            name_cell = $('<td class="name" colspan="4">');
+            name_cell = $('<td class="name" colspan="5">');
             var artist_album = result.artist;
             if (result.album) {
                 artist_album += ' - ' + result.album;
@@ -99,14 +102,15 @@ var PLAYDAR = {
                 .append($('<td class="choice">').append(choice_radio))
                 .append(name_cell);
             var duration = '';
-            var size = '';
-            var bitrate = '';
             if (result.duration) {
                 duration = Playdar.Util.mmss(result.duration);
             }
+            var size = '';
             if (result.size) {
                 size = (result.size/1000000).toFixed(1) + 'MB';
             }
+            var mimetype = result.mimetype || '';
+            var bitrate = '';
             if (result.bitrate) {
                 bitrate = result.bitrate + ' kbps';
             }
@@ -115,6 +119,7 @@ var PLAYDAR = {
                 .append($('<td class="source">').text((result.source ? result.source : '')/* + (result.preference ? ' (' + result.preference + ')' : '')*/))
                 .append($('<td class="time">').text(duration))
                 .append($('<td class="size">').text(size))
+                .append($('<td class="mimetype">').text(mimetype))
                 .append($('<td class="bitrate">').text(bitrate));
             result_tbody = $('<tbody>')
                 .attr('id', 's_' + result.sid)
@@ -164,7 +169,7 @@ var PLAYDAR = {
             source: Playdar.Util.location_from_url(playlist_track.track.url).host,
             duration: playlist_track.track.duration,
             size: playlist_track.track.size,
-            type: playlist_track.track.type
+            mimetype: playlist_track.track.mimetype
         };
         var highest_non_perfect;
         $.each(response.results, function (i, result) {
@@ -288,7 +293,7 @@ var PLAYDAR = {
         if (Playdar.client) {
             Playdar.client.cancel_resolve();
         }
-        $('#playlist').find('li').removeClass('scanning');
+        CONTROLLERS.Playlist.trackListElem.find('li').removeClass('scanning');
     },
     
     /* Playback */
@@ -318,9 +323,42 @@ var PLAYDAR = {
             }
             // No tracks remain to play in the currently loaded playlist.
             // Stop the session
-            PLAYDAR.stopPlaySession.call(this, true);
+            PLAYDAR.stopPlaySession();
         }
         return track_item;
+    },
+    sizeVideoShim: function () {
+        var track_item = $('#' + this.sID).data('track_item');
+        if (track_item && this.width && this.height) {
+            var videoShim = track_item.find('.video');
+            var width = this.width;
+            var height = this.height;
+            if (width > PLAYDAR.maxVideoWidth) {
+                var aspectRatio = height / width;
+                width = PLAYDAR.maxVideoWidth;
+                height = aspectRatio * width;
+            }
+            videoShim
+                .width(width)
+                .height(height)
+                .show();
+            return videoShim;
+        }
+    },
+    onResultMetadata: function () {
+        var videoShim = PLAYDAR.sizeVideoShim.call(this);
+        if (videoShim) {
+            var position = videoShim.offset();
+            var contentOffset = $('#content').offset();
+            PLAYDAR.sm2Container
+                .width(videoShim.width())
+                .height(videoShim.height())
+                .css({
+                    top: position.top - contentOffset.top,
+                    left: position.left - contentOffset.left
+                });
+            PLAYDAR.showSM2Container();
+        }
     },
     onResultStart: function () {
         var track_item = PLAYDAR.onResultPlay.call(this);
@@ -328,7 +366,7 @@ var PLAYDAR = {
             track_item.addClass('loading');
             var playlist_track = track_item.data('playlist_track');
             // Update the now playing track
-            PLAYLICK.now_playing = playlist_track;
+            CONTROLLERS.Playlist.playingTrack = playlist_track;
             // Highlight the playlist in the sidebar
             PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
             // Update the playback meter
@@ -353,10 +391,30 @@ var PLAYDAR = {
         }
         return track_item;
     },
+    showSM2Container: function () {
+        console.info('showSM2Container');
+        PLAYDAR.sm2Container.css('visibility', 'visible');
+    },
+    hideSM2Container: function () {
+        console.info('hideSM2Container');
+        PLAYDAR.sm2Container.css('visibility', 'hidden');
+    },
+    resetSM2Container: function () {
+        CONTROLLERS.Playlist.trackListElem.find('.video').hide();
+        PLAYDAR.sm2Container
+            .width(PLAYDAR.originalSM2Width)
+            .height(PLAYDAR.originalSM2Height)
+            .css({
+                top: PLAYDAR.originalSM2Top,
+                left: PLAYDAR.originalSM2Left
+            });
+    },
     resetResult: function () {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
+            // Hide video and reset sm2 position
+            PLAYDAR.resetSM2Container();
             // Remove track status classes
             track_item
                 .removeClass('playing')
@@ -369,7 +427,7 @@ var PLAYDAR = {
             progress.text(playlist_track.track.get_duration_string());
             // Reset loading bar
             var loading = track_item.find('.loading');
-            loading.css('width', 0);
+            loading.width(0);
         }
         return track_item;
     },
@@ -382,7 +440,7 @@ var PLAYDAR = {
         // Stop the player
         Playdar.player.stop_current(true);
         // Clear the now playing track
-        PLAYLICK.now_playing = null;
+        CONTROLLERS.Playlist.playingTrack = null;
         // Remove the playlist highlight from the sidebar
         PLAYLICK.set_playing_playlist_item();
     },
@@ -396,12 +454,13 @@ var PLAYDAR = {
             }
         }
         // Otherwise hard stop play session
-        PLAYDAR.stopPlaySession.call(this, true);
+        PLAYDAR.stopPlaySession();
         return track_item;
     },
     updatePlaybackProgress: function () {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
+            PLAYDAR.sizeVideoShim.call(this);
             var playlist_track = track_item.data('playlist_track');
             // Update the track progress
             var progress = track_item.find('.elapsed');
@@ -435,7 +494,7 @@ var PLAYDAR = {
             track_item.removeClass('loading');
             var loading = track_item.find('.loading');
             var loaded = this.bytesLoaded/this.bytesTotal * 100;
-            loading.css('width', loaded + "%");
+            loading.width(loaded + "%");
         }
         if (this.options.external) {
             PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, true);
@@ -500,3 +559,8 @@ var PLAYDAR = {
         return false;
     }
 };
+
+PLAYDAR.originalSM2Width = PLAYDAR.sm2Container.width();
+PLAYDAR.originalSM2Height = PLAYDAR.sm2Container.height();
+PLAYDAR.originalSM2Top = PLAYDAR.sm2Container.css('top');
+PLAYDAR.originalSM2Left = PLAYDAR.sm2Container.css('left');

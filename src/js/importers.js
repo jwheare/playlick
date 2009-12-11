@@ -171,7 +171,7 @@ IMPORTERS = {
             throw exception('No tracks in Podcast', jspf.trackList);
         }
         // Create the playlist
-        var description = podcast.description;
+        var description = podcast.description[0] || podcast.description;
         var copyrights = $.makeArray(podcast.copyright);
         var copyright = $.grep(copyrights, function (value, i) {
             return typeof value == 'string';
@@ -187,10 +187,12 @@ IMPORTERS = {
         if (podcast.subtitle) {
             title += ': ' + podcast.subtitle;
         }
+        var image = podcast.image ? podcast.image.href : (podcast.thumbnail ? podcast.thumbnail.url : '');
+        
         var playlist = new MODELS.Playlist({
             name: title,
-            description: description[0] || description,
-            image: IMPORTERS.getAbsoluteUrl(podcast.image ? podcast.image.href : ''),
+            description: description,
+            image: IMPORTERS.getAbsoluteUrl(image),
             url: link,
             source: source
         });
@@ -200,10 +202,12 @@ IMPORTERS = {
                 name: data.title,
                 artist: data.author || podcast.author
             };
+            // TODO support media:content alternative
+            // e.g. <media:content url="blah.mp3" fileSize="46669578" type="audio/mpeg">
             if (data.enclosure && data.enclosure.url) {
                 trackDoc.url = data.enclosure.url;
                 trackDoc.size = data.enclosure['length'];
-                trackDoc.type = data.enclosure.type;
+                trackDoc.mimetype = data.enclosure.type;
             }
             playlist.add_track(new MODELS.Track(trackDoc));
         });

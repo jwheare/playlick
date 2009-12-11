@@ -637,6 +637,7 @@ ul#lastfm_playlists img {
 }
 .sources table td.time,
 .sources table td.size,
+.sources table td.mimetype,
 .sources table td.bitrate {
     width: 60px;
     padding-right: 8px;

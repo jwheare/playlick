@@ -144,6 +144,9 @@ Playlist.prototype = {
         $.each(this.tracks, function (i, playlist_track) {
             playlist_track.unload();
         });
+        if (this.options.onUnload) {
+            this.options.onUnload.call(this);
+        }
     },
     /**
      * Build a DOMElement for the Playlist

@@ -12,6 +12,7 @@ function Playlist () {
     this.addTrackInput = $('input#add_track_input');
     
     this.current = null;
+    this.playingTrack = null;
 }
 Playlist.prototype = {
     showCreateTitle: function () {
@@ -31,7 +32,9 @@ Playlist.prototype = {
         // Update current sidebar item
         PLAYLICK.set_current_playlist_item($('#create_playlist').parent('li'));
         // Reset the playlist view
-        this.trackListElem.empty();
+        if (this.current) {
+            this.current.unload();
+        }
         // Hide playlist actions
         this.listActionsElem.hide();
         // Show title

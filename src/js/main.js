@@ -124,7 +124,7 @@ var PLAYLICK = {
         });
         var playlist_track = CONTROLLERS.Playlist.current.add_track(new_track);
         CONTROLLERS.Playlist.current.save();
-        $('#playlist').append(playlist_track.element);
+        CONTROLLERS.Playlist.trackListElem.append(playlist_track.element);
         // Change the start button to add
         $('#add_track_button').val(STRINGS.add_button_text);
         // Show playlist actions
@@ -225,7 +225,7 @@ var PLAYLICK = {
         $('#tracksLoading').hide();
         if (elements) {
             // Add to the DOM
-            $('#playlist').append(elements);
+            CONTROLLERS.Playlist.trackListElem.append(elements);
             setTimeout(function () {
                 var nowPlayingSound = Playdar.player.getNowPlaying();
                 if (nowPlayingSound) {
@@ -239,6 +239,10 @@ var PLAYLICK = {
         }
         // Show playlist actions
         $('#listActions').show();
+        // Show SM2
+        if (CONTROLLERS.Playlist.playingTrack && CONTROLLERS.Playlist.playingTrack.playlist === CONTROLLERS.Playlist.current) {
+            PLAYDAR.showSM2Container();
+        }
     },
     
     /**

@@ -11,8 +11,8 @@ function Track (doc) {
     this.spotifyUrl = doc.spotifyUrl || '';
     this.duration = doc.duration;
     this.size = doc.size;
+    this.mimetype = doc.mimetype;
     this.bitrate = doc.bitrate;
-    this.type = doc.type;
     
     this.playdar_qid = null;
     this.playdar_sid = null;
@@ -53,6 +53,7 @@ Track.prototype = {
             spotifyUrl: this.spotifyUrl,
             duration: this.duration,
             size: this.size,
+            mimetype: this.mimetype,
             bitrate: this.bitrate,
             type: this.type
         };
