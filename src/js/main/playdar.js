@@ -392,11 +392,9 @@ var PLAYDAR = {
         return track_item;
     },
     showSM2Container: function () {
-        console.info('showSM2Container');
         PLAYDAR.sm2Container.css('visibility', 'visible');
     },
     hideSM2Container: function () {
-        console.info('hideSM2Container');
         PLAYDAR.sm2Container.css('visibility', 'hidden');
     },
     resetSM2Container: function () {
