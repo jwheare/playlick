@@ -110,7 +110,7 @@ $('#add_to_playlist').submit(function (e) {
         $('#add_track_artist').val('');
         $('#add_track_track').val('');
         $('#add_track_input').val('').focus();
-        PLAYLICK.add_track(params.artist_name, params.track_name);
+        CONTROLLERS.Playlist.addTrack(params.artist_name, params.track_name);
     }
 });
 
@@ -122,28 +122,28 @@ $('#create_playlist').click(function (e) {
     CONTROLLERS.Playlist.create();
 });
 // Capture ESC while toggling playlist editing
-$('#playlists').keydown(function (e) {
+CONTROLLERS.Playlist.playlistSidebarElem.keydown(function (e) {
     // console.dir(e);
     var target = $(e.target);
     // Capture ESC
     if (target.is('input.playlist_name') && e.keyCode == 27) {
-        PLAYLICK.toggle_playlist_edit(target.parents('li.p'));
+        CONTROLLERS.Playlist.toggleSidebarEditName(target.parents('li.p'));
     }
 });
 // Click handlers for playlists in the sidebar
-$('#playlists').click(function (e) {
+CONTROLLERS.Playlist.playlistSidebarElem.click(function (e) {
     var target = $(e.target);
     var playlist_item = target.closest('li.p');
     // Load the clicked playlist
     if (target.is('li.p a.playlist')) {
         e.preventDefault();
         target.blur();
-        PLAYLICK.load_playlist_item(playlist_item);
+        CONTROLLERS.Playlist.loadItem(playlist_item);
     }
     // Delete the playlist
     if (target.is('li.p a.delete_playlist')) {
         e.preventDefault();
-        PLAYLICK.delete_playlist(playlist_item.data('playlist'));
+        CONTROLLERS.Playlist.remove(playlist_item.data('playlist'));
     }
     // Toggle play
     if (target.is('li.p a.playlist_playing')) {
@@ -155,7 +155,7 @@ $('#playlists').click(function (e) {
     if (target.is('li.p a.edit_playlist')) {
         e.preventDefault();
         target.blur();
-        PLAYLICK.toggle_playlist_edit(playlist_item);
+        CONTROLLERS.Playlist.toggleSidebarEditName(playlist_item);
     }
     // Update playlist name
     if (target.is('li.p form.edit_playlist_form input[type=submit]')) {
@@ -165,7 +165,7 @@ $('#playlists').click(function (e) {
         var playlist = playlist_item.data('playlist');
         playlist.set_name(params.name, function () {
             playlist_item.find('a.playlist').text(UTIL.truncateString(params.name));
-            PLAYLICK.toggle_playlist_edit(playlist_item);
+            CONTROLLERS.Playlist.toggleSidebarEditName(playlist_item);
         });
     }
 });

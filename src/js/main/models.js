@@ -93,30 +93,6 @@
         }
         return wrapper.html();
     };
-    function couchDownHandler (action, result) {
-        if (PLAYLICK.debug) {
-            var message = "couchdb unavailable";
-            if (result.error && result.error != 'unknown') {
-                message = result.error+': '+result.reason;
-            }
-            console.warn('['+action+'] '+message);
-            console.warn(result);
-        }
-        MODELS.couch_up = false;
-        
-        $('#loading_playlists').addClass('unavailable');
-        $('#loading_playlists').html(
-            '<b>Database unavailable.</b>'
-            + '<br>Your changes will not be saved. '
-            + '<a href="#" onclick="PLAYLICK.retryCouch(); return false;">retry</a>'
-        );
-        $('#loading_playlists').show();
-    };
-    function couchUpHandler (action, response) {
-        MODELS.couch_up = true;
-        $('#loading_playlists').hide();
-        $('#tracksError').hide();
-    }
     
     /* Apply to Models */
     MODELS.Track.prototype.toHTML = trackToHtml;
@@ -132,7 +108,7 @@
         },
         onCreate: function () {
             // Add to sidebar
-            $('#playlists').append(this.element);
+            CONTROLLERS.Playlist.playlistSidebarElem.append(this.element);
         },
         onUnload: function () {
             PLAYDAR.hideSM2Container();
@@ -146,6 +122,4 @@
             }
         }
     };
-    MODELS.couch_down_handler = couchDownHandler;
-    MODELS.couch_up_handler = couchUpHandler;
 })();

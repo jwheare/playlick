@@ -13,5 +13,5 @@ var STRINGS = {
     playdar_unavailable_text: 'Can\'t find Playdar',
     download_playdar_text: '<a href="http://www.playdar.org/download/" title="Download Playdar">Download</a>',
     create_playlist_title: CONTROLLERS.Playlist.playlistTitleElem.html(),
-    loading_playlists_text: $('#loading_playlists').html()
+    loading_playlists_text: CONTROLLERS.Playlist.loadingPlaylistsElem.html()
 };

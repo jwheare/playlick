@@ -7,14 +7,14 @@ var PLAYLICK = {
     **/
     
     init: function () {
-        // Prefill URLs
-        PLAYLICK.check_url_params();
-        // Load playlists
-        PLAYLICK.fetchPlaylists();
-        // Create appLauncher iframe
-        PLAYLICK.createAppLauncherFrame();
         // Start a new playlist
         CONTROLLERS.Playlist.create();
+        // Load playlists
+        CONTROLLERS.Playlist.fetchAll();
+        // Create appLauncher iframe
+        PLAYLICK.createAppLauncherFrame();
+        // Check URL hash
+        PLAYLICK.checkUrlHash();
     },
     appLauncherId: 'appLauncher',
     createAppLauncherFrame: function () {
@@ -24,18 +24,8 @@ var PLAYLICK = {
         $('body').append(iframe);
         iframe.attr('src', 'about:blank');
     },
-    retryCouch: function () {
-        $('#loading_playlists').removeClass('unavailable');
-        $('#loading_playlists').html(STRINGS.loading_playlists_text);
-        $('#loading_playlists').show();
-        if (PLAYLICK.fetchPlaylistsDone) {
-            MODELS.stat_couch();
-        } else {
-            PLAYLICK.fetchPlaylists();
-        }
-    },
     
-    check_url_params: function () {
+    checkUrlHash: function () {
         var hash_parts = UTIL.getHashParts();
         var url = hash_parts.url || hash_parts.xspf || hash_parts.podcast;
         if (url) {
@@ -49,7 +39,7 @@ var PLAYLICK = {
                 hash_parts.lastfm_loved,
                 function callback (playlistId, playlist) {
                     // Load playlist
-                    PLAYLICK.load_playlist(playlist);
+                    CONTROLLERS.Playlist.load(playlist);
                 }
             );
         }
@@ -63,13 +53,13 @@ var PLAYLICK = {
             // Make a new playlist
             CONTROLLERS.Playlist.create();
             // Add a track to it
-            PLAYLICK.add_track(hash_parts.artist, hash_parts.track);
+            CONTROLLERS.Playlist.addTrack(hash_parts.artist, hash_parts.track);
         }
         if (hash_parts.spotify_album) {
-            IMPORTERS.Spotify.album(hash_parts.spotify_album, PLAYLICK.load_playlist);
+            IMPORTERS.Spotify.album(hash_parts.spotify_album, CONTROLLERS.Playlist.load);
         }
         if (hash_parts.spotify_track) {
-            IMPORTERS.Spotify.track(hash_parts.spotify_track, PLAYLICK.load_playlist);
+            IMPORTERS.Spotify.track(hash_parts.spotify_track, CONTROLLERS.Playlist.load);
         }
     },
     
@@ -77,60 +67,6 @@ var PLAYLICK = {
      * Playlist state
     **/
     
-    registerPlaylist: function (playlist) {
-        PLAYLICK.last_playlist = playlist;
-    },
-    // Show/hide edit mode for playlist in sidebar
-    toggle_playlist_edit: function (playlist_item) {
-        // Toggle playlist link and form
-        playlist_item.find('a.playlist').toggle();
-        playlist_item.find('form.edit_playlist_form').toggle();
-        // Update button
-        var button = playlist_item.find('a.edit_playlist');
-        if (button.html() == STRINGS.cancel_edit_playlist_text) {
-            button.html(STRINGS.edit_playlist_text);
-        } else {
-            button.html(STRINGS.cancel_edit_playlist_text);
-            // Update input and select
-            var edit_input = playlist_item.find('input.playlist_name');
-            edit_input.val(playlist_item.data('playlist').name);
-            setTimeout(function () {
-                edit_input.select();
-            }, 1);
-        }
-    },
-    // Remove a playlist
-    delete_playlist: function (playlist) {
-        if (confirm('Are you sure you want to delete this playlist:\n\n' + playlist.name)) {
-            playlist.remove();
-        }
-    },
-    // Highlight the current playlist in the sidebar
-    set_current_playlist_item: function (playlist_item) {
-        $('#playlists').find('li').removeClass('current');
-        playlist_item.addClass('current');
-    },
-    // Highlight the currently playing playlist in the sidebar
-    set_playing_playlist_item: function (playlist_item) {
-        $('#playlists').find('li.p').removeClass('playing');
-        if (playlist_item) {
-            playlist_item.addClass('playing');
-        }
-    },
-    add_track: function (artist, track) {
-        var new_track = new MODELS.Track({
-            artist: artist,
-            name: track
-        });
-        var playlist_track = CONTROLLERS.Playlist.current.add_track(new_track);
-        CONTROLLERS.Playlist.current.save();
-        CONTROLLERS.Playlist.trackListElem.append(playlist_track.element);
-        // Change the start button to add
-        $('#add_track_button').val(STRINGS.add_button_text);
-        // Show playlist actions
-        $('#listActions').show();
-        PLAYDAR.resolve_track(playlist_track);
-    },
     selectSource: function (playlist_track, tbody) {
         // Check radio button
         var radio = tbody.find('input[name=choice]');
@@ -182,66 +118,6 @@ var PLAYLICK = {
         track.playdar_sid = result.sid;
         track.video = result.video;
     },
-    // Fetch playlists from Couch
-    fetchPlaylists: function () {
-        var elements = [];
-        var playlists = MODELS.Playlist.fetchAll(function callback (playlist) {
-            PLAYLICK.registerPlaylist(playlist);
-            elements.push(playlist.element.get()[0]);
-        });
-        $('#playlists').append(elements);
-        if (typeof playlists !== 'undefined') {
-            PLAYLICK.fetchPlaylistsDone = true;
-        }
-    },
-    load_playlist: function (playlist) {
-        PLAYLICK.load_playlist_item(playlist.element);
-    },
-    // Load a playlist from the sidebar
-    load_playlist_item: function (playlist_item) {
-        // Cancel Playdar
-        PLAYDAR.cancel_playdar_resolve();
-        // Unload the current playlist
-        if (CONTROLLERS.Playlist.current) {
-            CONTROLLERS.Playlist.current.unload();
-        }
-        // Update current sidebar item
-        PLAYLICK.set_current_playlist_item(playlist_item);
-        // Update the current playlist object
-        CONTROLLERS.Playlist.current = playlist_item.data('playlist');
-        // Update the title
-        CONTROLLERS.Playlist.updateTitle();
-        // Switch the add track button text
-        $('#add_track_button').val(STRINGS.add_button_text);
-        $('#tracksLoading').show();
-        // Hide error message
-        $('#tracksError').hide();
-        // Load tracks
-        var elements = CONTROLLERS.Playlist.current.load();
-        // Update the AppleScript link
-        CONTROLLERS.Playlist.updateAppleScript();
-        $('#tracksLoading').hide();
-        if (elements) {
-            // Add to the DOM
-            CONTROLLERS.Playlist.trackListElem.append(elements);
-            setTimeout(function () {
-                var nowPlayingSound = Playdar.player.getNowPlaying();
-                if (nowPlayingSound) {
-                    PLAYDAR.updatePlaybackProgress.call(nowPlayingSound);
-                }
-            });
-            // Resolve tracks with Playdar
-            PLAYDAR.resolve_current_playlist();
-        } else {
-            $('#tracksError').show();
-        }
-        // Show playlist actions
-        $('#listActions').show();
-        // Show SM2
-        if (CONTROLLERS.Playlist.playingTrack && CONTROLLERS.Playlist.playingTrack.playlist === CONTROLLERS.Playlist.current) {
-            PLAYDAR.showSM2Container();
-        }
-    },
     
     /**
      * Import
@@ -260,15 +136,15 @@ var PLAYLICK = {
         IMPORTERS.Url.url(
             url,
             function callback (playlist) {
-                // Register playlist
-                PLAYLICK.registerPlaylist(playlist);
                 // Update messages
                 $('p.messages').hide();
                 $('#url_title').text(playlist.name);
                 $('#url_count').text(playlist.tracks.length);
                 $('#url_done').show();
+                // Register playlist
+                CONTROLLERS.Playlist.register(playlist);
                 // Load playlist
-                PLAYLICK.load_playlist(playlist);
+                CONTROLLERS.Playlist.load(playlist);
             },
             function exceptionHandler (exception) {
                 // Reset input
@@ -290,15 +166,15 @@ var PLAYLICK = {
         IMPORTERS.Spotify.url(
             url,
             function callback (playlist) {
-                // Register playlist
-                PLAYLICK.registerPlaylist(playlist);
                 // Update messages
                 $('p.messages').hide();
                 var escapedAlbum = $('<b>').text(playlist.name);
                 $('#spotify_album_name').html(escapedAlbum);
                 $('#spotify_album_done').show();
+                // Register playlist
+                CONTROLLERS.Playlist.register(playlist);
                 // Load playlist
-                PLAYLICK.load_playlist(playlist);
+                CONTROLLERS.Playlist.load(playlist);
             },
             function exceptionHandler (exception) {
                 // Show error message
@@ -321,14 +197,14 @@ var PLAYLICK = {
         IMPORTERS.Spotify.url(
             url,
             function callback (playlist) {
-                // Register playlist
-                PLAYLICK.registerPlaylist(playlist);
                 // Update messages
                 $('p.messages').hide();
                 $('#spotify_title').text(playlist.name);
                 $('#spotify_done').show();
+                // Register playlist
+                CONTROLLERS.Playlist.register(playlist);
                 // Load playlist
-                PLAYLICK.load_playlist(playlist);
+                CONTROLLERS.Playlist.load(playlist);
             },
             function exceptionHandler (exception) {
                 // Reset input
@@ -350,15 +226,15 @@ var PLAYLICK = {
         IMPORTERS.LastFm.album(
             artist, album,
             function callback (playlist) {
-                // Register playlist
-                PLAYLICK.registerPlaylist(playlist);
                 // Update messages
                 $('p.messages').hide();
                 var escapedAlbum = $('<b>').text(playlist.name);
                 $('#album_name').html(escapedAlbum);
                 $('#album_done').show();
+                // Register playlist
+                CONTROLLERS.Playlist.register(playlist);
                 // Load playlist
-                PLAYLICK.load_playlist(playlist);
+                CONTROLLERS.Playlist.load(playlist);
             },
             function exceptionHandler (exception) {
                 // Show error message
@@ -394,7 +270,7 @@ var PLAYLICK = {
             username,
             function lovedTracksCallback (playlist) {
                 PLAYLICK.importedPlaylists[playlistId] = playlist;
-                PLAYLICK.registerPlaylist(playlist);
+                CONTROLLERS.Playlist.register(playlist);
                 callback(playlistId, playlist);
             },
             function exceptionHandler (exception) {
@@ -410,7 +286,7 @@ var PLAYLICK = {
             data,
             function playlistCallback (playlist) {
                 PLAYLICK.importedPlaylists[playlistId] = playlist;
-                PLAYLICK.registerPlaylist(playlist);
+                CONTROLLERS.Playlist.register(playlist);
                 callback(playlistId, playlist);
             },
             function playlistExceptionHandler (exception) {
@@ -488,13 +364,13 @@ var PLAYLICK = {
             you,
             they,
             function callback (playlist) {
-                // Register playlist
-                PLAYLICK.registerPlaylist(playlist);
                 // Update messages
                 $('p.messages').hide();
                 $('#generate_done').show();
+                // Register playlist
+                CONTROLLERS.Playlist.register(playlist);
                 // Load playlist
-                PLAYLICK.load_playlist(playlist);
+                CONTROLLERS.Playlist.load(playlist);
             },
             function exceptionHandler (exception) {
                 // Reset input

@@ -16,9 +16,15 @@ var MODELS = {
     },
     couch_down_handler: function (action, result) {
         MODELS.couch_up = false;
+        if (MODELS.onCouchDown) {
+            MODELS.onCouchDown.apply(this, arguments);
+        }
     },
     couch_up_handler: function (action, response) {
         MODELS.couch_up = true;
+        if (MODELS.onCouchUp) {
+            MODELS.onCouchUp.apply(this, arguments);
+        }
     }
 };
 (function () {

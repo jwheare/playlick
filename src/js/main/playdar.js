@@ -328,10 +328,8 @@ var PLAYDAR = {
         if (track_item) {
             track_item.addClass('loading');
             var playlist_track = track_item.data('playlist_track');
-            // Update the now playing track
-            CONTROLLERS.Playlist.playingTrack = playlist_track;
-            // Highlight the playlist in the sidebar
-            PLAYLICK.set_playing_playlist_item(playlist_track.playlist.element);
+            // Update Playlist state
+            CONTROLLERS.Playlist.setPlaying(playlist_track);
             // Update the playback meter
             PLAYDAR.updatePlaybackProgress.call(this);
         }
@@ -436,10 +434,8 @@ var PLAYDAR = {
     stopPlaySession: function () {
         // Stop the player
         Playdar.player.stop_current(true);
-        // Clear the now playing track
-        CONTROLLERS.Playlist.playingTrack = null;
-        // Remove the playlist highlight from the sidebar
-        PLAYLICK.set_playing_playlist_item();
+        // Update Playlist state
+        CONTROLLERS.Playlist.setPlaying();
     },
     onResultFinish: function () {
         // Reset the track
