@@ -13,8 +13,6 @@ var PLAYLICK = {
         CONTROLLERS.Playlist.fetchAll();
         // Create appLauncher iframe
         PLAYLICK.createAppLauncherFrame();
-        // Check URL hash
-        PLAYLICK.checkUrlHash();
     },
     appLauncherId: 'appLauncher',
     createAppLauncherFrame: function () {

@@ -123,7 +123,6 @@ $('#create_playlist').click(function (e) {
 });
 // Capture ESC while toggling playlist editing
 CONTROLLERS.Playlist.playlistSidebarElem.keydown(function (e) {
-    // console.dir(e);
     var target = $(e.target);
     // Capture ESC
     if (target.is('input.playlist_name') && e.keyCode == 27) {
@@ -354,7 +353,6 @@ $('#lastfm_battle_form').submit(function (e) {
 
 /* Keyboard shortcuts */
 $(document).keydown(function (e) {
-    // console.dir(e);
     var target = $(e.target);
     // Don't capture on keyboardable inputs
     if (target.is('input[type=text], textarea, select')) {

@@ -5,6 +5,8 @@ var PLAYDAR = {
     soundmanager_ready: function (status) {
         if (status.success) {
             Playdar.client.go();
+            // Check URL hash
+            PLAYLICK.checkUrlHash();
         } else {
             PLAYDAR.update_status(STRINGS.loading_flash_error_text);
         }
@@ -321,7 +323,11 @@ var PLAYDAR = {
         return track_item;
     },
     onResultMetadata: function () {
-        PLAYDAR.positionVideo.call(this);
+        var track_item = $('#' + this.sID).data('track_item');
+        if (track_item) {
+            track_item.removeClass('loading');
+            PLAYDAR.positionVideo.call(this);
+        }
     },
     onResultStart: function () {
         var track_item = PLAYDAR.onResultPlay.call(this);
@@ -485,7 +491,10 @@ var PLAYDAR = {
     updateLoadProgress: function () {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
-            track_item.removeClass('loading');
+            var playlist_track = track_item.data('playlist_track');
+            if (!playlist_track.track.video) {
+                track_item.removeClass('loading');
+            }
             var loading = track_item.find('.loading');
             var loaded = this.bytesLoaded/this.bytesTotal * 100;
             loading.width(loaded + "%");
