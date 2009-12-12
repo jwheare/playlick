@@ -74,12 +74,18 @@ $('#addModeToggle').click(function (e) {
         target.text(searchText);
         $('#autoAdd').hide();
         $('#manualAdd').show();
+        setTimeout(function () {
+            $('#manualAddArtistInput').focus().select();
+        });
     } else {
         $('#manualAdd input').attr('disabled', true);
         $('#autoAdd input').removeAttr('disabled');
         target.text(manualText);
         $('#autoAdd').show();
         $('#manualAdd').hide();
+        setTimeout(function () {
+            $('#add_track_input').focus().select();
+        });
     }
 });
 
