@@ -152,7 +152,7 @@ Playlist.prototype = {
      * Build a DOMElement for the Playlist
     **/
     set_element: function (element_name) {
-        var element_name = element_name || 'li';
+        element_name = element_name || 'li';
         this.element = $('<' + element_name + ' class="p">')
             .attr('id', this.get_dom_id())
             .data('playlist', this)
@@ -166,15 +166,6 @@ Playlist.prototype = {
     },
     titleHTML: function () {
         return this.toString();
-    },
-    get_urls: function () {
-        var urls = [];
-        $.each(this.tracks, function (i, playlist_track) {
-            if (playlist_track.track.playdar_url) {
-                urls.push(playlist_track.track.playdar_url);
-            }
-        });
-        return urls;
     },
     /**
      * Build an applescript for exporting to iTunes

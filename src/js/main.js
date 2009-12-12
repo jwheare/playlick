@@ -180,9 +180,6 @@ var PLAYLICK = {
             Playdar.player.stop_stream(track.playdar_sid);
         }
         track.playdar_sid = result.sid;
-        // URL to the actual file, for making a local playlist
-        // For streaming, construct the url from the sid
-        track.playdar_url = result.url;
         track.video = result.video;
     },
     // Fetch playlists from Couch

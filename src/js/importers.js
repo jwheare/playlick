@@ -16,8 +16,8 @@ IMPORTERS = {
      * Wraps jQuery.getJSON with response, exception and timeout handling.
     **/
     getJson: function (url, params, callback, exception, exceptionHandler) {
-        var params = params || {};
-        var exceptionHandler = exceptionHandler || IMPORTERS.defaultExceptionHandler;
+        params = params || {};
+        exceptionHandler = exceptionHandler || IMPORTERS.defaultExceptionHandler;
         // Setup a 2 second timeout for the JSONP request
         var hasTimedOut = false;
         var callTimeout = setTimeout(function () {
@@ -115,7 +115,7 @@ IMPORTERS = {
         if (!jspf.trackList || !jspf.trackList.track) {
             throw exception('No tracks in JSPF response', jspf);
         }
-        var metadata = metadata || {};
+        metadata = metadata || {};
         // XML to JSON converters often return single item lists as single items
         var trackList = $.makeArray(jspf.trackList.track);
         if (!trackList.length) {
@@ -135,11 +135,10 @@ IMPORTERS = {
             url: url,
             source: source
         });
-        var trackDoc, trackURL;
         // Load tracks
         $.each(trackList, function (i, data) {
             if (data.title) {
-                trackDoc = {
+                var trackDoc = {
                     name: data.title,
                     artist: data.creator,
                     album: data.album

@@ -141,69 +141,56 @@ var PLAYDAR = {
         return results_form;
     },
     // Load playdar resolution results
-    load_track_results: function (playlist_track, response, final_answer) {
+    load_track_results: function (playlist_track, response) {
         var list_item = playlist_track.element;
         playlist_track.track.playdar_qid = response.qid;
-        if (final_answer) {
-            list_item.removeClass('scanning');
-            if (response.results.length) {
-                playlist_track.track.playdar_response = response;
-                list_item.addClass('match');
-                var results_table = PLAYDAR.build_results_table(response, list_item);
-                var result = response.results[0];
-                if (result.score > 0.99) {
-                    PLAYLICK.update_track(playlist_track, result, true);
-                }
-                var sources = list_item.children('.sources');
-                sources.html(results_table);
-                // Highlight the list item
-                if (playlist_track.track.playdar_sid) {
-                    list_item.addClass('perfectMatch');
-                }
-                if (playlist_track.track.video) {
-                    list_item.addClass('video');
-                }
-            } else {
-                list_item.addClass('noMatch');
+        list_item.removeClass('scanning');
+        if (response.results.length) {
+            playlist_track.track.playdar_response = response;
+            list_item.addClass('match');
+            var results_table = PLAYDAR.build_results_table(response, list_item);
+            var result = response.results[0];
+            if (result.score > 0.99) {
+                PLAYLICK.update_track(playlist_track, result, true);
             }
+            var sources = list_item.children('.sources');
+            sources.html(results_table);
+            // Highlight the list item
+            if (playlist_track.track.playdar_sid) {
+                list_item.addClass('perfectMatch');
+            }
+            if (playlist_track.track.video) {
+                list_item.addClass('video');
+            }
+        } else {
+            list_item.addClass('noMatch');
         }
     },
-    splice_url_result: function (playlist_track, response) {
-        var url_result = {
-            score: 1,
-            preference: 80,
-            url: playlist_track.track.url,
-            artist: playlist_track.track.artist,
-            album: playlist_track.track.album,
-            track: playlist_track.track.name,
-            source: Playdar.Util.location_from_url(playlist_track.track.url).host,
-            duration: playlist_track.track.duration,
-            size: playlist_track.track.size,
-            mimetype: playlist_track.track.mimetype
+    buildUrlResponse: function (playlist_track) {
+        var urlResponse = {
+            qid: Playdar.Util.generate_uuid(),
+            results: [{
+                score: 1,
+                preference: 80,
+                url: playlist_track.track.url,
+                artist: playlist_track.track.artist,
+                album: playlist_track.track.album,
+                track: playlist_track.track.name,
+                source: Playdar.Util.location_from_url(playlist_track.track.url).host,
+                duration: playlist_track.track.duration,
+                size: playlist_track.track.size,
+                mimetype: playlist_track.track.mimetype
+            }]
         };
-        var highest_non_perfect;
-        $.each(response.results, function (i, result) {
-            if (result.score < 0.99) {
-                highest_non_perfect = i;
-                return false;
-            }
-        });
-        if (typeof highest_non_perfect != 'undefined') {
-            response.results.splice(highest_non_perfect, 0, url_result);
-        } else {
-            response.results.push(url_result);
-        }
+        return urlResponse;
     },
     // Generate a query ID and a results handler for a track
     track_handler: function (playlist_track) {
         var uuid = Playdar.Util.generate_uuid();
         Playdar.client.register_results_handler(function (response, final_answer) {
-            // HACK - Add the URL as a source
-            if (final_answer && playlist_track.track.url) {
-                PLAYDAR.splice_url_result(playlist_track, response);
+            if (final_answer) {
+                PLAYDAR.load_track_results(playlist_track, response);
             }
-            // ENDHACK
-            PLAYDAR.load_track_results(playlist_track, response, final_answer);
         }, uuid);
         return uuid;
     },
@@ -218,27 +205,15 @@ var PLAYDAR = {
     resolve_track: function (playlist_track, force) {
         var track = playlist_track.track;
         if (!force && track.playdar_response) {
-            PLAYDAR.load_track_results(playlist_track, track.playdar_response, true);
+            PLAYDAR.load_track_results(playlist_track, track.playdar_response);
+        } else if (track.url) {
+            PLAYDAR.load_track_results(playlist_track, PLAYDAR.buildUrlResponse(playlist_track));
         } else {
             var qid = PLAYDAR.track_handler(playlist_track);
-            var results;
-            if (track.url) {
-                results = [{
-                    artist: track.artist,
-                    track: track.name,
-                    album: track.album,
-                    url: track.url,
-                    duration: track.duration,
-                    size: track.size,
-                    bitrate: track.bitrate,
-                    type: track.type,
-                    source: Playdar.Util.location_from_url(track.url).host
-                }];
-            }
             if (Playdar.client && Playdar.client.isAvailable() && Playdar.client.is_authed()) {
                 playlist_track.element.removeClass('noMatch match perfectMatch video');
                 playlist_track.element.addClass('scanning');
-                Playdar.client.resolve(track.artist, track.name, track.album, qid, results);
+                Playdar.client.resolve(track.artist, track.name, track.album, qid);
             } else {
                 playlist_track.element.removeClass('noMatch match perfectMatch video');
                 playlist_track.element.addClass('scanning');

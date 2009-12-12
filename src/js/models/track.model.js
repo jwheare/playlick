@@ -17,7 +17,6 @@ function Track (doc) {
     this.playdar_qid = null;
     this.playdar_sid = null;
     this.playdar_response = null;
-    this.playdar_url = null;
 };
 Track.prototype = {
     get_duration_string: function () {
