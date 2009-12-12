@@ -142,7 +142,7 @@ Playlist.prototype = {
         // Update the current playlist object
         this.setCurrent(playlist);
         // Update the title
-        this.updateTitle();
+        this.updateTitle(playlist);
         // Switch the add track button text
         this.addTrackButton.val(STRINGS.add_button_text);
         this.tracksLoadingElem.show();
@@ -195,26 +195,50 @@ Playlist.prototype = {
             }, 1);
         }
     },
-    updateTitle: function () {
-        this.playlistTitleElem.html(this.current.titleHTML());
+    updateTitle: function (playlist, title) {
+        // Update playlist title
+        if (title) {
+            playlist.set_name(title);
+        }
+        // Update current title
+        if (this.current == playlist) {
+            this.playlistTitleElem.html(playlist.titleHTML());
+        }
+        // Update sidebar title
+        playlist.element.find('a.playlist').text(UTIL.truncateString(playlist.toString()));
     },
     // Update the playlist iTunes export AppleScript (when loading a playlist or saving)
     updateAppleScript: function () {
         this.applescriptLink.attr('href', this.current.toApplescript());
     },
     
-    addTrack: function (artistName, trackName) {
+    addTrack: function (artistName, trackName, albumName, url) {
         var track = new MODELS.Track({
             artist: artistName,
-            name: trackName
+            name: trackName,
+            album: albumName,
+            url: url
         });
         var playlist_track = this.current.add_track(track);
-        this.current.save();
+        // Set the playlist name if this is the first track and we supplied an album
+        if (albumName && playlist_track.get_position() == 1) {
+            var playlistName = albumName;
+            if (artistName) {
+                playlistName = artistName + ' - ' + playlistName;
+            }
+            // Autosaves
+            this.updateTitle(this.current, playlistName);
+        } else {
+            // Just save
+            this.current.save();
+        }
+        // Add the track to the playlist in the DOM
         this.trackListElem.append(playlist_track.element);
         // Change the start button to add
         this.addTrackButton.val(STRINGS.add_button_text);
         // Show playlist actions
         this.listActionsElem.show();
+        // Resolve
         PLAYDAR.resolve_track(playlist_track);
     },
     

@@ -366,6 +366,15 @@ form#add_to_playlist {
     margin: 10px 0 10px 40px;
     line-height: 25px;
 }
+
+a#addModeToggle {
+    float: right;
+}
+
+input#add_track_button {
+    float: right;
+}
+
 form#add_to_playlist input#add_track_input {
     margin: 0 10px 0 0;
     width: 250px;
@@ -375,6 +384,20 @@ form#lastfm_battle_form input#lastfm_battle_input_you {
 }
 form#lastfm_battle_form input#lastfm_battle_input_they {
     margin: 0 10px 0 0;
+}
+
+/* Manual add track */
+
+table#manualAdd {
+    display: none;
+}
+table#manualAdd td {
+    padding: 3px 15px 3px 3px;
+}
+table#manualAdd th {
+/*    padding-left: 10px;*/
+    font-weight: normal;
+/*    text-align: right;*/
 }
 
 /* Import playlists form */

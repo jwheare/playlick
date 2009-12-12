@@ -61,6 +61,28 @@ CONTROLLERS.Playlist.trackListElem.click(function (e) {
 
 /*  Add track handlers */
 
+$('#addModeToggle').click(function (e) {
+    e.preventDefault();
+    var target = $(e.target);
+    target.blur();
+    var manualText = 'Manual mode';
+    var searchText = 'Search mode';
+    var searchMode = (target.text() == manualText);
+    if (searchMode) {
+        $('#manualAdd input').removeAttr('disabled');
+        $('#autoAdd input').attr('disabled', true);
+        target.text(searchText);
+        $('#autoAdd').hide();
+        $('#manualAdd').show();
+    } else {
+        $('#manualAdd input').attr('disabled', true);
+        $('#autoAdd input').removeAttr('disabled');
+        target.text(manualText);
+        $('#autoAdd').show();
+        $('#manualAdd').hide();
+    }
+});
+
 // Add track autocomplete
 $("#add_track_input").autocomplete(IMPORTERS.LastFm.WS_ROOT + "/2.0/?callback=?", {
     multiple: false,
@@ -105,12 +127,20 @@ $('#add_to_playlist').submit(function (e) {
     e.preventDefault();
     // Parse the form and add tracks
     var params = UTIL.serializeForm(this);
-    if (params.track_name && params.artist_name) {
-        // Clear the inputs and refocus
-        $('#add_track_artist').val('');
-        $('#add_track_track').val('');
-        $('#add_track_input').val('').focus();
-        CONTROLLERS.Playlist.addTrack(params.artist_name, params.track_name);
+    if (params.trackName) {
+        if (params.autocomplete) {
+            // Clear the inputs and refocus
+            $('#add_track_artist').val('');
+            $('#add_track_track').val('');
+            $('#add_track_input').val('').focus().select();
+        } else {
+            if (params.albumName) {
+                $('#manualAddTrackInput').focus().select();
+            } else {
+                $('#manualAddArtistInput').focus().select();
+            }
+        }
+        CONTROLLERS.Playlist.addTrack(params.artistName, params.trackName, params.albumName, params.url);
     }
 });
 
@@ -162,10 +192,8 @@ CONTROLLERS.Playlist.playlistSidebarElem.click(function (e) {
         var form = target.parents('form');
         var params = UTIL.serializeForm(form);
         var playlist = playlist_item.data('playlist');
-        playlist.set_name(params.name, function () {
-            playlist_item.find('a.playlist').text(UTIL.truncateString(params.name));
-            CONTROLLERS.Playlist.toggleSidebarEditName(playlist_item);
-        });
+        CONTROLLERS.Playlist.updateTitle(playlist_item.data('playlist'), params.name);
+        CONTROLLERS.Playlist.toggleSidebarEditName(playlist_item);
     }
 });
 

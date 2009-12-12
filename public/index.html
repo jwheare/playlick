@@ -48,10 +48,10 @@
                                     </p>
                                     
                                     <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…" />
-                                    <input type="hidden" name="artist_name" id="album_import_artist" />
-                                    <input type="hidden" name="album_name" id="album_import_name" />
-                                    <input type="submit" id="album_button" value="Go" />
+                                    <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…">
+                                    <input type="hidden" name="artist_name" id="album_import_artist">
+                                    <input type="hidden" name="album_name" id="album_import_name">
+                                    <input type="submit" id="album_button" value="Go">
                                 </form>
                                 <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
                                 <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
@@ -65,9 +65,9 @@
                                     </p>
                                     
                                     <img src="spotify_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="album" id="spotify_album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…" />
-                                    <input type="hidden" name="spotifyUrl" id="spotify_album_import_url" />
-                                    <input type="submit" id="spotify_album_button" value="Go" />
+                                    <input type="text" name="album" id="spotify_album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…">
+                                    <input type="hidden" name="spotifyUrl" id="spotify_album_import_url">
+                                    <input type="submit" id="spotify_album_button" value="Go">
                                 </form>
                                 <p class="messages" id="spotify_album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
                                 <p class="messages" id="spotify_album_done">Done! Album imported: <span id="spotify_album_name"></span></p>
@@ -80,8 +80,8 @@
                                         <label for="lastfm_input">Import your Last.fm playlists and Loved Tracks</label>
                                     </p>
                                     <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="username" id="lastfm_input" class="importer_input" placeholder="Last.fm username…" />
-                                    <input type="submit" id="lastfm_button" value="Get ’em" />
+                                    <input type="text" name="username" id="lastfm_input" class="importer_input" placeholder="Last.fm username…">
+                                    <input type="submit" id="lastfm_button" value="Get ’em">
                                 </form>
                                 
                                 <p class="messages" id="lastfm_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
@@ -119,11 +119,11 @@
                                     </p>
                                     <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
                                     
-                                    <input type="text" name="you" id="lastfm_battle_input_you" class="importer_input" placeholder="You…" />
+                                    <input type="text" name="you" id="lastfm_battle_input_you" class="importer_input" placeholder="You…">
                                     <br>
                                     <label for="lastfm_battle_input_they" class="favicon"><small>VS</small></label>
-                                    <input type="text" name="they" id="lastfm_battle_input_they" class="importer_input" placeholder="…Them" />
-                                    <input type="submit" id="lastfm_battle_button" value="Fight!" />
+                                    <input type="text" name="they" id="lastfm_battle_input_they" class="importer_input" placeholder="…Them">
+                                    <input type="submit" id="lastfm_battle_button" value="Fight!">
                                     
                                     <p class="messages" id="generate_loading"><img src="/track_scanning.gif" width="16" height="16"> Fetching tracks…</p>
                                     <p class="messages" id="generate_done">Done!</p>
@@ -170,11 +170,50 @@
                     <ol class="trackList" id="playlist"></ol>
                     
                     <form id="add_to_playlist">
-                        <label for="add_track_input">Add a Track:</label>
-                        <input type="text" name="track" id="add_track_input" />
-                        <input type="hidden" name="artist_name" id="add_track_artist" />
-                        <input type="hidden" name="track_name" id="add_track_name" />
-                        <input type="submit" id="add_track_button" value="Start a Playlist" />
+                        <a href="#" id="addModeToggle">Manual mode</a>
+                        
+                        <br>
+                        
+                        <input type="submit" id="add_track_button" value="Start a Playlist">
+                        
+                        <div id="autoAdd">
+                            <label for="add_track_input">Search for a track:</label>
+                            <input type="text" name="track" id="add_track_input">
+                            <input type="hidden" name="artistName" id="add_track_artist">
+                            <input type="hidden" name="trackName" id="add_track_name">
+                            <input type="hidden" name="autocomplete" value="1">
+                        </div>
+                        
+                        <table border="0" cellspacing="0" cellpadding="0" id="manualAdd">
+                            <tr>
+                                <th>
+                                    <label for="manualAddArtistInput">Artist:</label>
+                                </th>
+                                <td>
+                                    <input type="text" name="artistName" id="manualAddArtistInput" disabled="disabled">
+                                </td>
+                                <th>
+                                    <label for="manualAddTrackInput">Track:</label>
+                                </th>
+                                <td>
+                                    <input type="text" name="trackName" id="manualAddTrackInput" disabled="disabled">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="manualAddUrlInput">URL:</label>
+                                </th>
+                                <td>
+                                    <input type="text" name="url" id="manualAddUrlInput" disabled="disabled">
+                                </td>
+                                <th>
+                                    <label for="manualAddAlbumInput">Album:</label>
+                                </th>
+                                <td>
+                                    <input type="text" name="albumName" id="manualAddAlbumInput" disabled="disabled">
+                                </td>
+                            </tr>
+                        </table>
                     </form>
                     
                     <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>

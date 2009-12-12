@@ -101,7 +101,6 @@
     MODELS.Playlist.DefaultOptions = {
         onSave: function () {
             if (this == CONTROLLERS.Playlist.current) {
-                CONTROLLERS.Playlist.updateTitle();
                 CONTROLLERS.Playlist.updateAppleScript();
                 PLAYDAR.showSM2Container();
             }
