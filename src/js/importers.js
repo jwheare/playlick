@@ -92,12 +92,18 @@ IMPORTERS = {
      * 
      * Convert a relative URL to absolute with a given root.
     **/
-    getAbsoluteUrl: function (url, root) {
-        root = root || window.location.href;
-        // Check for a relative URL and an absolute http root URL
-        if (url && !url.match(/^https?:\/\//) && root.match(/^https?:\/\//)) {
-            // Strip off the last part of the root and add the relative URL
-            url = root.replace(/(\/[^\/]*)$/, '') + '/' + url.replace(/^\//, '');
+    getAbsoluteUrl: function (url, base) {
+        base = base || window.location.href;
+        // Check for a relative URL and an absolute http base URL
+        if (url && !url.match(/^https?:\/\//) && base.match(/^https?:\/\//)) {
+            if (url.indexOf('/') === 0) {
+                // Add the relative URL to the base URL's root
+                var baseLocation = Playdar.Util.location_from_url(base);
+                url = baseLocation.protocol + '//' + baseLocation.host + url;
+            } else {
+                // Add the relative URL to the base URL's last part
+                url = base.replace(/(\/[^\/]*)$/, '') + '/' + url;
+            }
         }
         return url;
     },
@@ -132,7 +138,7 @@ IMPORTERS = {
             name: title,
             image: IMPORTERS.getAbsoluteUrl(metadata.image || jspf.image, source),
             description: description,
-            url: url,
+            url: IMPORTERS.getAbsoluteUrl(url, source),
             source: source
         });
         // Load tracks
