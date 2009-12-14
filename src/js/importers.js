@@ -179,12 +179,12 @@ IMPORTERS = {
         // XML to JSON converters often return single item lists as single items
         var trackList = $.makeArray(podcast.item);
         if (!trackList.length) {
-            throw exception('No tracks in Podcast', jspf.trackList);
+            throw exception('No tracks in Podcast', podcast.item);
         }
         // Create the playlist
         var image = podcast.image ? podcast.image.href : (podcast.thumbnail ? podcast.thumbnail.url : '');
         var subtitle = IMPORTERS.getStringItem(podcast.subtitle);
-        var description = IMPORTERS.getStringItem(podcast.description);
+        var description = IMPORTERS.getStringItem(podcast.description || podcast.summary);
         if (description == subtitle) {
             description = '';
         }
@@ -209,6 +209,62 @@ IMPORTERS = {
                 trackDoc.url = data.enclosure.url;
                 trackDoc.size = data.enclosure['length'];
                 trackDoc.mimetype = data.enclosure.type;
+            }
+            playlist.add_track(new MODELS.Track(trackDoc));
+        });
+        // Save
+        playlist.save();
+        // Call the IMPORTERS.createPlaylistFromPodcast callback
+        if (callback) {
+            callback(playlist);
+        }
+        return playlist;
+    },
+    createPlaylistFromAtomPodcast: function (source, podcast, callback, exception) {
+        if (!podcast.entry) {
+            throw exception('No tracks in Atom Podcast response', podcast);
+        }
+        // XML to JSON converters often return single item lists as single items
+        var trackList = $.makeArray(podcast.entry);
+        if (!trackList.length) {
+            throw exception('No tracks in Atom Podcast', podcast.entry);
+        }
+        // Create the playlist
+        var image = podcast.image ? podcast.image.href : podcast.logo;
+        var subtitle = IMPORTERS.getStringItem(podcast.subtitle);
+        var description = IMPORTERS.getStringItem(podcast.description || podcast.summary);
+        if (description == subtitle) {
+            description = '';
+        }
+        var linkObject = $.grep(podcast.link, function (value, i) {
+            return value.rel == 'alternate';
+        })[0];
+        var link = linkObject ? linkObject.href : '';
+        var playlist = new MODELS.Playlist({
+            name: IMPORTERS.getStringItem(podcast.title),
+            subtitle: subtitle,
+            description: description,
+            copyright: IMPORTERS.getStringItem(podcast.copyright),
+            image: IMPORTERS.getAbsoluteUrl(image),
+            url: link,
+            source: source
+        });
+        // Load tracks
+        $.each(trackList, function (i, data) {
+            var trackDoc = {
+                name: data.title,
+                artist: data.author ? (data.author.name || IMPORTERS.getStringItem(data.author)) : podcast.author
+            };
+            // TODO support media:content alternative
+            // e.g. <media:content url="blah.mp3" fileSize="46669578" type="audio/mpeg">
+            var trackLinks = $.makeArray(data.link);
+            var trackLink = $.grep(trackLinks, function (value, i) {
+                return value.rel && value.rel == 'enclosure';
+            })[0];
+            if (trackLink) {
+                trackDoc.url = trackLink.href;
+                trackDoc.size = trackLink['length'];
+                trackDoc.mimetype = trackLink.type;
             }
             playlist.add_track(new MODELS.Track(trackDoc));
         });

@@ -17,6 +17,7 @@ var Url = {};
  * Available subclasses:
  * Url.XspfException
  * Url.PodcastException
+ * Url.AtomPodcastException
 **/
 Url.Exception = function (url, message, diagnostics) {
     this.url = url;
@@ -32,11 +33,14 @@ Url.Exception.prototype.toString = function () {
 /**
  * class Url.XspfException < Url.Exception
  * class Url.PodcastException < Url.Exception
+ * class Url.AtomPodcastException < Url.Exception
 **/
 Url.XspfException = Url.Exception;
 Url.XspfException.prototype.name = 'UrlXspfException';
 Url.PodcastException = Url.Exception;
 Url.PodcastException.prototype.name = 'UrlPodcastException';
+Url.AtomPodcastException = Url.Exception;
+Url.AtomPodcastException.prototype.name = 'UrlAtomPodcastException';
 /**
  * Url.url(url[, callback][, exceptionHandler])
  * - url (String): URL to import the playlist from
@@ -50,26 +54,36 @@ Url.PodcastException.prototype.name = 'UrlPodcastException';
 Url.url = function (source, callback, exceptionHandler) {
     var exception = new Url.XspfException(source);
     IMPORTERS.getJsonFomXml(source, function (json) {
-        var podcast = json.query.results.rss ? json.query.results.rss.channel : '';
-        var jspf = json.query.results.lfm ? json.query.results.lfm.playlist : json.query.results.playlist;
-        if (!podcast && !jspf) {
-            throw exception('Invalid Podcast/XSPF', json.query.results);
+        var root = json.query.results;
+        var podcast = root.rss ? root.rss.channel : '';
+        var atom = root.feed;
+        var jspf = root.lfm ? root.lfm.playlist : root.playlist;
+        if (!podcast && !atom && !jspf) {
+            throw exception('Invalid Podcast/XSPF', root);
         }
-        if (podcast) {
-            var playlist = IMPORTERS.createPlaylistFromPodcast(
-                source,
-                podcast,
-                callback,
-                new Url.PodcastException(source)
-            );
-        } else if (jspf) {
+        var playlist;
+        if (jspf) {
             var metadata = {};
-            var playlist = IMPORTERS.createPlaylistFromJspf(
+            playlist = IMPORTERS.createPlaylistFromJspf(
                 source,
                 jspf,
                 metadata,
                 callback,
                 new Url.XspfException(source)
+            );
+        } else if (podcast) {
+            playlist = IMPORTERS.createPlaylistFromPodcast(
+                source,
+                podcast,
+                callback,
+                new Url.PodcastException(source)
+            );
+        } else if (atom) {
+            playlist = IMPORTERS.createPlaylistFromAtomPodcast(
+                source,
+                atom,
+                callback,
+                new Url.AtomPodcastException(source)
             );
         }
     }, exception, exceptionHandler);
