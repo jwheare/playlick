@@ -123,8 +123,8 @@ h1#title small {
 /* Sidebar */
 #sidebar {
     float: right;
-    width: 300px;
-    margin: 0 30px 15px 30px;
+    width: 297px;
+    margin: 0 39px 55px 24px;
 }
 #sidebar h1 {
     margin: 0 0 15px 0;
@@ -287,18 +287,19 @@ form#lastfm_battle_form input#lastfm_battle_input_they {
 #main {
     float: left;
     width: 580px;
-    margin: 0 15px 15px 15px;
+    margin: 0 15px 55px 15px;
     min-height: 200px;
 }
 #main h1 {
     margin: 0 0 15px 40px;
+    padding-right: 24px;
 }
 #main h2 {
     margin: 0 0 0 40px;
 }
 #main h1 img {
     float: right;
-    margin: 0 24px 24px 10px;
+    margin: 0 0 24px 10px;
     vertical-align: middle;
     max-width: 100px;
     max-height: 100px;
@@ -338,7 +339,9 @@ p#tracksError {
 
 /* Playlist footer */
 #listFooter {
-    margin: 10px 24px 0 0;
+    float: left;
+    width: 556px;
+    margin: 10px 24px 10px 0;
     font-size: 12px;
 }
 #listFooter span#playlistSource {
@@ -348,11 +351,13 @@ p#tracksError {
 /* Playlist actions */
 #listActions {
     display: none;
-    clear: left;
+    clear: both;
+    float: left;
+    width: 556px;
+    margin: 10px 24px 0 0;
 }
 a#playlistApplescript {
     float: right;
-    margin: 20px 24px 0 0;
     font-size: 13px;
     text-align: right;
 }
