@@ -83,11 +83,6 @@ Playlist.prototype = {
         // Hide playlist actions and footer
         this.footerElem.hide();
         this.actionsElem.hide();
-        // Focus/select add track input
-        var that = this;
-        setTimeout(function () {
-            that.addTrackSearchInput.select();
-        });
     },
     
     /* RETRIEVE */
@@ -206,7 +201,7 @@ Playlist.prototype = {
             var edit_input = playlist_item.find('input.playlist_name');
             edit_input.val(playlist_item.data('playlist').name);
             setTimeout(function () {
-                edit_input.select();
+                edit_input.focus().select();
             }, 1);
         }
     },

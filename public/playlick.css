@@ -167,12 +167,15 @@ ul#playlists li a.playlist {
     text-decoration: none;
     background: #e8f9bb;
 }
-ul#playlists li.current a.playlist {
+ul#playlists li a.create {
     background: #d2f380;
+}
+ul#playlists li.current a.playlist {
+    background: #c0e95b;
 }
 
 ul#playlists li.current {
-    border-left-color: #c0e95b;
+    border-left-color: #a8d840;
 }
 ul#playlists li.playing a.playlist {
     background: #a8d840;
@@ -394,7 +397,7 @@ form#addTrackForm {
     border-bottom: 1px solid #c0e95b;
     border-right: 24px solid #fff;
     font-size: 14px;
-    background-color: #e8f9bb;
+    background-color: #d2f380;
 }
 form#addTrackForm a#addTrackButton {
     display: block;
@@ -423,7 +426,7 @@ form#addTrackForm #addTrackSearch input#addTrackSearchInput {
 form#addTrackForm table#addTrackTable {
     margin-left: 39px;
     width: 517px;
-    background-color: #d2f380;
+    background-color: #e8f9bb;
 }
 form#addTrackForm table#addTrackTable tr.fields input {
     width: 232px;

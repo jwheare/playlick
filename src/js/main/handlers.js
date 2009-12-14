@@ -186,7 +186,7 @@ $('#lastfm_form').submit(function (e) {
     // Parse the form
     var params = UTIL.serializeForm(this);
     // Clear the input and refocus
-    $('#lastfm_input').val('').select();
+    $('#lastfm_input').val('').focus().select();
     PLAYLICK.fetchLastFmUserPlaylists(params.username);
 });
 $('#lastfm_playlists').click(function (e) {
@@ -275,7 +275,7 @@ $('#album_form').submit(function (e) {
     // Clear the inputs and refocus
     $("#album_import_artist").val('');
     $("#album_import_name").val('');
-    $("#album_import_input").val('').select();
+    $("#album_import_input").val('').focus().select();
     // Load the XSPF
     PLAYLICK.fetchLastFmAlbum(params.artist_name, params.album_name);
 });
@@ -323,7 +323,7 @@ $('#spotify_album_form').submit(function (e) {
     var params = UTIL.serializeForm(this);
     // Clear the inputs and refocus
     $("#spotify_album_import_url").val('');
-    $("#spotify_album_import_input").val('').select();
+    $("#spotify_album_import_input").val('').focus().select();
     // Load the Album URL
     PLAYLICK.fetchSpotifyAlbum(params.spotifyUrl);
 });
@@ -334,7 +334,7 @@ $('#url_form').submit(function (e) {
     // Parse the form
     var params = UTIL.serializeForm(this);
     // Clear the input and refocus
-    $('#url_input').val('').select();
+    $('#url_input').val('').focus().select();
     PLAYLICK.fetchUrl(params.url);
 });
 
@@ -344,7 +344,7 @@ $('#spotify_form').submit(function (e) {
     // Parse the form
     var params = UTIL.serializeForm(this);
     // Clear the input and refocus
-    $('#spotify_input').val('').select();
+    $('#spotify_input').val('').focus().select();
     PLAYLICK.fetchSpotify(params.url);
 });
 
@@ -355,7 +355,7 @@ $('#lastfm_battle_form').submit(function (e) {
     var params = UTIL.serializeForm(this);
     // Clear the inputs and refocus
     $("#lastfm_battle_input_they").val('');
-    $("#lastfm_battle_input_you").val('').select();
+    $("#lastfm_battle_input_you").val('').focus().select();
     // Generate the playlist
     PLAYLICK.generateLastFmUsersPlaylist(params.you, params.they);
 });
