@@ -53,27 +53,26 @@ Playlist.prototype = {
         this.tracks.push(playlist_track);
         return playlist_track;
     },
-    remove_track: function (playlist_track, onSave) {
+    remove_track: function (playlist_track) {
         var i = $.inArray(playlist_track, this.tracks);
         this.tracks.splice(i, 1);
+        // Refactor view
+        playlist_track.element.remove();
         // AUTOSAVE
-        this.save(function () {
-            // Remove from the DOM
-            playlist_track.element.remove();
-        });
+        this.save();
     },
-    reset_tracks: function (playlist_tracks, onSave) {
+    reset_tracks: function (playlist_tracks) {
         this.tracks = playlist_tracks;
         // AUTOSAVE
-        this.save(onSave);
+        this.save();
     },
     /**
      * Playlist management
     **/
-    set_name: function (name, onSave) {
+    set_name: function (name) {
         this.name = name;
         // AUTOSAVE
-        this.save(onSave);
+        this.save();
     },
     update_duration: function () {
         var duration = 0;
@@ -217,19 +216,16 @@ Playlist.prototype = {
     /**
      * Persistance
     **/
-    onSave: function (callback) {
+    onSave: function () {
         if (!this.persisted && this.options.onCreate) {
             this.options.onCreate.call(this);
-        }
-        if (callback) {
-            callback.call(this);
         }
         if (this.options.onSave) {
             this.options.onSave.call(this);
         }
         this.saved = true;
     },
-    save: function (callback) {
+    save: function () {
         // Persist in CouchDB
         if (MODELS.couch_up) {
             try {
@@ -237,7 +233,7 @@ Playlist.prototype = {
                 // console.dir(result);
                 if (result.ok) {
                     this.set_doc_ref(result.id, result.rev);
-                    this.onSave(callback);
+                    this.onSave();
                     this.persisted = true;
                     // console.info('[saved] ' + result.id + ' [' + result.rev + ']');
                 }
@@ -246,7 +242,7 @@ Playlist.prototype = {
             }
         }
         if (!MODELS.couch_up && !this.persisted) {
-            this.onSave(callback);
+            this.onSave();
         }
     },
     onRemove: function () {
@@ -275,15 +271,15 @@ Playlist.prototype = {
             this.onRemove();
         }
     },
-    publish: function (onSave) {
+    publish: function () {
         this.published = true;
         // AUTOSAVE
-        this.save(onSave);
+        this.save();
     },
-    make_private: function (onSave) {
+    make_private: function () {
         this.published = false;
         // AUTOSAVE
-        this.save(onSave);
+        this.save();
     },
     share: function (person) {
         // TODO

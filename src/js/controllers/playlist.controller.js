@@ -76,13 +76,13 @@ Playlist.prototype = {
         }
         // Set a new current playlist
         this.setCurrent();
-        // Show add track details
-        this.addTrackTable.show();
-        // Show title
-        this.showCreateTitle();
-        // Hide playlist actions and footer
-        this.footerElem.hide();
-        this.actionsElem.hide();
+        // Metadata
+        this.hideMetadata();
+    },
+    
+    onCreate: function (playlist) {
+        // Add to sidebar
+        this.playlistSidebarElem.append(playlist.element);
     },
     
     /* RETRIEVE */
@@ -145,26 +145,50 @@ Playlist.prototype = {
         }
         // Update the current playlist object
         this.setCurrent(playlist);
+        // Load metadata
+        this.loadMetadata();
+        // Load tracks
+        this.loadTracks();
+    },
+    loadFooter: function () {
+        this.loadCopyright();
+        this.loadSource();
+        this.footerElem.show();
+        this.loadAppleScript();
+        this.actionsElem.show();
+    },
+    hideFooter: function () {
+        this.footerElem.hide();
+        this.actionsElem.hide();
+    },
+    loadMetadata: function () {
+        // Header
+        this.loadTitle();
+        // Footer
+        this.loadFooter();
         // Hide add track details
         this.addTrackTable.hide();
-        // Update the title
-        this.updateTitle(playlist);
-        // Update the copyright
-        this.updateCopyright(playlist);
-        // Update the source
-        this.updateSource(playlist);
+    },
+    hideMetadata: function () {
+        // Header
+        this.showCreateTitle();
+        // Footer
+        this.hideFooter();
+        // Show add track details
+        this.addTrackTable.show();
+    },
+    loadTracks: function () {
         // Show loading message
         this.tracksLoadingElem.show();
         // Hide error message
         this.tracksErrorElem.hide();
         // Load tracks
         var elements = this.current.load();
-        // Update the AppleScript link
-        this.updateAppleScript();
         this.tracksLoadingElem.hide();
         if (elements) {
             // Add to the DOM
             this.trackListElem.append(elements);
+            // Set loading/playback progress bars correctly
             setTimeout(function () {
                 var nowPlayingSound = Playdar.player.getNowPlaying();
                 if (nowPlayingSound) {
@@ -174,16 +198,33 @@ Playlist.prototype = {
             });
             // Resolve tracks with Playdar
             PLAYDAR.resolve_current_playlist();
+            // Show SM2 if the current playing track is in this playlist
+            if (this.playingTrack && this.playingTrack.playlist === this.current) {
+                PLAYDAR.showSM2Container();
+            }
         } else {
             this.tracksErrorElem.show();
         }
-        // Show playlist actions and footer
-        this.footerElem.show();
-        this.actionsElem.show();
-        // Show SM2
-        if (this.playingTrack && this.playingTrack.playlist === this.current) {
-            PLAYDAR.showSM2Container();
+    },
+    loadTitle: function () {
+        this.titleElem.html(this.current.titleHTML());
+    },
+    loadCopyright: function () {
+        this.copyrightElem.text(this.current.copyright || '');
+    },
+    loadSource: function () {
+        if (this.current.source) {
+            this.sourceLink
+                .attr('href', this.current.source)
+                .text(Playdar.Util.location_from_url(this.current.source).host);
+            this.sourceElem.show();
+        } else {
+            this.sourceElem.hide();
         }
+    },
+    // Update the playlist iTunes export AppleScript (when loading a playlist or saving)
+    loadAppleScript: function () {
+        this.applescriptLink.attr('href', this.current.toApplescript());
     },
     
     /* UPDATE */
@@ -211,11 +252,14 @@ Playlist.prototype = {
         if (title) {
             playlist.set_name(title);
         }
+        // Update sidebar title
+        this.updateSidebarTitle(playlist);
         // Update current title
         if (this.current == playlist) {
-            this.titleElem.html(playlist.titleHTML());
+            this.loadTitle();
         }
-        // Update sidebar title
+    },
+    updateSidebarTitle: function (playlist) {
         playlist.element.find('a.playlist').text(UTIL.truncateString(playlist.toString()));
     },
     updateCopyright: function (playlist, copyright) {
@@ -226,25 +270,8 @@ Playlist.prototype = {
         }
         // Update current copyright
         if (this.current == playlist) {
-            this.copyrightElem.text(playlist.copyright || '');
+            this.loadCopyright();
         }
-        
-    },
-    updateSource: function (playlist) {
-        if (this.current == playlist) {
-            if (playlist.source) {
-                this.sourceLink
-                    .attr('href', playlist.source)
-                    .text(Playdar.Util.location_from_url(playlist.source).host);
-                this.sourceElem.show();
-            } else {
-                this.sourceElem.hide();
-            }
-        }
-    },
-    // Update the playlist iTunes export AppleScript (when loading a playlist or saving)
-    updateAppleScript: function () {
-        this.applescriptLink.attr('href', this.current.toApplescript());
     },
     
     addTrack: function (artistName, trackName, albumName, url) {
@@ -265,23 +292,43 @@ Playlist.prototype = {
             this.updateTitle(this.current, playlistName);
         } else {
             // Update title display
-            this.updateTitle(this.current);
+            this.loadTitle();
             // Save
             this.current.save();
         }
         // Add the track to the playlist in the DOM
         this.trackListElem.append(playlist_track.element);
         // Show playlist actions and footer
-        this.footerElem.show();
-        this.actionsElem.show();
+        this.loadFooter();
         // Resolve
         PLAYDAR.resolve_track(playlist_track);
+    },
+    
+    onSave: function (playlist) {
+        if (playlist == this.current) {
+            this.loadAppleScript();
+            PLAYDAR.showSM2Container();
+        }
+    },
+    
+    /* UNLOAD */
+    onUnload : function (playlist) {
+        PLAYDAR.hideSM2Container();
     },
     
     /* DELETE */
     remove: function (playlist) {
         if (confirm('Are you sure you want to delete this playlist:\n\n' + playlist.name)) {
             playlist.remove();
+        }
+    },
+    
+    onDelete: function (playlist) {
+        if (playlist == this.current) {
+            this.create();
+        }
+        if (this.playingTrack && playlist == this.playingTrack.playlist) {
+            PLAYDAR.stopPlaySession();
         }
     }
 };

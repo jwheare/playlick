@@ -14,6 +14,20 @@ var CONTROLLERS = {
     MODELS.onCouchUp = function () {
         Playlist.couchUpHandler.apply(Playlist, arguments);
     };
+    MODELS.Playlist.DefaultOptions = {
+        onSave: function () {
+            Playlist.onSave(this);
+        },
+        onCreate: function () {
+            Playlist.onCreate(this);
+        },
+        onUnload: function () {
+            Playlist.onUnload(this);
+        },
+        onDelete: function () {
+            Playlist.onDelete(this);
+        }
+    };
     // Expose
     CONTROLLERS.Playlist = Playlist;
 })();

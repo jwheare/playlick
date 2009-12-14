@@ -92,27 +92,4 @@
     MODELS.Track.prototype.toHTML = trackToHtml;
     MODELS.Playlist.prototype.toHTML = playlistToHtml;
     MODELS.Playlist.prototype.titleHTML = playlistTitleHtml;
-    MODELS.Playlist.DefaultOptions = {
-        onSave: function () {
-            if (this == CONTROLLERS.Playlist.current) {
-                CONTROLLERS.Playlist.updateAppleScript();
-                PLAYDAR.showSM2Container();
-            }
-        },
-        onCreate: function () {
-            // Add to sidebar
-            CONTROLLERS.Playlist.playlistSidebarElem.append(this.element);
-        },
-        onUnload: function () {
-            PLAYDAR.hideSM2Container();
-        },
-        onDelete: function () {
-            if (this == CONTROLLERS.Playlist.current) {
-                CONTROLLERS.Playlist.create();
-            }
-            if (CONTROLLERS.Playlist.playingTrack && this === CONTROLLERS.Playlist.playingTrack.playlist) {
-                PLAYDAR.stopPlaySession();
-            }
-        }
-    };
 })();
