@@ -183,10 +183,15 @@ IMPORTERS = {
         }
         // Create the playlist
         var image = podcast.image ? podcast.image.href : (podcast.thumbnail ? podcast.thumbnail.url : '');
+        var subtitle = IMPORTERS.getStringItem(podcast.subtitle);
+        var description = IMPORTERS.getStringItem(podcast.description);
+        if (description == subtitle) {
+            description = '';
+        }
         var playlist = new MODELS.Playlist({
-            name: podcast.title,
-            description: IMPORTERS.getStringItem(podcast.description),
-            subtitle: podcast.subtitle,
+            name: IMPORTERS.getStringItem(podcast.title),
+            subtitle: subtitle,
+            description: description,
             copyright: IMPORTERS.getStringItem(podcast.copyright),
             image: IMPORTERS.getAbsoluteUrl(image),
             url: IMPORTERS.getStringItem(podcast.link),
