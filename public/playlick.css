@@ -273,6 +273,16 @@ ul#importers li input.importer_input {
     width: 200px;
 }
 
+
+/* Last.fm battle */
+
+form#lastfm_battle_form input#lastfm_battle_input_you {
+    margin: 0 10px 0 0;
+}
+form#lastfm_battle_form input#lastfm_battle_input_they {
+    margin: 0 10px 0 0;
+}
+
 /* Main */
 #main {
     float: left;
@@ -290,8 +300,8 @@ ul#importers li input.importer_input {
     float: right;
     margin: 0 24px 24px 0;
     vertical-align: middle;
-    max-width: 200px;
-    max-height: 200px;
+    max-width: 100px;
+    max-height: 100px;
 }
 #main h1 small {
     display: block;
@@ -304,6 +314,9 @@ ul#importers li input.importer_input {
 }
 #main h1 small span a {
     color: #4c7a0f;
+}
+#main h1 span.subtitle {
+    font-size: 14px;
 }
 
 p#tracksLoading {
@@ -321,6 +334,15 @@ p#tracksError {
     margin: 0 0 20px 40px;
     line-height: 39px;
     color: #B0252B;
+}
+
+/* Playlist footer */
+#listFooter {
+    margin: 10px 24px 0 0;
+    font-size: 12px;
+}
+#listFooter span#playlistSource {
+    float: right;
 }
 
 /* Playlist actions */
@@ -362,45 +384,56 @@ a#playlistApplescript img {
 }
 
 /* Add track form */
-form#add_to_playlist {
-    margin: 10px 0 10px 40px;
-    line-height: 25px;
+form#addTrackForm {
+    position: relative;
+    border-bottom: 1px solid #c0e95b;
+    border-right: 24px solid #fff;
+    font-size: 14px;
+    background-color: #e8f9bb;
+}
+form#addTrackForm a#addTrackButton {
+    display: block;
+    text-decoration: none;
+    line-height: 39px;
+}
+form#addTrackForm a#addTrackButton:hover {
+    background-color: #a8d840;
+}
+form#addTrackForm a#addTrackButton span.icon {
+    display: block;
+    float: left;
+    width: 39px;
+    height: 39px;
+    text-align: center;
 }
 
-a#addModeToggle {
+form#addTrackForm #addTrackSearch {
+    line-height: 39px;
     float: right;
 }
-
-input#add_track_button {
-    float: right;
-}
-
-form#add_to_playlist input#add_track_input {
-    margin: 0 10px 0 0;
-    width: 250px;
-}
-form#lastfm_battle_form input#lastfm_battle_input_you {
-    margin: 0 10px 0 0;
-}
-form#lastfm_battle_form input#lastfm_battle_input_they {
+form#addTrackForm #addTrackSearch input#addTrackSearchInput {
     margin: 0 10px 0 0;
 }
 
-/* Manual add track */
+form#addTrackForm table#addTrackTable {
+    margin-left: 39px;
+    width: 517px;
+    background-color: #d2f380;
+}
+form#addTrackForm table#addTrackTable tr.fields input {
+    width: 232px;
+}
+form#addTrackForm table#addTrackTable td {
+    padding: 10px 10px 0 10px;
+    line-height: 20px;
+}
+form#addTrackForm table#addTrackTable td.addTrackSubmitCell {
+    padding-bottom: 10px;
+}
 
-table#manualAdd {
-    display: none;
-}
-table#manualAdd td {
-    padding: 3px 15px 3px 3px;
-}
-table#manualAdd th {
-/*    padding-left: 10px;*/
-    font-weight: normal;
-/*    text-align: right;*/
-}
 
 /* Import playlists form */
+
 form#lastfm_playlists_form {
     display: none;
 }
@@ -443,7 +476,7 @@ ul#lastfm_playlists img {
 /* Track list */
 .trackList {
     clear: both;
-    margin: 0 0 20px 0;
+    margin: 0;
     padding: 0;
     list-style: none;
 }
@@ -456,6 +489,10 @@ ul#lastfm_playlists img {
 }
 .trackList li.placeholder {
     border-top: 1px solid #335507;
+}
+.trackList a.item {
+    display: block;
+    text-decoration: none;
 }
 .trackList li span.status {
     display: block;
@@ -492,10 +529,6 @@ ul#lastfm_playlists img {
 }
 .trackList li.perfectMatch span.status span.play {
     display: inline;
-}
-.trackList a.item {
-    display: block;
-    text-decoration: none;
 }
 .trackList span.contributor {
     margin-right: 3px;

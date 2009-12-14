@@ -167,57 +167,60 @@
                 <div id="main">
                     <h1 id="playlistTitle">Create a new playlist</h1>
                     
+                    <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>
+                    <p id="tracksError">Failed to load tracks. Please try again later.</p>
+                    
                     <ol class="trackList" id="playlist"></ol>
                     
-                    <form id="add_to_playlist">
-                        <a href="#" id="addModeToggle">Manual mode</a>
+                    <form id="addTrackForm">
+                        <span id="addTrackSearch">
+                            <label for="addTrackSearchInput">Search</label>
+                            <input type="text" name="trackSearch" id="addTrackSearchInput" placeholder="Search for a track…">
+                        </span>
                         
-                        <br>
+                        <a href="#" id="addTrackButton">
+                            <span class="icon">+</span>
+                            <span>Add a track</span>
+                        </a>
                         
-                        <input type="submit" id="add_track_button" value="Start a Playlist">
-                        
-                        <div id="autoAdd">
-                            <label for="add_track_input">Search for a track:</label>
-                            <input type="text" name="track" id="add_track_input" placeholder="Start typing for track results…">
-                            <input type="hidden" name="artistName" id="add_track_artist">
-                            <input type="hidden" name="trackName" id="add_track_name">
-                            <input type="hidden" name="autocomplete" value="1">
-                        </div>
-                        
-                        <table border="0" cellspacing="0" cellpadding="0" id="manualAdd">
-                            <tr>
-                                <th>
-                                    <label for="manualAddArtistInput">Artist:</label>
-                                </th>
+                        <table border="0" cellspacing="0" cellpadding="0" id="addTrackTable">
+                            <tr class="fields">
                                 <td>
-                                    <input type="text" name="artistName" id="manualAddArtistInput" disabled="disabled" placeholder="Artist name">
+                                    <label for="addTrackArtistInput">Artist:</label>
+                                    <br>
+                                    <input type="text" name="artistName" id="addTrackArtistInput" placeholder="Artist name">
                                 </td>
-                                <th>
-                                    <label for="manualAddTrackInput">Track:</label>
-                                </th>
                                 <td>
-                                    <input type="text" name="trackName" id="manualAddTrackInput" disabled="disabled" placeholder="Track name">
+                                    <label for="addTrackTrackInput">Track:</label>
+                                    <br>
+                                    <input type="text" name="trackName" id="addTrackTrackInput" placeholder="Track name">
+                                </td>
+                            </tr>
+                            <tr class="fields">
+                                <td>
+                                    <label for="addTrackUrlInput">URL:</label>
+                                    <br>
+                                    <input type="text" name="url" id="addTrackUrlInput" placeholder="Sound file URL">
+                                </td>
+                                <td>
+                                    <label for="addTrackAlbumInput">Album:</label>
+                                    <br>
+                                    <input type="text" name="albumName" id="addTrackAlbumInput" placeholder="Album name">
                                 </td>
                             </tr>
                             <tr>
-                                <th>
-                                    <label for="manualAddUrlInput">URL:</label>
-                                </th>
-                                <td>
-                                    <input type="text" name="url" id="manualAddUrlInput" disabled="disabled" placeholder="Sound file URL">
-                                </td>
-                                <th>
-                                    <label for="manualAddAlbumInput">Album:</label>
-                                </th>
-                                <td>
-                                    <input type="text" name="albumName" id="manualAddAlbumInput" disabled="disabled" placeholder="Album name">
+                                <td colspan="2" class="addTrackSubmitCell">
+                                    <input type="submit" id="addTrackSubmit" value="Add track">
+                                    or <a href="#" id="addTrackCancel">Cancel</a>
                                 </td>
                             </tr>
                         </table>
                     </form>
                     
-                    <p id="tracksLoading"><img src="/track_scanning.gif" width="16" height="16">Loading tracks…</p>
-                    <p id="tracksError">Failed to load tracks. Please try again later.</p>
+                    <div id="listFooter">
+                        <span id="playlistSource">Data source: <a href="#" id="playlistSourceLink"></a></span>
+                        <span id="playlistCopyright"></span>
+                    </div>
                     
                     <div id="listActions">
                         <a id="playlistApplescript" href="#">

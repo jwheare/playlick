@@ -61,43 +61,24 @@ CONTROLLERS.Playlist.trackListElem.click(function (e) {
 
 /*  Add track handlers */
 
-$('#addModeToggle').click(function (e) {
+CONTROLLERS.Playlist.addTrackButton.click(function (e) {
     e.preventDefault();
-    var target = $(e.target);
-    target.blur();
-    var manualText = 'Manual mode';
-    var searchText = 'Search mode';
-    var searchMode = (target.text() == manualText);
-    if (searchMode) {
-        $('#manualAdd input').removeAttr('disabled');
-        $('#autoAdd input').attr('disabled', true);
-        target.text(searchText);
-        $('#autoAdd').hide();
-        $('#manualAdd').show();
-        setTimeout(function () {
-            $('#manualAddArtistInput').focus().select();
-        });
-    } else {
-        $('#manualAdd input').attr('disabled', true);
-        $('#autoAdd input').removeAttr('disabled');
-        target.text(manualText);
-        $('#autoAdd').show();
-        $('#manualAdd').hide();
-        setTimeout(function () {
-            $('#add_track_input').focus().select();
-        });
-    }
+    CONTROLLERS.Playlist.addTrackTable.toggle();
+});
+CONTROLLERS.Playlist.addTrackCancel.click(function (e) {
+    e.preventDefault();
+    CONTROLLERS.Playlist.addTrackTable.hide();
 });
 
 // Add track autocomplete
-$("#add_track_input").autocomplete(IMPORTERS.LastFm.WS_ROOT + "/2.0/?callback=?", {
+CONTROLLERS.Playlist.addTrackSearchInput.autocomplete(IMPORTERS.LastFm.WS_ROOT + "/2.0/?callback=?", {
     multiple: false,
     delay: 200,
     dataType: "jsonp",
     extraParams: {
         method: "track.search",
         track: function () {
-            return $("#add_track_input").val();
+            return CONTROLLERS.Playlist.addTrackSearchInput.val();
         },
         api_key: IMPORTERS.LastFm.API_KEY,
         format: "json"
@@ -123,28 +104,22 @@ $("#add_track_input").autocomplete(IMPORTERS.LastFm.WS_ROOT + "/2.0/?callback=?"
     }
 });
 // Add track autocomplete select
-$("#add_track_input").result(function (e, track, formatted) {
-    $("#add_track_name").val(track.name);
-    $("#add_track_artist").val(track.artist);
-    $('#add_to_playlist').submit();
+CONTROLLERS.Playlist.addTrackSearchInput.result(function (e, track, formatted) {
+    CONTROLLERS.Playlist.addTrackTable.show();
+    $("#addTrackTrackInput").val(track.name).focus().select();
+    $("#addTrackArtistInput").val(track.artist);
+    $("#addTrackSearchInput").val('');
 });
 // Add to loaded playlist form submit
-$('#add_to_playlist').submit(function (e) {
+CONTROLLERS.Playlist.addTrackForm.submit(function (e) {
     e.preventDefault();
     // Parse the form and add tracks
     var params = UTIL.serializeForm(this);
     if (params.trackName) {
-        if (params.autocomplete) {
-            // Clear the inputs and refocus
-            $('#add_track_artist').val('');
-            $('#add_track_track').val('');
-            $('#add_track_input').val('').focus().select();
+        if (params.albumName) {
+            $('#addTrackTrackInput').focus().select();
         } else {
-            if (params.albumName) {
-                $('#manualAddTrackInput').focus().select();
-            } else {
-                $('#manualAddArtistInput').focus().select();
-            }
+            $('#addTrackArtistInput').focus().select();
         }
         CONTROLLERS.Playlist.addTrack(params.artistName, params.trackName, params.albumName, params.url);
     }
@@ -153,7 +128,7 @@ $('#add_to_playlist').submit(function (e) {
 /* Sidebar handlers */
 
 // Click handler to start a new blank playlist
-$('#create_playlist').click(function (e) {
+CONTROLLERS.Playlist.createLink.click(function (e) {
     e.preventDefault();
     CONTROLLERS.Playlist.create();
 });

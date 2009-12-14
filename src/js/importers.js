@@ -166,6 +166,12 @@ IMPORTERS = {
         }
         return playlist;
     },
+    getStringItem: function (field) {
+        var fields = $.makeArray(field);
+        return $.grep(fields, function (value, i) {
+            return typeof value == 'string';
+        })[0];
+    },
     createPlaylistFromPodcast: function (source, podcast, callback, exception) {
         if (!podcast.item) {
             throw exception('No tracks in Podcast response', podcast);
@@ -176,29 +182,14 @@ IMPORTERS = {
             throw exception('No tracks in Podcast', jspf.trackList);
         }
         // Create the playlist
-        var description = podcast.description[0] || podcast.description;
-        var copyrights = $.makeArray(podcast.copyright);
-        var copyright = $.grep(copyrights, function (value, i) {
-            return typeof value == 'string';
-        })[0];
-        if (copyright) {
-            description += ' - ' + copyright;
-        }
-        var links = $.makeArray(podcast.link);
-        var link = $.grep(links, function (value, i) {
-            return typeof value == 'string';
-        })[0];
-        var title = podcast.title;
-        if (podcast.subtitle) {
-            title += ': ' + podcast.subtitle;
-        }
         var image = podcast.image ? podcast.image.href : (podcast.thumbnail ? podcast.thumbnail.url : '');
-        
         var playlist = new MODELS.Playlist({
-            name: title,
-            description: description,
+            name: podcast.title,
+            description: IMPORTERS.getStringItem(podcast.description),
+            subtitle: podcast.subtitle,
+            copyright: IMPORTERS.getStringItem(podcast.copyright),
             image: IMPORTERS.getAbsoluteUrl(image),
-            url: link,
+            url: IMPORTERS.getStringItem(podcast.link),
             source: source
         });
         // Load tracks

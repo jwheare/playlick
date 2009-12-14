@@ -76,19 +76,13 @@
         } else {
             wrapper.append(title);
         }
+        if (this.subtitle) {
+            wrapper.append('<br>').append($('<span class="subtitle">').text(this.subtitle));
+        }
         // Autolink description
-        var description = $('<small>');
         if (this.description) {
-            description.append(autoLink($('<div>').html(this.description).text()));
-        }
-        if (this.source) {
-            description.append($('<span class="source">')
-                .append(' [')
-                .append($('<a>').attr('href', this.source).text('Original Source'))
-                .append(']')
-            );
-        }
-        if (this.description || this.source) {
+            var description = $('<small>')
+                .append(autoLink($('<div>').html(this.description).text()));
             wrapper.append('<br>').append(description);
         }
         return wrapper.html();

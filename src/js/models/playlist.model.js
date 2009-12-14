@@ -29,9 +29,11 @@ function Playlist (options) {
     }
     this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
     this.image = this.options.image || '';
+    this.subtitle = this.options.subtitle || '';
     this.description = this.options.description || '';
     this.url = this.options.url || '';
     this.source = this.options.source || '';
+    this.copyright = this.options.copyright || '';
     this.addOptions(Playlist.DefaultOptions);
     
     // Create the DOM element
@@ -321,9 +323,11 @@ Playlist.prototype = {
             name: this.name,
             duration: this.duration,
             image: this.image,
+            subtitle: this.subtitle,
             description: this.description,
             url: this.url,
             source: this.source,
+            copyright: this.copyright,
             tracks: $.map(this.tracks, function (playlist_track, i) {
                 return playlist_track.get_doc();
             })
