@@ -500,7 +500,7 @@ var PLAYDAR = {
             loading.width(loaded + "%");
         }
         if (this.options.external) {
-            PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, true);
+            PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, loaded < 100);
         }
     },
     updateStreamDuration: function (sid, duration, estimate) {
