@@ -55,6 +55,15 @@ var PLAYDAR = {
         var resultsTable = $('<table cellspacing="0"></table>');
         var foundPerfect = false;
         
+        response.results.sort(function (a, b) {
+            if (a.score > b.score) {
+                return -1;
+            }
+            if (a.score < b.score) {
+                return 1;
+            }
+            return 0;
+        });
         $.each(response.results, function (i, result) {
             // Register sound
             Playdar.player.register_stream(result, {
@@ -250,12 +259,12 @@ var PLAYDAR = {
         var aolUrl = 'http://music.aol.com/api/audio/search?c=?';
         $.getJSON(aolUrl, {
             start: 0,
-            count: 20,
+            count: 5,
             artistName: artist,
             songTitle: track
         }, function (json) {
             if (json.response.data) {
-                response.results = $.map(json.response.data.assets.slice(0, 5), function (result, i) {
+                response.results = $.map(json.response.data.assets, function (result, i) {
                     var score = 0.8;
                     if (UTIL.compareString(result.artistname, artist)
                      && UTIL.compareString(result.songtitle, track)) {

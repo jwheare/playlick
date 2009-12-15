@@ -369,7 +369,8 @@ form#playlistEditForm p {
 form#playlistEditForm p.submit {
     margin: 10px 0 0 0;
 }
-form#playlistEditForm p.field input {
+form#playlistEditForm p.field input,
+form#playlistEditForm p.field textarea {
     width: 510px;
 }
 

@@ -237,16 +237,25 @@ Playlist.prototype = {
         }
         return this.metadataElem;
     },
-    buildEditField: function (inputId, name, label, value) {
-        return $('<p class="field">')
+    buildEditField: function (inputId, name, label, value, textarea) {
+        var field = $('<p class="field">')
             .append($('<label>')
                 .attr('for', inputId)
                 .text(label))
-            .append('<br>')
-            .append($('<input type="text">')
+            .append('<br>');
+        if (textarea) {
+            field.append($('<textarea>')
+                .attr('rows', 5)
+                .attr('id', inputId)
+                .attr('name', name)
+                .text(value));
+        } else {
+            field.append($('<input type="text">')
                 .attr('id', inputId)
                 .attr('name', name)
                 .val(value));
+        }
+        return field;
     },
     buildEditForm: function () {
         var that = this;
@@ -276,7 +285,7 @@ Playlist.prototype = {
             .append(this.buildEditField('playlistEditTitle',       'title',       'Title',       this.current.toString()))
             .append(this.buildEditField('playlistEditUrl',         'url',         'Info URL',    this.current.url))
             .append(this.buildEditField('playlistEditSubtitle',    'subtitle',    'Subtitle',    this.current.subtitle))
-            .append(this.buildEditField('playlistEditDescription', 'description', 'Description', this.current.description))
+            .append(this.buildEditField('playlistEditDescription', 'description', 'Description', this.current.description, true))
             .append(this.buildEditField('playlistEditImage',       'image',       'Image URL',   this.current.image))
             .append(this.buildEditField('playlistEditCopyright',   'copyright',   'Copyright',   this.current.copyright))
             .append(editSave);
