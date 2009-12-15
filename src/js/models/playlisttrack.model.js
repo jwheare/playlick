@@ -33,14 +33,13 @@ PlaylistTrack.prototype = {
     set_track_duration: function (duration) {
         if (duration) {
             this.track.duration = duration;
-            this.playlist.update_duration();
         }
     },
     /**
      * Build a DOMElement for the PlaylistTrack
     **/
     set_element: function (element_name) {
-        var element_name = element_name || 'li';
+        element_name = element_name || 'li';
         this.element = $('<' + element_name + ' class="p_t">')
             .attr('id', this.get_dom_id())
             .data('playlist_track', this)

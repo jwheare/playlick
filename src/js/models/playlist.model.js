@@ -1,13 +1,12 @@
 /**
  * class MODELS.Playlist
- * Playlist objects have a name, array of Tracks and duration
+ * Playlist objects have an array of PlaylistTracks, and associated metadata
 **/
 function Playlist (options) {
     this.saved = false;
     this.persisted = false;
     this.published = false;
     this.tracks = [];
-    this.duration = 0;
     
     this.options = options || {};
     
@@ -73,24 +72,6 @@ Playlist.prototype = {
         this.name = name;
         // AUTOSAVE
         this.save();
-    },
-    update_duration: function () {
-        var duration = 0;
-        $.each(this.tracks, function (i, playlist_track) {
-            if (playlist_track.track.duration) {
-                duration += playlist_track.track.duration;
-            }
-        });
-        this.set_duration(duration);
-    },
-    set_duration: function (duration) {
-        this.duration = duration;
-        if (this.options.onSetDuration) {
-            this.options.onSetDuration.call(this);
-        }
-    },
-    get_duration: function () {
-        return Playdar.Util.mmss(this.duration);
     },
     toString: function () {
         return this.name;
@@ -314,7 +295,6 @@ Playlist.prototype = {
             published: this.published,
             type: 'playlist',
             name: this.name,
-            duration: this.duration,
             image: this.image,
             subtitle: this.subtitle,
             description: this.description,

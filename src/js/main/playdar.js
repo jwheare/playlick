@@ -304,7 +304,7 @@ var PLAYDAR = {
     
     // Not called when served from cache
     onResultLoad: function () {
-        if (this.options.external && this.duration) {
+        if (this.duration) {
             PLAYDAR.updateStreamDuration(this.sID, this.duration);
         }
         var trackSource = $('#' + this.sID);
@@ -508,9 +508,7 @@ var PLAYDAR = {
             var loaded = this.bytesLoaded/this.bytesTotal * 100;
             loading.width(loaded + "%");
         }
-        if (this.options.external) {
-            PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, loaded < 100);
-        }
+        PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, loaded < 100);
     },
     updateStreamDuration: function (sid, duration, estimate) {
         var track_item = $('#' + sid).data('track_item');
