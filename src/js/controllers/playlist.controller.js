@@ -151,10 +151,16 @@ Playlist.prototype = {
         this.setCurrent(playlist);
         // Hide add track details
         this.addTrackTable.hide();
-        // Load metadata
+        // Load metadata and track form
         this.loadMetadata();
+        // Hide footer and add track form while loading tracks
+        this.hideFooter();
+        this.addTrackForm.hide();
         // Load tracks
         this.loadTracks();
+        // Show footer and add track form again
+        this.showFooter();
+        this.addTrackForm.show();
     },
     
     loadMetadata: function () {
@@ -302,6 +308,10 @@ Playlist.prototype = {
     hideFooter: function () {
         this.footerElem.hide();
         this.actionsElem.hide();
+    },
+    showFooter: function () {
+        this.footerElem.show();
+        this.actionsElem.show();
     },
     loadCopyright: function () {
         var escapedCopyright = $('<div>').html(this.current.copyright).text();
