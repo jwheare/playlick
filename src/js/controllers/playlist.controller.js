@@ -291,7 +291,8 @@ Playlist.prototype = {
         this.actionsElem.hide();
     },
     loadCopyright: function () {
-        this.copyrightElem.text(this.current.copyright || '');
+        var escapedCopyright = $('<div>').html(this.current.copyright).text();
+        this.copyrightElem.html(UTIL.autoLink(escapedCopyright) || '');
     },
     loadSource: function () {
         if (this.current.source) {

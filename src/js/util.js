@@ -42,6 +42,7 @@ var UTIL = {
     // Based on http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
     autolink_regexp: /\b([\w-]+:\/+|www[.])[^\s()<>]+(?:\([\w\d]+\)|(?:[^.,;'">\:\s\<\>\)\]\!]|\/))/g,
     autoLink: function (word) {
+        word = word || '';
         return word.replace(UTIL.autolink_regexp, function (match, protocol, index, full) {
             var url = match;
             if (protocol == 'www.') {
