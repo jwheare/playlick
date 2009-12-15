@@ -375,6 +375,7 @@ form#playlistEditForm p.field input {
 
 /* Tracks loading/error */
 p#tracksLoading {
+    clear: both;
     display: none;
     margin: 0 0 20px 40px;
     line-height: 39px;
@@ -385,6 +386,7 @@ p#tracksLoading img {
     padding-right: 11px;
 }
 p#tracksError {
+    clear: both;
     display: none;
     margin: 0 0 20px 40px;
     line-height: 39px;
@@ -444,6 +446,7 @@ a#playlistApplescript img {
 
 /* Add track form */
 form#addTrackForm {
+    clear: both;
     position: relative;
     border-bottom: 1px solid #c0e95b;
     border-right: 24px solid #fff;

@@ -168,9 +168,18 @@ IMPORTERS = {
     },
     getStringItem: function (field) {
         var fields = $.makeArray(field);
-        return $.grep(fields, function (value, i) {
+        var string = $.grep(fields, function (value, i) {
             return typeof value == 'string';
         })[0];
+        if (!string) {
+            string = $.grep(fields, function (value, i) {
+                return value.content;
+            })[0] || '';
+            if (string) {
+                string = string.content;
+            }
+        }
+        return string;
     },
     createPlaylistFromPodcast: function (source, podcast, callback, exception) {
         if (!podcast.item) {
@@ -193,7 +202,7 @@ IMPORTERS = {
             subtitle: subtitle,
             description: description,
             copyright: IMPORTERS.getStringItem(podcast.copyright),
-            image: IMPORTERS.getAbsoluteUrl(image),
+            image: IMPORTERS.getAbsoluteUrl(image, source),
             url: IMPORTERS.getStringItem(podcast.link),
             source: source
         });
@@ -201,7 +210,7 @@ IMPORTERS = {
         $.each(trackList, function (i, data) {
             var trackDoc = {
                 name: data.title,
-                artist: data.author || podcast.author
+                artist: data.author ? (data.author.name || IMPORTERS.getStringItem(data.author)) : IMPORTERS.getStringItem(podcast.author)
             };
             // TODO support media:content alternative
             // e.g. <media:content url="blah.mp3" fileSize="46669578" type="audio/mpeg">
@@ -245,7 +254,7 @@ IMPORTERS = {
             subtitle: subtitle,
             description: description,
             copyright: IMPORTERS.getStringItem(podcast.copyright),
-            image: IMPORTERS.getAbsoluteUrl(image),
+            image: IMPORTERS.getAbsoluteUrl(image, source),
             url: link,
             source: source
         });
@@ -253,7 +262,7 @@ IMPORTERS = {
         $.each(trackList, function (i, data) {
             var trackDoc = {
                 name: data.title,
-                artist: data.author ? (data.author.name || IMPORTERS.getStringItem(data.author)) : podcast.author
+                artist: data.author ? (data.author.name || IMPORTERS.getStringItem(data.author)) : IMPORTERS.getStringItem(podcast.author)
             };
             // TODO support media:content alternative
             // e.g. <media:content url="blah.mp3" fileSize="46669578" type="audio/mpeg">
