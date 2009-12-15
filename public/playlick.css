@@ -301,37 +301,79 @@ form#lastfm_battle_form input#lastfm_battle_input_they {
     margin: 0 0 0 40px;
 }
 
+/* Playlist header */
 #playlistHeader {
+    position: relative;
+    float: left;
+    width: 556px;
     margin-bottom: 15px;
 }
-#playlistHeader h1 {
+
+#playlistEdit {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 12px;
+    width: 16px;
+    font-size: 9px;
+}
+#playlistEdit a {
+    display: block;
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+}
+#playlistEdit a#playlistEditIcon {
+    background: url('pencil.png') no-repeat 0 0;
+}
+#playlistEdit a#playlistDeleteIcon {
+    background: url('bin_closed.png') no-repeat 0 0;
+}
+
+#playlistHeader:hover #playlistEdit {
+    display: block;
+}
+#playlistMetadata h1 {
     margin-bottom: 0;
 }
-#playlistHeader img {
+#playlistMetadata img.image {
     float: right;
-    margin: 0 0 24px 10px;
+    margin: 0 0 5px 5px;
     vertical-align: middle;
     max-width: 100px;
     max-height: 100px;
 }
-#playlistHeader p {
+#playlistMetadata p {
     margin: 0;
 }
-#playlistHeader p.subtitle {
+#playlistMetadata p.subtitle {
     font-size: 14px;
     line-height: 1.6;
     font-weight: bold;
 }
-#playlistHeader p.description {
+#playlistMetadata p.description {
     display: block;
     font-weight: normal;
     font-size: 13px;
     line-height: 1.5;
 }
-#playlistHeader p.description a {
+#playlistMetadata p.description a {
     color: #4c7a0f;
 }
 
+form#playlistEditForm p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+form#playlistEditForm p.submit {
+    margin-top: 10px;
+}
+form#playlistEditForm p.field input {
+    width: 510px;
+}
+
+/* Tracks loading/error */
 p#tracksLoading {
     display: none;
     margin: 0 0 20px 40px;
@@ -352,8 +394,8 @@ p#tracksError {
 /* Playlist footer */
 #listFooter {
     float: left;
-    width: 556px;
-    margin: 10px 24px 10px 0;
+    width: 546px;
+    margin: 10px 0 10px 10px;
     font-size: 12px;
 }
 #listFooter span#playlistSource {

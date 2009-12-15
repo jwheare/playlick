@@ -152,20 +152,10 @@ Playlist.prototype = {
         // Load tracks
         this.loadTracks();
     },
-    loadFooter: function () {
-        this.loadCopyright();
-        this.loadSource();
-        this.footerElem.show();
-        this.loadAppleScript();
-        this.actionsElem.show();
-    },
-    hideFooter: function () {
-        this.footerElem.hide();
-        this.actionsElem.hide();
-    },
+    
     loadMetadata: function () {
         // Header
-        this.loadTitle();
+        this.loadHeader();
         // Footer
         this.loadFooter();
         // Hide add track details
@@ -179,6 +169,145 @@ Playlist.prototype = {
         // Show add track details
         this.addTrackTable.show();
     },
+    
+    loadHeader: function () {
+        this.createTitleElem.hide();
+        this.buildHeaderElem();
+    },
+    buildHeaderElem: function () {
+        this.headerElem.html(this.buildEditElem());
+        this.headerElem.append(this.buildMetadataElem());
+        this.headerElem.append(this.buildEditForm());
+        this.headerElem.show();
+    },
+    buildEditElem: function () {
+        var that = this;
+        var editButton = $('<a href="#">')
+            .append($('<img>')
+                .attr('src', 'pencil.png')
+                .attr('width', 16)
+                .attr('height', 16)
+                .attr('alt', 'Edit'))
+            .click(function (e) {
+                e.preventDefault();
+                that.toggleEditForm();
+            });
+        var deleteButton = $('<a href="#">')
+            .append($('<img>')
+                .attr('src', 'bin_closed.png')
+                .attr('width', 16)
+                .attr('height', 16)
+                .attr('alt', 'Delete'))
+            .click(function (e) {
+                e.preventDefault();
+                that.removeCurrent();
+            });
+        this.editButtons = $('<div id="playlistEdit">')
+            .append(editButton)
+            .append(' ')
+            .append(deleteButton);
+        return this.editButtons;
+    },
+    buildMetadataElem: function () {
+        this.metadataElem = $('<div id="playlistMetadata">');
+        // Add an image
+        if (this.current.image) {
+            this.metadataElem.append($('<img class="image">').attr('src', this.current.image));
+        }
+        
+        var title = $('<h1>');
+        var titleText = this.current.toString();
+        if (this.current.url) {
+            title.append(
+                $('<a>').attr('href', this.current.url).text(titleText)
+            );
+        } else {
+            title.text(titleText);
+        }
+        this.metadataElem.append(title);
+        
+        if (this.current.subtitle) {
+            this.metadataElem.append($('<p class="subtitle">').text(this.current.subtitle));
+        }
+        if (this.current.description) {
+            // Autolink description
+            var escapedDescription = $('<div>').html(this.current.description).text();
+            var description = $('<p class="description">').html(UTIL.autoLink(escapedDescription));
+            this.metadataElem.append(description);
+        }
+        return this.metadataElem;
+    },
+    buildEditField: function (inputId, name, label, value) {
+        return $('<p class="field">')
+            .append($('<label>')
+                .attr('for', inputId)
+                .text(label))
+            .append('<br>')
+            .append($('<input type="text">')
+                .attr('id', inputId)
+                .attr('name', name)
+                .val(value));
+    },
+    buildEditForm: function () {
+        var that = this;
+        this.editForm = $('<form id="playlistEditForm">').hide().submit(function (e) {
+            e.preventDefault();
+            var params = UTIL.serializeForm(this);
+            that.current.name        = params.title;
+            that.current.url         = params.url;
+            that.current.subtitle    = params.subtitle;
+            that.current.description = params.description;
+            that.current.image       = params.image;
+            that.current.copyright   = params.copyright;
+            that.current.save();
+        });
+        var editSave = $('<p class="submit">')
+            .append($('<input type="submit">').val('Save'))
+            .append(' or ')
+            .append($('<a href="#">').text('Cancel').click(function (e) {
+                e.preventDefault();
+                that.toggleEditForm();
+            }));
+        this.editForm
+            .append(this.buildEditField('playlistEditTitle',       'title',       'Title',       this.current.toString()))
+            .append(this.buildEditField('playlistEditUrl',         'url',         'Info URL',    this.current.url))
+            .append(this.buildEditField('playlistEditSubtitle',    'subtitle',    'Subtitle',    this.current.subtitle))
+            .append(this.buildEditField('playlistEditDescription', 'description', 'Description', this.current.description))
+            .append(this.buildEditField('playlistEditImage',       'image',       'Image URL',   this.current.image))
+            .append(this.buildEditField('playlistEditCopyright',   'copyright',   'Copyright',   this.current.copyright))
+            .append(editSave);
+        return this.editForm;
+    },
+    
+    loadFooter: function () {
+        this.loadCopyright();
+        this.loadSource();
+        this.footerElem.show();
+        this.loadAppleScript();
+        this.actionsElem.show();
+    },
+    hideFooter: function () {
+        this.footerElem.hide();
+        this.actionsElem.hide();
+    },
+    loadCopyright: function () {
+        this.copyrightElem.text(this.current.copyright || '');
+    },
+    loadSource: function () {
+        if (this.current.source) {
+            this.sourceLink
+                .attr('href', this.current.source)
+                .text(Playdar.Util.location_from_url(this.current.source).host);
+            this.sourceElem.show();
+        } else {
+            this.sourceElem.hide();
+        }
+    },
+    // Update the playlist iTunes export AppleScript (when loading a playlist or saving)
+    loadAppleScript: function () {
+        this.applescriptLink.attr('href', this.current.toApplescript());
+    },
+    
     loadTracks: function () {
         // Show loading message
         this.tracksLoadingElem.show();
@@ -208,56 +337,6 @@ Playlist.prototype = {
             this.tracksErrorElem.show();
         }
     },
-    buildTitle: function () {
-        this.headerElem.empty();
-        // Add an image
-        if (this.current.image) {
-            this.headerElem.append($('<img>').attr('src', this.current.image));
-        }
-        
-        var title = $('<h1>');
-        var titleText = this.current.toString();
-        if (this.current.url) {
-            title.append(
-                $('<a>').attr('href', this.current.url).text(titleText)
-            );
-        } else {
-            title.text(titleText);
-        }
-        this.headerElem.append(title);
-        
-        if (this.current.subtitle) {
-            this.headerElem.append($('<p class="subtitle">').text(this.current.subtitle));
-        }
-        if (this.current.description) {
-            // Autolink description
-            var escapedDescription = $('<div>').html(this.current.description).text();
-            var description = $('<p class="description">').html(UTIL.autoLink(escapedDescription));
-            this.headerElem.append(description);
-        }
-        this.headerElem.show();
-    },
-    loadTitle: function () {
-        this.createTitleElem.hide();
-        this.buildTitle();
-    },
-    loadCopyright: function () {
-        this.copyrightElem.text(this.current.copyright || '');
-    },
-    loadSource: function () {
-        if (this.current.source) {
-            this.sourceLink
-                .attr('href', this.current.source)
-                .text(Playdar.Util.location_from_url(this.current.source).host);
-            this.sourceElem.show();
-        } else {
-            this.sourceElem.hide();
-        }
-    },
-    // Update the playlist iTunes export AppleScript (when loading a playlist or saving)
-    loadAppleScript: function () {
-        this.applescriptLink.attr('href', this.current.toApplescript());
-    },
     
     /* UPDATE */
     // Show/hide edit mode for playlist in sidebar
@@ -276,20 +355,15 @@ Playlist.prototype = {
             edit_input.val(playlist_item.data('playlist').name);
             setTimeout(function () {
                 edit_input.focus().select();
-            }, 1);
+            });
         }
     },
-    updateTitle: function (playlist, title) {
-        // Update playlist title
-        if (title) {
-            playlist.set_name(title);
-        }
-        // Update sidebar title
-        this.updateSidebarTitle(playlist);
-        // Update current title
-        if (this.current == playlist) {
-            this.loadTitle();
-        }
+    toggleEditForm: function () {
+        this.metadataElem.toggle();
+        this.editForm.toggle();
+        setTimeout(function () {
+            $('#playlistEditTitle').focus().select();
+        });
     },
     updateSidebarTitle: function (playlist) {
         playlist.element.find('a.playlist').text(UTIL.truncateString(playlist.toString()));
@@ -320,14 +394,10 @@ Playlist.prototype = {
             if (artistName) {
                 playlistName = artistName + ' - ' + playlistName;
             }
-            // Autosaves
-            this.updateTitle(this.current, playlistName);
-        } else {
-            // Update title display
-            this.loadTitle();
-            // Save
-            this.current.save();
+            this.current.name = playlistName;
         }
+        // Save
+        this.current.save();
         // Add the track to the playlist in the DOM
         this.trackListElem.append(playlist_track.element);
         // Show playlist actions and footer
@@ -338,7 +408,8 @@ Playlist.prototype = {
     
     onSave: function (playlist) {
         if (playlist == this.current) {
-            this.loadAppleScript();
+            this.loadMetadata();
+            this.updateSidebarTitle(playlist);
             PLAYDAR.showSM2Container();
         }
     },
@@ -352,7 +423,12 @@ Playlist.prototype = {
     remove: function (playlist) {
         if (confirm('Are you sure you want to delete this playlist:\n\n' + playlist.name)) {
             playlist.remove();
+            return true;
         }
+        return false;
+    },
+    removeCurrent: function () {
+        return this.remove(this.current);
     },
     
     onDelete: function (playlist) {

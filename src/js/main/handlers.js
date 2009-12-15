@@ -173,7 +173,7 @@ CONTROLLERS.Playlist.playlistSidebarElem.click(function (e) {
         var form = target.parents('form');
         var params = UTIL.serializeForm(form);
         var playlist = playlist_item.data('playlist');
-        CONTROLLERS.Playlist.updateTitle(playlist_item.data('playlist'), params.name);
+        playlist_item.data('playlist').set_name(params.name);
         CONTROLLERS.Playlist.toggleSidebarEditName(playlist_item);
     }
 });
