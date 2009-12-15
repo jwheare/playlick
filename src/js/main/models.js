@@ -49,47 +49,8 @@
             .append(edit_form)
             .html();
     };
-    // Based on http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
-    var autolink_regexp = /\b([\w-]+:\/+|www[.])[^\s()<>]+(?:\([\w\d]+\)|(?:[^.,;'">\:\s\<\>\)\]\!]|\/))/g;
-    function autoLink (word) {
-        return word.replace(autolink_regexp, function (match, protocol, index, full) {
-            var url = match;
-            if (protocol == 'www.') {
-                url = 'http://' + url;
-            }
-            var text = match.replace(/^http:\/\//, '').replace(/\/$/, '');
-            return '<a href="' + url + '">' + text + '</a>';
-        });
-    }
-    function playlistTitleHtml () {
-        var wrapper = $('<div>');
-        // Add an image
-        if (this.image) {
-            wrapper.append($('<img>').attr('src', this.image));
-        }
-        
-        var title = this.toString();
-        if (this.url) {
-            wrapper.append(
-                $('<a>').attr('href', this.url).text(title)
-            );
-        } else {
-            wrapper.append(title);
-        }
-        if (this.subtitle) {
-            wrapper.append('<br>').append($('<span class="subtitle">').text(this.subtitle));
-        }
-        // Autolink description
-        if (this.description) {
-            var description = $('<small>')
-                .append(autoLink($('<div>').html(this.description).text()));
-            wrapper.append('<br>').append(description);
-        }
-        return wrapper.html();
-    };
     
     /* Apply to Models */
     MODELS.Track.prototype.toHTML = trackToHtml;
     MODELS.Playlist.prototype.toHTML = playlistToHtml;
-    MODELS.Playlist.prototype.titleHTML = playlistTitleHtml;
 })();

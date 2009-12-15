@@ -37,5 +37,18 @@ var UTIL = {
             }
         });
         return hash_parts;
+    },
+    
+    // Based on http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
+    autolink_regexp: /\b([\w-]+:\/+|www[.])[^\s()<>]+(?:\([\w\d]+\)|(?:[^.,;'">\:\s\<\>\)\]\!]|\/))/g,
+    autoLink: function (word) {
+        return word.replace(UTIL.autolink_regexp, function (match, protocol, index, full) {
+            var url = match;
+            if (protocol == 'www.') {
+                url = 'http://' + url;
+            }
+            var text = match.replace(/^http:\/\//, '').replace(/\/$/, '');
+            return '<a href="' + url + '">' + text + '</a>';
+        });
     }
 };

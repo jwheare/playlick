@@ -4,7 +4,8 @@
 function Playlist () {
     this.playlistSidebarElem = $('#playlists');
     this.loadingPlaylistsElem = $('#loading_playlists');
-    this.titleElem = $('#playlistTitle');
+    this.createTitleElem = $('#createPlaylist');
+    this.headerElem = $('#playlistHeader');
     this.copyrightElem = $('span#playlistCopyright');
     this.sourceElem = $('#playlistSource');
     this.sourceLink = $('a#playlistSourceLink');
@@ -64,7 +65,8 @@ Playlist.prototype = {
     
     /* CREATE */
     showCreateTitle: function () {
-        this.titleElem.html(STRINGS.create_playlist_title);
+        this.headerElem.hide();
+        this.createTitleElem.show();
     },
     
     create: function () {
@@ -206,8 +208,38 @@ Playlist.prototype = {
             this.tracksErrorElem.show();
         }
     },
+    buildTitle: function () {
+        this.headerElem.empty();
+        // Add an image
+        if (this.current.image) {
+            this.headerElem.append($('<img>').attr('src', this.current.image));
+        }
+        
+        var title = $('<h1>');
+        var titleText = this.current.toString();
+        if (this.current.url) {
+            title.append(
+                $('<a>').attr('href', this.current.url).text(titleText)
+            );
+        } else {
+            title.text(titleText);
+        }
+        this.headerElem.append(title);
+        
+        if (this.current.subtitle) {
+            this.headerElem.append($('<p class="subtitle">').text(this.current.subtitle));
+        }
+        if (this.current.description) {
+            // Autolink description
+            var escapedDescription = $('<div>').html(this.current.description).text();
+            var description = $('<p class="description">').html(UTIL.autoLink(escapedDescription));
+            this.headerElem.append(description);
+        }
+        this.headerElem.show();
+    },
     loadTitle: function () {
-        this.titleElem.html(this.current.titleHTML());
+        this.createTitleElem.hide();
+        this.buildTitle();
     },
     loadCopyright: function () {
         this.copyrightElem.text(this.current.copyright || '');

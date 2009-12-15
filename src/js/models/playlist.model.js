@@ -165,9 +165,6 @@ Playlist.prototype = {
     toHTML: function () {
         return this.toString();
     },
-    titleHTML: function () {
-        return this.toString();
-    },
     /**
      * Build an applescript for exporting to iTunes
     **/

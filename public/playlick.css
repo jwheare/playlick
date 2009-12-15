@@ -300,27 +300,36 @@ form#lastfm_battle_form input#lastfm_battle_input_they {
 #main h2 {
     margin: 0 0 0 40px;
 }
-#main h1 img {
+
+#playlistHeader {
+    margin-bottom: 15px;
+}
+#playlistHeader h1 {
+    margin-bottom: 0;
+}
+#playlistHeader img {
     float: right;
     margin: 0 0 24px 10px;
     vertical-align: middle;
     max-width: 100px;
     max-height: 100px;
 }
-#main h1 small {
+#playlistHeader p {
+    margin: 0;
+}
+#playlistHeader p.subtitle {
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: bold;
+}
+#playlistHeader p.description {
     display: block;
     font-weight: normal;
     font-size: 13px;
     line-height: 1.5;
 }
-#main h1 small span.source {
-    color: #999;
-}
-#main h1 small span a {
+#playlistHeader p.description a {
     color: #4c7a0f;
-}
-#main h1 span.subtitle {
-    font-size: 14px;
 }
 
 p#tracksLoading {
