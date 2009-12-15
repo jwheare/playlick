@@ -367,7 +367,7 @@ form#playlistEditForm p {
     line-height: 1.6;
 }
 form#playlistEditForm p.submit {
-    margin-top: 10px;
+    margin: 10px 0 0 0;
 }
 form#playlistEditForm p.field input {
     width: 510px;

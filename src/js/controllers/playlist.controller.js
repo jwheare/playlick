@@ -260,6 +260,10 @@ Playlist.prototype = {
             that.current.image       = params.image;
             that.current.copyright   = params.copyright;
             that.current.save();
+        }).keydown(function (e) {
+            if (e.keyCode == 27) {
+                that.toggleEditForm();
+            }
         });
         var editSave = $('<p class="submit">')
             .append($('<input type="submit">').val('Save'))
