@@ -63,7 +63,12 @@ CONTROLLERS.Playlist.trackListElem.click(function (e) {
 
 CONTROLLERS.Playlist.addTrackButton.click(function (e) {
     e.preventDefault();
-    CONTROLLERS.Playlist.addTrackTable.toggle();
+    if (CONTROLLERS.Playlist.current && !CONTROLLERS.Playlist.current.persisted) {
+        CONTROLLERS.Playlist.addTrackTable.show();
+        CONTROLLERS.Playlist.addTrackSearchInput.focus().select();
+    } else {
+        CONTROLLERS.Playlist.addTrackTable.toggle();
+    }
 });
 CONTROLLERS.Playlist.addTrackCancel.click(function (e) {
     e.preventDefault();

@@ -80,6 +80,8 @@ Playlist.prototype = {
         this.setCurrent();
         // Metadata
         this.hideMetadata();
+        // Show add track details
+        this.addTrackTable.show();
     },
     
     onCreate: function (playlist) {
@@ -147,6 +149,8 @@ Playlist.prototype = {
         }
         // Update the current playlist object
         this.setCurrent(playlist);
+        // Hide add track details
+        this.addTrackTable.hide();
         // Load metadata
         this.loadMetadata();
         // Load tracks
@@ -158,16 +162,12 @@ Playlist.prototype = {
         this.loadHeader();
         // Footer
         this.loadFooter();
-        // Hide add track details
-        this.addTrackTable.hide();
     },
     hideMetadata: function () {
         // Header
         this.showCreateTitle();
         // Footer
         this.hideFooter();
-        // Show add track details
-        this.addTrackTable.show();
     },
     
     loadHeader: function () {
