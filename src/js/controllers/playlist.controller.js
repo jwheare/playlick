@@ -161,6 +161,11 @@ Playlist.prototype = {
         this.load(playlistItem.data('playlist'));
     },
     load: function (playlist) {
+        if (this.current == playlist) {
+            // Already loaded, just resolve
+            PLAYDAR.resolve_current_playlist();
+            return;
+        }
         // Cancel Playdar
         PLAYDAR.cancel_playdar_resolve();
         // Unload the current playlist
