@@ -150,7 +150,7 @@ CONTROLLERS.Playlist.playlistSidebarLists.click(function (e) {
     var target = $(e.target);
     var playlist_item = target.closest('li.p');
     // Load the clicked playlist
-    if (target.is('li.p a.playlist')) {
+    if (target.is('li.p a.playlist, li.p a.playlist span, li.p a.playlist img')) {
         e.preventDefault();
         target.blur();
         CONTROLLERS.Playlist.loadItem(playlist_item);
@@ -178,7 +178,8 @@ CONTROLLERS.Playlist.playlistSidebarLists.click(function (e) {
         var form = target.parents('form');
         var params = UTIL.serializeForm(form);
         var playlist = playlist_item.data('playlist');
-        playlist_item.data('playlist').set_name(params.name);
+        playlist_item.data('playlist').title = params.name;
+        playlist_item.data('playlist').save();
         CONTROLLERS.Playlist.toggleSidebarEditName(playlist_item);
     }
 });

@@ -296,7 +296,7 @@ Playlist.prototype = {
         this.editForm = $('<form id="playlistEditForm">').hide().submit(function (e) {
             e.preventDefault();
             var params = UTIL.serializeForm(this);
-            that.current.name        = params.title;
+            that.current.title        = params.title;
             that.current.url         = params.url;
             that.current.subtitle    = params.subtitle;
             that.current.description = params.description;
@@ -404,7 +404,7 @@ Playlist.prototype = {
             button.html(STRINGS.cancel_edit_playlist_text);
             // Update input and select
             var edit_input = playlist_item.find('input.playlist_name');
-            edit_input.val(playlist_item.data('playlist').name);
+            edit_input.val(playlist_item.data('playlist').toString());
             setTimeout(function () {
                 edit_input.focus().select();
             });
@@ -418,18 +418,7 @@ Playlist.prototype = {
         });
     },
     updateSidebarTitle: function (playlist) {
-        playlist.element.find('a.playlist').text(UTIL.truncateString(playlist.toString()));
-    },
-    updateCopyright: function (playlist, copyright) {
-        // Update playlist copyright
-        if (copyright) {
-            playlist.copyright = copyright;
-            playlist.save();
-        }
-        // Update current copyright
-        if (this.current == playlist) {
-            this.loadCopyright();
-        }
+        playlist.element.find('a.playlist span').text(UTIL.truncateString(playlist.toString()));
     },
     
     addTrack: function (artistName, trackName, albumName, url) {
@@ -446,7 +435,7 @@ Playlist.prototype = {
             if (artistName) {
                 playlistName = artistName + ' - ' + playlistName;
             }
-            this.current.name = playlistName;
+            this.current.title = playlistName;
         }
         // Save
         this.current.save();
@@ -473,7 +462,7 @@ Playlist.prototype = {
     
     /* DELETE */
     remove: function (playlist) {
-        if (confirm('Are you sure you want to delete this playlist:\n\n' + playlist.name)) {
+        if (confirm('Are you sure you want to delete this playlist:\n\n' + playlist.toString())) {
             playlist.remove();
             return true;
         }

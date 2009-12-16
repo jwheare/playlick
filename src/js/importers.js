@@ -136,8 +136,9 @@ IMPORTERS = {
         }
         var playlist = new MODELS.Playlist({
             type: metadata.type,
-            name: title,
+            title: title,
             artist: metadata.artist,
+            album: metadata.album,
             image: IMPORTERS.getAbsoluteUrl(metadata.image || jspf.image, source),
             description: description,
             url: IMPORTERS.getAbsoluteUrl(url, source),
@@ -200,7 +201,7 @@ IMPORTERS = {
             description = '';
         }
         var playlist = new MODELS.Playlist({
-            name: IMPORTERS.getStringItem(podcast.title),
+            title: IMPORTERS.getStringItem(podcast.title),
             subtitle: subtitle,
             description: description,
             copyright: IMPORTERS.getStringItem(podcast.copyright),
@@ -252,7 +253,7 @@ IMPORTERS = {
         })[0];
         var link = linkObject ? linkObject.href : '';
         var playlist = new MODELS.Playlist({
-            name: IMPORTERS.getStringItem(podcast.title),
+            title: IMPORTERS.getStringItem(podcast.title),
             subtitle: subtitle,
             description: description,
             copyright: IMPORTERS.getStringItem(podcast.copyright),

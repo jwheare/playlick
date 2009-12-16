@@ -136,7 +136,7 @@ var PLAYLICK = {
             function callback (playlist) {
                 // Update messages
                 $('p.messages').hide();
-                $('#url_title').text(playlist.name);
+                $('#url_title').text(playlist.toString());
                 $('#url_count').text(playlist.tracks.length);
                 $('#url_done').show();
                 // Register playlist
@@ -166,7 +166,7 @@ var PLAYLICK = {
             function callback (playlist) {
                 // Update messages
                 $('p.messages').hide();
-                $('#spotify_title').text(playlist.name);
+                $('#spotify_title').text(playlist.toString());
                 $('#spotify_done').show();
                 // Register playlist
                 CONTROLLERS.Playlist.register(playlist);
@@ -195,7 +195,7 @@ var PLAYLICK = {
             function callback (playlist) {
                 // Update messages
                 $('p.messages').hide();
-                var escapedAlbum = $('<b>').text(playlist.name);
+                var escapedAlbum = $('<b>').text(playlist.toString());
                 $('#album_name').html(escapedAlbum);
                 $('#album_done').show();
                 // Register playlist

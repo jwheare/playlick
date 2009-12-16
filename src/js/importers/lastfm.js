@@ -164,7 +164,7 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
         }
         // Create the playlist
         var playlist = new MODELS.Playlist({
-            name: 'Loved tracks for ' + json.lovedtracks['@attr'].user
+            title: 'Loved tracks for ' + json.lovedtracks['@attr'].user
         });
         // Load tracks
         $.each(trackList, function (i, data) {
@@ -213,8 +213,8 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
         }
         var metadata = {
             type: 'album',
-            title: json.album.name,
             artist: json.album.artist,
+            album: json.album.name,
             description: description,
             url: json.album.url
         };
@@ -260,7 +260,7 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
         var artists = UTIL.shuffle(json.comparison.result.artists.artist);
         // Create the playlist
         var playlist = new MODELS.Playlist({
-            name: userA + ' and ' + userB,
+            title: userA + ' and ' + userB,
             description: 'A playlist based on your shared artists'
         });
         var playlistTracks = {};

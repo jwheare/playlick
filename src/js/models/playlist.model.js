@@ -27,8 +27,10 @@ function Playlist (options) {
         }
     }
     this.type = this.options.type || 'playlist';
-    this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
+    this.date = this.options.date ? new Date(this.options.date) : new Date();
     this.artist = this.options.artist || '';
+    this.album = this.options.album || '';
+    this.title = this.options.title;
     this.image = this.options.image || '';
     this.subtitle = this.options.subtitle || '';
     this.description = this.options.description || '';
@@ -70,22 +72,20 @@ Playlist.prototype = {
     /**
      * Playlist management
     **/
-    set_name: function (name) {
-        this.name = name;
-        // AUTOSAVE
-        this.save();
-    },
     isAlbum: function () {
         return this.type == 'album';
     },
     albumToString: function () {
-        return this.artist + ' - ' + this.name;
+        return this.artist + ' - ' + this.album;
     },
     toString: function () {
+        if (this.title) {
+            return this.title;
+        }
         if (this.isAlbum()) {
             return this.albumToString();
         }
-        return this.name;
+        return "Playlist: " + this.date.toLocaleString();
     },
     /**
      * Fetch tracks from Couch
@@ -167,7 +167,7 @@ Playlist.prototype = {
                 + 'track: "' + playlist_track.track.name.replace(/"/g, '\\"') + '"'
                 + '}';
         });
-        var applescript = 'set playlist_name to "' + this.name + '"\n'
+        var applescript = 'set playlist_name to "' + this.toString() + '"\n'
         + 'tell application "iTunes"\n'
         + '    set new_playlist to (make playlist with properties {name:playlist_name})\n'
         + '    set l to source "Library"\n'
@@ -305,8 +305,10 @@ Playlist.prototype = {
         var doc = $.extend(this.get_doc_ref(), {
             published: this.published,
             type: this.type,
-            name: this.name,
+            date: this.date.getTime(),
+            title: this.title,
             artist: this.artist,
+            album: this.album,
             image: this.image,
             subtitle: this.subtitle,
             description: this.description,

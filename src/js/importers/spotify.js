@@ -141,8 +141,8 @@ Spotify.album = function (url, callback, exceptionHandler) {
         // Create the playlist
         var playlist = new MODELS.Playlist({
             type: 'album',
-            name: album.name,
             artist: album.artist.name || album.artist[0].name,
+            album: album.name,
             url: url,
             source: albumLookupUrl,
             image: LastFm.getAlbumArt(album.artist.name || album.artist[0].name, album.name, 'large')
@@ -189,7 +189,7 @@ Spotify.track = function (url, callback, exceptionHandler) {
         }
         // Create a playlist
         var playlist = new MODELS.Playlist({
-            name: (trackData.artist.name || trackData.artist[0].name) + ' - ' + trackData.name,
+            title: (trackData.artist.name || trackData.artist[0].name) + ' - ' + trackData.name,
             url: url,
             source: trackLookupUrl
         });

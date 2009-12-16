@@ -36,7 +36,13 @@
         var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">');
         var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
         var edit_link   = $('<a href="#" class="edit_playlist">').text(STRINGS.edit_playlist_text);
-        var name        = $('<a href="#" class="playlist">').text(UTIL.truncateString(this.toString()));
+        var name        = $('<a href="#" class="playlist">')
+            .attr('title', this.toString())
+            .append($('<span>').text(UTIL.truncateString(this.toString())));
+        if (this.isAlbum()) {
+            var albumArt = IMPORTERS.LastFm.getAlbumArt(this.artist, this.album);
+            name.prepend($('<img width="24" height="24" class="art">').attr('src', albumArt));
+        }
         var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
             .append('<input type="text" name="name" class="playlist_name">')
             .append('<input type="submit" value="save">');

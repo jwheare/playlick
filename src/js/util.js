@@ -25,7 +25,7 @@ var UTIL = {
     compareString: function (a, b) {
         a = a || '';
         b = b || '';
-        return a.trim().toUpperCase() == b.trim().toUpperCase();
+        return a.toUpperCase() == b.toUpperCase();
     },
     getHashParts: function () {
         var hash_sections = window.location.hash.replace(/^#(.*)/, '$1').split(';');

@@ -159,9 +159,9 @@ ul.playlists li {
     border-bottom: 1px solid #c0e95b;
     line-height: 32px;
 }
-ul.playlists li img {
-    float: right;
-    margin: 7px 0 0 3px;
+ul.playlists li img.art {
+    float: left;
+    margin: 5px 6px 0 -6px;
     vertical-align: middle;
 }
 ul.playlists li a.playlist {
@@ -520,7 +520,8 @@ form#lastfm_playlists_form input.submit {
 p#lastfm_done input {
 }
 ul#lastfm_playlists {
-    margin-top: -29px;
+    margin-top: -22px;
+    margin-left: 11px;
     list-style-type: none;
 }
 ul#lastfm_playlists li {
