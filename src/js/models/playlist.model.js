@@ -26,7 +26,9 @@ function Playlist (options) {
             this.set_id(MODELS.next_playlist_id++);
         }
     }
+    this.type = this.options.type || 'playlist';
     this.name = this.options.name || "Playlist: " + new Date().toLocaleString();
+    this.artist = this.options.artist || '';
     this.image = this.options.image || '';
     this.subtitle = this.options.subtitle || '';
     this.description = this.options.description || '';
@@ -73,7 +75,16 @@ Playlist.prototype = {
         // AUTOSAVE
         this.save();
     },
+    isAlbum: function () {
+        return this.type == 'album';
+    },
+    albumToString: function () {
+        return this.artist + ' - ' + this.name;
+    },
     toString: function () {
+        if (this.isAlbum()) {
+            return this.albumToString();
+        }
         return this.name;
     },
     /**
@@ -293,8 +304,9 @@ Playlist.prototype = {
     get_doc: function () {
         var doc = $.extend(this.get_doc_ref(), {
             published: this.published,
-            type: 'playlist',
+            type: this.type,
             name: this.name,
+            artist: this.artist,
             image: this.image,
             subtitle: this.subtitle,
             description: this.description,

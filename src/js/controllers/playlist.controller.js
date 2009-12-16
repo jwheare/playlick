@@ -2,7 +2,10 @@
  * class CONTROLLERS.Playlist
 **/
 function Playlist () {
-    this.playlistSidebarElem = $('#playlists');
+    this.playlistSidebarLists = $('.playlists');
+    this.playlistsSidebarList = $('#playlists');
+    this.albumsSidebarTitleElem = $('h1#albumsTitle');
+    this.albumsSidebarList = $('#albums');
     this.loadingPlaylistsElem = $('#loading_playlists');
     this.createTitleElem = $('#createPlaylist');
     this.headerElem = $('#playlistHeader');
@@ -21,6 +24,7 @@ function Playlist () {
     this.addTrackTable = $('table#addTrackTable');
     this.addTrackForm = $('form#addTrackForm');
     this.addTrackSearchInput = $('input#addTrackSearchInput');
+    this.mainImporters = $('#mainImporters');
     
     this.current = null;
     this.playingTrack = null;
@@ -86,7 +90,12 @@ Playlist.prototype = {
     
     onCreate: function (playlist) {
         // Add to sidebar
-        this.playlistSidebarElem.append(playlist.element);
+        if (playlist.isAlbum()) {
+            this.albumsSidebarList.append(playlist.element);
+            this.albumsSidebarTitleElem.show();
+        } else {
+            this.playlistsSidebarList.append(playlist.element);
+        }
     },
     
     /* RETRIEVE */
@@ -95,13 +104,24 @@ Playlist.prototype = {
         if (this.fetchAllDone) {
             MODELS.stat_couch();
         } else {
-            var elements = [];
+            var playlistElements = [];
+            var albumElements = [];
             var that = this;
             var playlists = MODELS.Playlist.fetchAll(function callback (playlist) {
                 that.register(playlist);
-                elements.push(playlist.element.get()[0]);
+                if (playlist.isAlbum()) {
+                    albumElements.push(playlist.element.get()[0]);
+                } else {
+                    playlistElements.push(playlist.element.get()[0]);
+                }
             });
-            this.playlistSidebarElem.append(elements);
+            if (playlistElements) {
+                this.playlistsSidebarList.append(playlistElements);
+            }
+            if (albumElements.length) {
+                this.albumsSidebarTitleElem.show();
+                this.albumsSidebarList.append(albumElements);
+            }
             if (typeof playlists !== 'undefined') {
                 this.fetchAllDone = true;
             }
@@ -121,7 +141,7 @@ Playlist.prototype = {
             playlistItem = this.createLink.parent('li');
         }
         // Update the sidebar
-        this.playlistSidebarElem.find('li').removeClass('current');
+        this.playlistSidebarLists.find('li').removeClass('current');
         playlistItem.addClass('current');
     },
     // Highlight the currently playing playlist in the sidebar
@@ -129,7 +149,7 @@ Playlist.prototype = {
         // Update the now playing track
         this.playingTrack = playlist_track;
         // Remove the current highlight from the sidebar
-        this.playlistSidebarElem.find('li.p').removeClass('playing');
+        this.playlistSidebarLists.find('li.p').removeClass('playing');
         if (playlist_track) {
             // Add a new highlight
             playlist_track.playlist.element.addClass('playing');
@@ -160,7 +180,9 @@ Playlist.prototype = {
         this.loadTracks();
         // Show footer and add track form again
         this.showFooter();
-        this.addTrackForm.show();
+        if (!playlist.isAlbum()) {
+            this.addTrackForm.show();
+        }
     },
     
     loadMetadata: function () {
@@ -168,12 +190,18 @@ Playlist.prototype = {
         this.loadHeader();
         // Footer
         this.loadFooter();
+        // Hide main importers
+        this.mainImporters.hide();
     },
     hideMetadata: function () {
         // Header
         this.showCreateTitle();
         // Footer
         this.hideFooter();
+        // Show add track form
+        this.addTrackForm.show();
+        // Show main importers
+        this.mainImporters.show();
     },
     
     loadHeader: function () {
@@ -456,11 +484,16 @@ Playlist.prototype = {
     },
     
     onDelete: function (playlist) {
-        if (playlist == this.current) {
-            this.create();
-        }
         if (this.playingTrack && playlist == this.playingTrack.playlist) {
             PLAYDAR.stopPlaySession();
+        }
+        if (playlist.isAlbum()) {
+            if (!this.albumsSidebarList.find('li').size()) {
+                this.albumsSidebarTitleElem.hide();
+            }
+        }
+        if (playlist == this.current) {
+            this.create();
         }
     }
 };

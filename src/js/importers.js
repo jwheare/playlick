@@ -128,14 +128,16 @@ IMPORTERS = {
             throw exception('No tracks in JSPF', jspf.trackList);
         }
         // Create the playlist
-        var title = jspf.title || jspf.info;
+        var title = metadata.title || jspf.title || jspf.info;
         var url = metadata.url || jspf.info;
         var description = metadata.description || jspf.annotation || jspf.info;
         if (description == title || description == url) {
             description = '';
         }
         var playlist = new MODELS.Playlist({
+            type: metadata.type,
             name: title,
+            artist: metadata.artist,
             image: IMPORTERS.getAbsoluteUrl(metadata.image || jspf.image, source),
             description: description,
             url: IMPORTERS.getAbsoluteUrl(url, source),

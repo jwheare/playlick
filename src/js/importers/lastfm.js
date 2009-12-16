@@ -42,7 +42,7 @@ LastFm.Exception.prototype.toString = function () {
  * Wraps getJson with Last.fm specifics
 **/
 LastFm.getJson = function (method, params, callback, exception, exceptionHandler) {
-    var params = params || {};
+    params = params || {};
     params.method = method;
     IMPORTERS.getJson(LastFm.WS_ROOT + "/2.0/?callback=?", $.extend(params, {
         api_key: LastFm.API_KEY,
@@ -62,7 +62,7 @@ LastFm.getJson = function (method, params, callback, exception, exceptionHandler
 **/
 LastFm.generateSignature = function (method, params) {
     var signature = method;
-    var params = params || {};
+    params = params || {};
     for (k in params) {
         signature += " --" + k + "=" + encodeURIComponent(params[k]);
     }
@@ -212,6 +212,9 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
             description = $('<div/>').html(json.album.wiki.summary).text() + '';
         }
         var metadata = {
+            type: 'album',
+            title: json.album.name,
+            artist: json.album.artist,
             description: description,
             url: json.album.url
         };
@@ -289,7 +292,7 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
                 artist_name,
                 function callback (tracks) {
                     // Pick a random track
-                    var tracks = UTIL.shuffle(tracks);
+                    tracks = UTIL.shuffle(tracks);
                     var track = tracks[0];
                     var trackDoc = {
                         name: track.name,

@@ -153,39 +153,8 @@ var PLAYLICK = {
                 var errorMessage = $('<p>').text(exception.message);
                 errorMessage.append('<br>')
                              .append(escapedUrl);
-                $('#url_error').html(errorMessage);
+                $('#url_error').html(errorMessage.html());
                 $('#url_error').show();
-            }
-        );
-    },
-    // Fetch the metadata from a Spotify Album URL retrieved from autocomplete
-    fetchSpotifyAlbum: function (url) {
-        PLAYLICK.importSetup('spotify_album');
-        IMPORTERS.Spotify.url(
-            url,
-            function callback (playlist) {
-                // Update messages
-                $('p.messages').hide();
-                var escapedAlbum = $('<b>').text(playlist.name);
-                $('#spotify_album_name').html(escapedAlbum);
-                $('#spotify_album_done').show();
-                // Register playlist
-                CONTROLLERS.Playlist.register(playlist);
-                // Load playlist
-                CONTROLLERS.Playlist.load(playlist);
-            },
-            function exceptionHandler (exception) {
-                // Show error message
-                $('p.messages').hide();
-                var escapedAlbum = $('<b>').text('URL: ' + url);
-                var escapedSignature = $('<small>').text(exception.signature);
-                var errorMessage = $('<p>').text(exception.message);
-                errorMessage.append('<br>')
-                             .append(escapedAlbum)
-                             .append('<br>')
-                             .append(escapedSignature);
-                $('#spotify_album_error').html(errorMessage);
-                $('#spotify_album_error').show();
             }
         );
     },
@@ -213,7 +182,7 @@ var PLAYLICK = {
                 var errorMessage = $('<p>').text(exception.message);
                 errorMessage.append('<br>')
                              .append(escapedUrl);
-                $('#spotify_error').html(errorMessage);
+                $('#spotify_error').html(errorMessage.html());
                 $('#spotify_error').show();
             }
         );
@@ -244,7 +213,7 @@ var PLAYLICK = {
                              .append(escapedAlbum)
                              .append('<br>')
                              .append(escapedSignature);
-                $('#album_error').html(errorMessage);
+                $('#album_error').html(errorMessage.html());
                 $('#album_error').show();
             }
         );
@@ -343,14 +312,14 @@ var PLAYLICK = {
                 $('p.messages').hide();
                 var escapedName = $('<b>').text('Username: ' + username);
                 var escapedSignature = $('<small>').text(exception.signature);
-                var errorMessage = $('<span>').text(exception.message);
+                var errorMessage = $('<p>').text(exception.message);
                 errorMessage.append('<br>')
                              .append(escapedName);
                 if (PLAYLICK.debug) {
                     errorMessage.append('<br>')
                                 .append(escapedSignature);
                 }
-                $('#lastfm_error').html(errorMessage);
+                $('#lastfm_error').html(errorMessage.html());
                 $('#lastfm_error').show();
             }
         );
@@ -383,7 +352,7 @@ var PLAYLICK = {
                              .append(escapedInput)
                              .append('<br>')
                              .append(escapedSignature);
-                $('#generate_error').html(errorMessage);
+                $('#generate_error').html(errorMessage.html());
                 $('#generate_error').show();
             }
         );

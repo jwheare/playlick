@@ -33,134 +33,16 @@
                 <div id="sidebar">
                     <h1>Your playlists</h1>
                     <div class="sidebar_list">
-                        <ul id="playlists">
-                            <li class="current"><a href="#" id="create_playlist" class="create playlist">+ Create</a></li>
+                        <ul class="playlists" id="playlists">
+                            <li class="current"><a href="#" id="create_playlist" class="create playlist">+ Create &amp; Import</a></li>
                         </ul>
                         
                         <p id="loading_playlists">Loading playlists…</p>
                     </div>
+                    
+                    <h1 id="albumsTitle">Your favourite albums</h1>
                     <div class="sidebar_list">
-                        <ul id="importers">
-                            <li class="importer">
-                                <form id="album_form">
-                                    <p class="label">
-                                        <label for="album_import_input">Add an Album (Last.fm Search)</label>
-                                    </p>
-                                    
-                                    <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…">
-                                    <input type="hidden" name="artist_name" id="album_import_artist">
-                                    <input type="hidden" name="album_name" id="album_import_name">
-                                    <input type="submit" id="album_button" value="Go">
-                                </form>
-                                <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
-                                <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
-                                <p class="messages" id="album_error"></p>
-                            </li>
-                            
-                            <li class="importer">
-                                <form id="spotify_album_form">
-                                    <p class="label">
-                                        <label for="spotify_album_import_input">Add an Album (Spotify Search)</label>
-                                    </p>
-                                    
-                                    <img src="spotify_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="album" id="spotify_album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…">
-                                    <input type="hidden" name="spotifyUrl" id="spotify_album_import_url">
-                                    <input type="submit" id="spotify_album_button" value="Go">
-                                </form>
-                                <p class="messages" id="spotify_album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
-                                <p class="messages" id="spotify_album_done">Done! Album imported: <span id="spotify_album_name"></span></p>
-                                <p class="messages" id="spotify_album_error"></p>
-                            </li>
-                            
-                            <li class="importer">
-                                <form id="lastfm_form">
-                                    <p class="label">
-                                        <label for="lastfm_input">Import your Last.fm playlists and Loved Tracks</label>
-                                    </p>
-                                    <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="username" id="lastfm_input" class="importer_input" placeholder="Last.fm username…">
-                                    <input type="submit" id="lastfm_button" value="Get ’em">
-                                </form>
-                                
-                                <p class="messages" id="lastfm_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
-                                <p class="messages" id="lastfm_error"></p>
-                                <p class="messages" id="lastfm_import_error"></p>
-                                <p class="messages" id="lastfm_imported">Done!</p>
-                                
-                                <form id="lastfm_playlists_form">
-                                    <p class="messages" id="lastfm_done">
-                                        <small id="lastfm_playlists_count"></small>
-                                        <small>
-                                            <a href="#" id="lastfm_playlists_all">All</a>
-                                            <a href="#" id="lastfm_playlists_none">None</a>
-                                        </small>
-                                    </p>
-                                    <p class="messages" id="lastfm_error_no_playlists">
-                                        <input type="submit" value="Import Loved Tracks">
-                                        <small>No playlists found</small>
-                                    </p>
-                                    <ul id="lastfm_playlists">
-                                        <li class="header">&nbsp;<small>Tracks</small></li>
-                                    </ul>
-                                    <input type="submit" value="Import Playlists" class="submit">
-                                </form>
-                            </li>
-                            
-                            <li class="importer">
-                                <form id="lastfm_battle_form">
-                                    <p class="label">
-                                        <label for="lastfm_battle_input_you">
-                                            The Last.fm Battle
-                                            <br>
-                                            <small>Generate a playlist based on shared artists between two Last.fm users.</small>
-                                        </label>
-                                    </p>
-                                    <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
-                                    
-                                    <input type="text" name="you" id="lastfm_battle_input_you" class="importer_input" placeholder="You…">
-                                    <br>
-                                    <label for="lastfm_battle_input_they" class="favicon"><small>VS</small></label>
-                                    <input type="text" name="they" id="lastfm_battle_input_they" class="importer_input" placeholder="…Them">
-                                    <input type="submit" id="lastfm_battle_button" value="Fight!">
-                                    
-                                    <p class="messages" id="generate_loading"><img src="/track_scanning.gif" width="16" height="16"> Fetching tracks…</p>
-                                    <p class="messages" id="generate_done">Done!</p>
-                                    <p class="messages" id="generate_error"></p>
-                                </form>
-                            </li>
-                            
-                            <li class="importer">
-                                <form id="spotify_form">
-                                    <p class="label">
-                                        <label for="spotify_input">Add a Spotify Track/Album by URL</label>
-                                    </p>
-                                    
-                                    <img src="spotify_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="url" id="spotify_input" class="importer_input" placeholder="Paste a URL…">
-                                    <input type="submit" id="url_button" value="Go">
-                                </form>
-                                <p class="messages" id="spotify_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
-                                <p class="messages" id="spotify_done">Done! Imported “<span id="spotify_title"></span>”</p>
-                                <p class="messages" id="spotify_error"></p>
-                            </li>
-                            
-                            <li class="importer">
-                                <form id="url_form">
-                                    <p class="label">
-                                        <label for="url_input">Import an XSPF or Podcast</label>
-                                    </p>
-                                    
-                                    <img src="podcast_icon.gif" width="16" height="16" class="favicon">
-                                    <input type="text" name="url" id="url_input" class="importer_input" placeholder="Paste a URL…">
-                                    <input type="submit" id="url_button" value="Go">
-                                </form>
-                                <p class="messages" id="url_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
-                                <p class="messages" id="url_done">Done! Imported “<span id="url_title"></span>” (<span id="url_count"></span>)</p>
-                                <p class="messages" id="url_error"></p>
-                            </li>
-                        </ul>
+                        <ul class="playlists" id="albums"></ul>
                     </div>
                 </div>
                 
@@ -230,6 +112,105 @@
                             Export&nbsp;to&nbsp;iTunes<br>
                             <small>Mac&nbsp;only&nbsp;applescript</small>
                         </a>
+                    </div>
+                    
+                    <div id="mainImporters">
+                        <form id="album_form">
+                            <h1><label for="album_import_input">Add an Album to your collection</label></h1>
+                            
+                            <p>
+                                <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…">
+                                <input type="hidden" name="artist_name" id="album_import_artist">
+                                <input type="hidden" name="album_name" id="album_import_name">
+                                <input type="submit" id="album_button" value="Go">
+                            </p>
+                            <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
+                            <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
+                            <p class="messages" id="album_error"></p>
+                        </form>
+                        
+                        
+                        
+                        <form id="lastfm_battle_form">
+                            <h1>
+                                <label for="lastfm_battle_input_you">The Last.fm Battle</label>
+                            </h1>
+                            <p>Generate a playlist based on shared artists between two Last.fm users.</p>
+                            <p>
+                                <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
+                            
+                                <input type="text" name="you" id="lastfm_battle_input_you" class="importer_input" placeholder="You…">
+                                <label for="lastfm_battle_input_they"><small>VS</small></label>
+                                <input type="text" name="they" id="lastfm_battle_input_they" class="importer_input" placeholder="…Them">
+                                <input type="submit" id="lastfm_battle_button" value="Fight!">
+                            </p>
+                            <p class="messages" id="generate_loading"><img src="/track_scanning.gif" width="16" height="16"> Fetching tracks…</p>
+                            <p class="messages" id="generate_done">Done!</p>
+                            <p class="messages" id="generate_error"></p>
+                        </form>
+                        
+                        <h1>Import playlists from elsewhere</h1>
+                        
+                        <form id="lastfm_form">
+                            <p class="label">
+                                <label for="lastfm_input">Import your Last.fm playlists and Loved Tracks</label>
+                            </p>
+                            <p>
+                                <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
+                                <input type="text" name="username" id="lastfm_input" class="importer_input" placeholder="Last.fm username…">
+                                <input type="submit" id="lastfm_button" value="Get ’em">
+                            </p>
+                            <p class="messages" id="lastfm_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading playlists…</p>
+                            <p class="messages" id="lastfm_error"></p>
+                            <p class="messages" id="lastfm_import_error"></p>
+                            <p class="messages" id="lastfm_imported">Done!</p>
+                        </form>
+                        
+                        <form id="lastfm_playlists_form">
+                            <p class="messages" id="lastfm_done">
+                                <small id="lastfm_playlists_count"></small>
+                                <small>
+                                    <a href="#" id="lastfm_playlists_all">All</a>
+                                    <a href="#" id="lastfm_playlists_none">None</a>
+                                </small>
+                            </p>
+                            <p class="messages" id="lastfm_error_no_playlists">
+                                <input type="submit" value="Import Loved Tracks">
+                                <small>No playlists found</small>
+                            </p>
+                            <ul id="lastfm_playlists">
+                                <li class="header">&nbsp;<small>Tracks</small></li>
+                            </ul>
+                            <input type="submit" value="Import Playlists" class="submit">
+                        </form>
+                        
+                        <form id="spotify_form">
+                            <p class="label">
+                                <label for="spotify_input">Add a Spotify Track/Album by URL</label>
+                            </p>
+                            <p>
+                                <img src="spotify_icon.gif" width="16" height="16" class="favicon">
+                                <input type="text" name="url" id="spotify_input" class="importer_input" placeholder="Paste a URL…">
+                                <input type="submit" id="url_button" value="Go">
+                            </p>
+                            <p class="messages" id="spotify_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
+                            <p class="messages" id="spotify_done">Done! Imported “<span id="spotify_title"></span>”</p>
+                            <p class="messages" id="spotify_error"></p>
+                        </form>
+                        
+                        <form id="url_form">
+                            <p class="label">
+                                <label for="url_input">Import an XSPF or Podcast</label>
+                            </p>
+                            <p>
+                                <img src="podcast_icon.gif" width="16" height="16" class="favicon">
+                                <input type="text" name="url" id="url_input" class="importer_input" placeholder="Paste a URL…">
+                                <input type="submit" id="url_button" value="Go">
+                            </p>
+                            <p class="messages" id="url_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
+                            <p class="messages" id="url_done">Done! Imported “<span id="url_title"></span>” (<span id="url_count"></span>)</p>
+                            <p class="messages" id="url_error"></p>
+                        </form>
                     </div>
                 </div>
                 

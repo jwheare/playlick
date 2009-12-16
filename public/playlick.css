@@ -133,6 +133,9 @@ h1#title small {
     margin: 15px 0;
 }
 /* Playlists */
+h1#albumsTitle {
+    display: none;
+}
 p#loading_playlists {
     margin: 0;
     padding: 5px 10px;
@@ -143,56 +146,56 @@ p#loading_playlists {
 p#loading_playlists.unavailable {
     background: #f37d70;
 }
-ul#playlists {
+ul.playlists {
     margin: 0;
     padding: 0;
     list-style-type: none;
     font-size: 14px;
 }
-ul#playlists li {
+ul.playlists li {
     margin: 0 -24px;
     border-right: 24px solid #fff;
     border-left: 24px solid #fff;
     border-bottom: 1px solid #c0e95b;
     line-height: 32px;
 }
-ul#playlists li img {
+ul.playlists li img {
     float: right;
     margin: 7px 0 0 3px;
     vertical-align: middle;
 }
-ul#playlists li a.playlist {
+ul.playlists li a.playlist {
     display: block;
     padding: 0 10px;
     text-decoration: none;
     background: #e8f9bb;
 }
-ul#playlists li a.create {
+ul.playlists li a.create {
     background: #d2f380;
 }
-ul#playlists li.current a.playlist {
+ul.playlists li.current a.playlist {
     background: #c0e95b;
 }
 
-ul#playlists li.current {
+ul.playlists li.current {
     border-left-color: #a8d840;
 }
-ul#playlists li.playing a.playlist {
+ul.playlists li.playing a.playlist {
     background: #a8d840;
 }
-ul#playlists li a.playlist:hover {
+ul.playlists li a.playlist:hover {
     background: #c0e95b;
 }
-ul#playlists li a.playlist:active {
+ul.playlists li a.playlist:active {
     background: #a8d840;
 }
 
-ul#playlists li form {
+ul.playlists li form {
     padding: 0 7px;
     line-height: 32px;
     background: #c0e95b;
 }
-ul#playlists li a.edit_playlist {
+ul.playlists li a.edit_playlist {
     float: right;
     padding: 0 6px;
     font-size: 11px;
@@ -200,14 +203,14 @@ ul#playlists li a.edit_playlist {
     background: #a8d840;
     text-decoration: none;
 }
-ul#playlists li:hover a.edit_playlist {
+ul.playlists li:hover a.edit_playlist {
     visibility: visible;
 }
-ul#playlists li a.edit_playlist:hover {
+ul.playlists li a.edit_playlist:hover {
     background: #92c137;
 }
 
-ul#playlists li a.playlist_playing {
+ul.playlists li a.playlist_playing {
     float: left;
     display: block;
     width: 24px;
@@ -219,14 +222,14 @@ ul#playlists li a.playlist_playing {
     text-decoration: none;
     cursor: default;
 }
-ul#playlists li.playing a.playlist_playing {
+ul.playlists li.playing a.playlist_playing {
     background: #a8d840 url('track_play.gif') no-repeat 50% 50%;
 }
-ul#playlists li.playing a.playlist_playing:hover {
+ul.playlists li.playing a.playlist_playing:hover {
     background-color: #92c137;
 }
 
-ul#playlists li a.delete_playlist {
+ul.playlists li a.delete_playlist {
     float: right;
     width: 24px;
     margin-right: -24px;
@@ -236,18 +239,19 @@ ul#playlists li a.delete_playlist {
     visibility: hidden;
     text-decoration: none;
 }
-ul#playlists li:hover a.delete_playlist {
+ul.playlists li:hover a.delete_playlist {
     visibility: visible;
 }
-ul#playlists li a.delete_playlist:hover {
+ul.playlists li a.delete_playlist:hover {
     background: #eee;
 }
-ul#playlists li input {
+ul.playlists li input {
     margin-right: 5px;
 }
-ul#playlists li input.playlist_name {
+ul.playlists li input.playlist_name {
     width: 180px;
 }
+
 
 /* Sidebar importers */
 ul#importers {
@@ -272,7 +276,7 @@ ul#importers li.importer p.label {
 ul#importers li input {
     margin-right: 5px;
 }
-ul#importers li input.importer_input {
+input.importer_input {
     width: 200px;
 }
 
@@ -283,7 +287,7 @@ form#lastfm_battle_form input#lastfm_battle_input_you {
     margin: 0 10px 0 0;
 }
 form#lastfm_battle_form input#lastfm_battle_input_they {
-    margin: 0 10px 0 0;
+    margin: 0 10px;
 }
 
 /* Main */
@@ -299,6 +303,12 @@ form#lastfm_battle_form input#lastfm_battle_input_they {
 }
 #main h2 {
     margin: 0 0 0 40px;
+}
+
+/* Main importers */
+
+#mainImporters h1 {
+    margin-top: 40px;
 }
 
 /* Playlist header */
