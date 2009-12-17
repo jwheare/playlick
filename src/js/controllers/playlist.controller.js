@@ -6,6 +6,8 @@ function Playlist () {
     this.playlistsSidebarList = $('#playlists');
     this.albumsSidebarTitleElem = $('h1#albumsTitle');
     this.albumsSidebarList = $('#albums');
+    this.subscriptionsSidebarTitleElem = $('h1#subscriptionsTitle');
+    this.subscriptionsSidebarList = $('#subscriptions');
     this.loadingPlaylistsElem = $('#loading_playlists');
     this.createTitleElem = $('#createPlaylist');
     this.headerElem = $('#playlistHeader');
@@ -93,6 +95,9 @@ Playlist.prototype = {
         if (playlist.isAlbum()) {
             this.albumsSidebarList.append(playlist.element);
             this.albumsSidebarTitleElem.show();
+        } else if (playlist.isSubscription()) {
+            this.subscriptionsSidebarList.append(playlist.element);
+            this.subscriptionsSidebarTitleElem.show();
         } else {
             this.playlistsSidebarList.append(playlist.element);
         }
@@ -106,16 +111,24 @@ Playlist.prototype = {
         } else {
             var playlistElements = [];
             var albumElements = [];
+            var subscriptionElements = [];
             var that = this;
             var playlists = MODELS.Playlist.fetchAll(function callback (playlist) {
+                var element = playlist.element.get()[0];
                 if (playlist.isAlbum()) {
-                    albumElements.push(playlist.element.get()[0]);
+                    albumElements.push(element);
+                } else if (playlist.isSubscription()) {
+                    subscriptionElements.push(element);
                 } else {
-                    playlistElements.push(playlist.element.get()[0]);
+                    playlistElements.push(element);
                 }
             });
-            if (playlistElements) {
+            if (playlistElements.length) {
                 this.playlistsSidebarList.append(playlistElements);
+            }
+            if (subscriptionElements.length) {
+                this.subscriptionsSidebarTitleElem.show();
+                this.subscriptionsSidebarList.append(subscriptionElements);
             }
             if (albumElements.length) {
                 this.albumsSidebarTitleElem.show();
@@ -133,6 +146,9 @@ Playlist.prototype = {
         if (playlist) {
             this.current = playlist;
             playlistItem = playlist.element;
+            // Update metadata and update sidebar
+            this.loadMetadata();
+            this.updateSidebarTitle(playlist);
         } else {
             // Create the playlist object
             this.current = new MODELS.Playlist();
@@ -174,8 +190,6 @@ Playlist.prototype = {
         this.setCurrent(playlist);
         // Hide add track details
         this.addTrackTable.hide();
-        // Load metadata and track form
-        this.loadMetadata();
         // Hide footer and add track form while loading tracks
         this.hideFooter();
         this.addTrackForm.hide();
@@ -444,16 +458,13 @@ Playlist.prototype = {
         this.current.save();
         // Add the track to the playlist in the DOM
         this.trackListElem.append(playlist_track.element);
-        // Show playlist actions and footer
-        this.loadFooter();
         // Resolve
         PLAYDAR.resolve_track(playlist_track);
     },
     
     onSave: function (playlist) {
         if (playlist == this.current) {
-            this.loadMetadata();
-            this.updateSidebarTitle(playlist);
+            this.setCurrent(playlist);
             PLAYDAR.showSM2Container();
         }
     },
@@ -499,6 +510,10 @@ Playlist.prototype = {
         if (playlist.isAlbum()) {
             if (!this.albumsSidebarList.find('li').size()) {
                 this.albumsSidebarTitleElem.hide();
+            }
+        } else if (playlist.isSubscription()) {
+            if (!this.subscriptionsSidebarList.find('li').size()) {
+                this.subscriptionsSidebarTitleElem.hide();
             }
         }
         if (playlist == this.current) {
