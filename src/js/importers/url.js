@@ -53,7 +53,7 @@ Url.AtomPodcastException.prototype.name = 'UrlAtomPodcastException';
 **/
 Url.url = function (source, callback, exceptionHandler) {
     var exception = new Url.XspfException(source);
-    IMPORTERS.getJsonFomXml(source, function (json) {
+    IMPORTERS.getJsonFomXml(source, function (json, requestUrl, requestParams) {
         var root = json.query.results;
         var podcast = root.rss ? root.rss.channel : '';
         var atom = root.feed;
@@ -62,8 +62,15 @@ Url.url = function (source, callback, exceptionHandler) {
             throw exception('Invalid Podcast/XSPF', root);
         }
         var playlist;
+        var metadata = {
+            type: 'subscription',
+            subscription: {
+                namespace: 'Url',
+                method: 'url',
+                arguments: [source]
+            }
+        };
         if (jspf) {
-            var metadata = {};
             playlist = IMPORTERS.createPlaylistFromJspf(
                 source,
                 jspf,
@@ -75,6 +82,7 @@ Url.url = function (source, callback, exceptionHandler) {
             playlist = IMPORTERS.createPlaylistFromPodcast(
                 source,
                 podcast,
+                metadata,
                 callback,
                 new Url.PodcastException(source)
             );
@@ -82,6 +90,7 @@ Url.url = function (source, callback, exceptionHandler) {
             playlist = IMPORTERS.createPlaylistFromAtomPodcast(
                 source,
                 atom,
+                metadata,
                 callback,
                 new Url.AtomPodcastException(source)
             );

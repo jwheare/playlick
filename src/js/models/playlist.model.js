@@ -26,17 +26,18 @@ function Playlist (options) {
             this.set_id(MODELS.next_playlist_id++);
         }
     }
-    this.type = this.options.type || 'playlist';
     this.date = this.options.date ? new Date(this.options.date) : new Date();
-    this.artist = this.options.artist || '';
-    this.album = this.options.album || '';
-    this.title = this.options.title;
-    this.image = this.options.image || '';
-    this.subtitle = this.options.subtitle || '';
-    this.description = this.options.description || '';
-    this.url = this.options.url || '';
-    this.source = this.options.source || '';
-    this.copyright = this.options.copyright || '';
+    this.setOption('type');
+    this.setOption('artist');
+    this.setOption('album');
+    this.setOption('title');
+    this.setOption('image');
+    this.setOption('subtitle');
+    this.setOption('description');
+    this.setOption('url');
+    this.setOption('copyright');
+    this.setOption('source');
+    this.setOption('subscription');
     this.addOptions(Playlist.DefaultOptions);
     
     // Create the DOM element
@@ -45,6 +46,9 @@ function Playlist (options) {
 // Override this
 Playlist.DefaultOptions = {};
 Playlist.prototype = {
+    setOption: function (optionName) {
+        this[optionName] = this.options[optionName] || '';
+    },
     addOptions: function (options) {
         $.extend(this.options, options);
     },
@@ -74,6 +78,9 @@ Playlist.prototype = {
     **/
     isAlbum: function () {
         return this.type == 'album';
+    },
+    isSubscription: function () {
+        return this.type == 'subscription' && this.subscription;
     },
     albumToString: function () {
         return this.artist + ' - ' + this.album;
@@ -303,9 +310,9 @@ Playlist.prototype = {
     },
     get_doc: function () {
         var doc = $.extend(this.get_doc_ref(), {
+            date: this.date.getTime(),
             published: this.published,
             type: this.type,
-            date: this.date.getTime(),
             title: this.title,
             artist: this.artist,
             album: this.album,
@@ -313,8 +320,9 @@ Playlist.prototype = {
             subtitle: this.subtitle,
             description: this.description,
             url: this.url,
-            source: this.source,
             copyright: this.copyright,
+            source: this.source,
+            subscription: this.subscription,
             tracks: $.map(this.tracks, function (playlist_track, i) {
                 return playlist_track.get_doc();
             })

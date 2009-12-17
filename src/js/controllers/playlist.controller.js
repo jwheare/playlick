@@ -32,7 +32,7 @@ function Playlist () {
 }
 Playlist.prototype = {
     register: function (playlist) {
-        // May be needed later. See how MVC stuff goes
+        playlist.save();
     },
     
     /* COUCHDB */
@@ -108,7 +108,6 @@ Playlist.prototype = {
             var albumElements = [];
             var that = this;
             var playlists = MODELS.Playlist.fetchAll(function callback (playlist) {
-                that.register(playlist);
                 if (playlist.isAlbum()) {
                     albumElements.push(playlist.element.get()[0]);
                 } else {
@@ -137,7 +136,6 @@ Playlist.prototype = {
         } else {
             // Create the playlist object
             this.current = new MODELS.Playlist();
-            this.register(this.current);
             playlistItem = this.createLink.parent('li');
         }
         // Update the sidebar
@@ -458,6 +456,23 @@ Playlist.prototype = {
             this.updateSidebarTitle(playlist);
             PLAYDAR.showSM2Container();
         }
+    },
+    
+    /* SUBSCRIPTIONS */
+    checkSubscription: function (playlist) {
+        if (!playlist.isSubscription()) {
+            // Not a subscription
+            return;
+        }
+        var sub = playlist.subscription;
+        // Add callback and exception handler to the arguments
+        sub.arguments.push(function callback (newPlaylist) {
+            // compare with saved playlist and update/warn for conflicts?
+        });
+        sub.arguments.push(function exceptionHandler (exception) {
+            // show a warning icon and message
+        });
+        IMPORTERS[sub.namespace][sub.method].apply(this, sub.arguments);
     },
     
     /* UNLOAD */

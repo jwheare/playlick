@@ -81,7 +81,7 @@ LastFm.getPlaylist = function (url, metadata, callback, exceptionHandler) {
         playlistURL: url
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
-    LastFm.getJson(method, params, function (json) {
+    LastFm.getJson(method, params, function (json, requestUrl, requestParams) {
         var playlist = IMPORTERS.createPlaylistFromJspf(this.url, json.playlist, metadata, callback, exception);
     }, exception, exceptionHandler);
 };
@@ -94,7 +94,13 @@ LastFm.getUserPlaylist = function (data, callback, exceptionHandler) {
     var url = "lastfm://playlist/" + data.id;
     // Extract other metadata from playlist info
     var metadata = {
-        url: data.url
+        type: 'subscription',
+        url: data.url,
+        subscription: {
+            namespace: 'LastFm',
+            method: 'getUserPlaylist',
+            arguments: [data]
+        }
     };
     var image = $.grep(data.image, function (value, i) {
         return value.size == 'medium';
@@ -123,7 +129,7 @@ LastFm.userPlaylists = function (user, callback, noPlaylistHandler, exceptionHan
         user: user
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
-    LastFm.getJson(method, params, function (json) {
+    LastFm.getJson(method, params, function (json, requestUrl, requestParams) {
         if (!json.playlists) {
             throw exception('No playlists in response', json);
         }
@@ -153,7 +159,7 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
         user: user
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
-    LastFm.getJson(method, params, function (json) {
+    LastFm.getJson(method, params, function (json, requestUrl, requestParams) {
         if (!json.lovedtracks || !json.lovedtracks.track) {
             throw exception('No loved tracks in response', json);
         }
@@ -164,7 +170,13 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
         }
         // Create the playlist
         var playlist = new MODELS.Playlist({
-            title: 'Loved tracks for ' + json.lovedtracks['@attr'].user
+            type: 'subscription',
+            title: 'Loved tracks for ' + json.lovedtracks['@attr'].user,
+            subscription: {
+                namespace: 'LastFm',
+                method: 'lovedTracks',
+                arguments: [user]
+            }
         });
         // Load tracks
         $.each(trackList, function (i, data) {
@@ -174,8 +186,6 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
             };
             playlist.add_track(new MODELS.Track(trackDoc));
         });
-        // Save
-        playlist.save();
         // Call the LastFm.lovedtracks callback
         if (callback) {
             callback(playlist);
@@ -201,7 +211,7 @@ LastFm.album = function (artist, album, callback, exceptionHandler) {
         album: album
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
-    LastFm.getJson(method, params, function (json) {
+    LastFm.getJson(method, params, function (json, requestUrl, requestParams) {
         if (!json.album) {
             throw exception('No album data', json);
         }
@@ -235,7 +245,7 @@ LastFm.getTopTracks = function (artist, callback, exceptionHandler) {
         artist: artist
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
-    LastFm.getJson(method, params, function (json) {
+    LastFm.getJson(method, params, function (json, requestUrl, requestParams) {
         if (!json.toptracks || !json.toptracks.track) {
             throw exception('No top tracks for ' + artist, json);
         }
@@ -253,7 +263,7 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
         limit: 20
     };
     var exception = new LastFm.Exception(LastFm.generateSignature(method, params));
-    LastFm.getJson(method, params, function (json) {
+    LastFm.getJson(method, params, function (json, requestUrl, requestParams) {
         if (!json.comparison || !json.comparison.result || !json.comparison.result.artists || !json.comparison.result.artists.artist) {
             throw exception("No shared artists found", json);
         }
@@ -276,9 +286,7 @@ LastFm.generateUsersPlaylist = function (userA, userB, callback, exceptionHandle
             if (!playlist.tracks.length) {
                 return exceptionHandler(exception("No valid tracks found for artists", playlistTracks));
             }
-            // Save
-            playlist.save();
-            // Call the LastFm.generateUsersPlaylist callback
+            // Call the callback
             if (callback) {
                 callback(playlist);
             }

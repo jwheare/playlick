@@ -36,7 +36,7 @@ IMPORTERS = {
             // Check the response, call the callback and handle any exceptions
             try {
                 IMPORTERS.checkResponse.call(this, json, exception);
-                callback.call(this, json);
+                callback.call(this, json, url, params);
             } catch (e) {
                 exceptionHandler(e);
             }
@@ -58,11 +58,11 @@ IMPORTERS = {
         IMPORTERS.getJson(IMPORTERS.YQL_URL, {
             q: IMPORTERS.yqlSelectXML(url),
             format: 'json'
-        }, function (json) {
+        }, function (json, requestUrl, requestParams) {
             if (!json.query || !json.query.results) {
                 throw exception('Invalid URL', json);
             }
-            callback.call(this, json);
+            callback.call(this, json, requestUrl, requestParams);
         }, exception, exceptionHandler);
     },
     autocompleteFromXml: function (element, url, params, parse, formatItem) {
@@ -142,7 +142,8 @@ IMPORTERS = {
             image: IMPORTERS.getAbsoluteUrl(metadata.image || jspf.image, source),
             description: description,
             url: IMPORTERS.getAbsoluteUrl(url, source),
-            source: source
+            source: source,
+            subscription: metadata.subscription
         });
         // Load tracks
         $.each(trackList, function (i, data) {
@@ -161,9 +162,7 @@ IMPORTERS = {
                 playlist.add_track(new MODELS.Track(trackDoc));
             }
         });
-        // Save
-        playlist.save();
-        // Call the IMPORTERS.createPlaylistFromJspf callback
+        // Call the callback
         if (callback) {
             callback(playlist);
         }
@@ -184,7 +183,7 @@ IMPORTERS = {
         }
         return string;
     },
-    createPlaylistFromPodcast: function (source, podcast, callback, exception) {
+    createPlaylistFromPodcast: function (source, podcast, metadata, callback, exception) {
         if (!podcast.item) {
             throw exception('No tracks in Podcast response', podcast);
         }
@@ -201,6 +200,8 @@ IMPORTERS = {
             description = '';
         }
         var playlist = new MODELS.Playlist({
+            type: metadata.type,
+            subscription: metadata.subscription,
             title: IMPORTERS.getStringItem(podcast.title),
             subtitle: subtitle,
             description: description,
@@ -224,15 +225,13 @@ IMPORTERS = {
             }
             playlist.add_track(new MODELS.Track(trackDoc));
         });
-        // Save
-        playlist.save();
-        // Call the IMPORTERS.createPlaylistFromPodcast callback
+        // Call the callback
         if (callback) {
             callback(playlist);
         }
         return playlist;
     },
-    createPlaylistFromAtomPodcast: function (source, podcast, callback, exception) {
+    createPlaylistFromAtomPodcast: function (source, podcast, metadata, callback, exception) {
         if (!podcast.entry) {
             throw exception('No tracks in Atom Podcast response', podcast);
         }
@@ -253,6 +252,8 @@ IMPORTERS = {
         })[0];
         var link = linkObject ? linkObject.href : '';
         var playlist = new MODELS.Playlist({
+            type: metadata.type,
+            subscription: metadata.subscription,
             title: IMPORTERS.getStringItem(podcast.title),
             subtitle: subtitle,
             description: description,
@@ -280,9 +281,7 @@ IMPORTERS = {
             }
             playlist.add_track(new MODELS.Track(trackDoc));
         });
-        // Save
-        playlist.save();
-        // Call the IMPORTERS.createPlaylistFromPodcast callback
+        // Call the callback
         if (callback) {
             callback(playlist);
         }

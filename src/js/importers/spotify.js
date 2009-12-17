@@ -120,7 +120,7 @@ Spotify.album = function (url, callback, exceptionHandler) {
         extras: 'trackdetail'
     });
     var exception = new Spotify.AlbumException(url);
-    IMPORTERS.getJsonFomXml(albumLookupUrl, function (json) {
+    IMPORTERS.getJsonFomXml(albumLookupUrl, function (json, requestUrl, requestParams) {
         if (!json.query.results.album) {
             throw exception('No album', json);
         }
@@ -154,8 +154,6 @@ Spotify.album = function (url, callback, exceptionHandler) {
                 Spotify.addTrack(playlist, trackData);
             }
         });
-        // Save
-        playlist.save();
         // Call the Spotify.album callback
         if (callback) {
             callback(playlist);
@@ -179,7 +177,7 @@ Spotify.track = function (url, callback, exceptionHandler) {
         uri: url
     });
     var exception = new Spotify.TrackException(url);
-    IMPORTERS.getJsonFomXml(trackLookupUrl, function (json) {
+    IMPORTERS.getJsonFomXml(trackLookupUrl, function (json, requestUrl, requestParams) {
         if (!json.query || !json.query.results || !json.query.results.track) {
             throw exception('No track', json);
         }
@@ -195,8 +193,6 @@ Spotify.track = function (url, callback, exceptionHandler) {
         });
         trackData.href = url;
         Spotify.addTrack(playlist, trackData);
-        // Save
-        playlist.save();
         // Call the Spotify.track callback
         if (callback) {
             callback(playlist);
