@@ -315,6 +315,8 @@ Playlist.prototype = {
         return doc_ref;
     },
     get_doc: function () {
+        // Load tracks
+        this.load();
         var doc = $.extend(this.get_doc_ref(), {
             date: this.date.getTime(),
             published: this.published,
@@ -334,6 +336,44 @@ Playlist.prototype = {
             })
         });
         return doc;
+    },
+    /**
+     * Coarse comparison of data with another playlist
+     * Returns an object containing differing fields
+    **/
+    diff: function (playlist) {
+        // Get the data
+        var thisDoc = this.get_doc();
+        var playlistDoc = playlist.get_doc();
+        // Store anything that differs in an object
+        var diff = {};
+        var field, i, arrayLen;
+        for (field in thisDoc) {
+            // Only care about single level arrays, if anything differs add the whole array
+            if ($.isArray(thisDoc[field])) {
+                arrayLen = thisDoc[field].length;
+                if (arrayLen !== playlistDoc[field].length) {
+                    // Lengths differ
+                    diff[field] = playlistDoc[field];
+                } else {
+                    // Check if any of the elements differ
+                    for (i = 0; i < arrayLen; i++) {
+                        if (JSON.stringify(thisDoc[field][i]) !== JSON.stringify(playlistDoc[field][i])) {
+                            diff[field] = playlistDoc[field];
+                            break;
+                        }
+                    }
+                }
+            } else if (JSON.stringify(thisDoc[field]) !== JSON.stringify(playlistDoc[field])) {
+                diff[field] = playlistDoc[field];
+            }
+        }
+        // Certain keys will always differ
+        delete diff._id;
+        delete diff._rev;
+        delete diff.date;
+        
+        return diff;
     }
 };
 /**

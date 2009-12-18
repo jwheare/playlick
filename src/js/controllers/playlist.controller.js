@@ -488,14 +488,25 @@ Playlist.prototype = {
             return;
         }
         var sub = playlist.subscription;
+        // Make a copy of the args so we don't modify the original
+        var args = sub.arguments.slice();
         // Add callback and exception handler to the arguments
-        sub.arguments.push(function callback (newPlaylist) {
+        args.push(function callback (newPlaylist) {
             // compare with saved playlist and update/warn for conflicts?
+            var diffs = 0;
+            for (var field in playlist.diff(newPlaylist)) {
+                diffs++;
+                console.info(playlist[field], newPlaylist[field]);
+            }
+            if (!diffs) {
+                console.info('no updates');
+            }
         });
-        sub.arguments.push(function exceptionHandler (exception) {
-            // show a warning icon and message
+        args.push(function exceptionHandler (exception) {
+            // show a warning icon and message?
+            exception.diagnose();
         });
-        IMPORTERS[sub.namespace][sub.method].apply(this, sub.arguments);
+        IMPORTERS[sub.namespace][sub.method].apply(this, args);
     },
     
     /* UNLOAD */
