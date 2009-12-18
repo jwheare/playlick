@@ -12,6 +12,7 @@ Exception.prototype = {
      * Log diagnostics to the console
     **/
     diagnose: function () {
+        console.warn(this.toString());
         if (this.diagnostics) {
             if (typeof this.diagnostics == 'string') {
                 console.log(this.diagnostics);

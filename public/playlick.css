@@ -705,6 +705,11 @@ ul#lastfm_playlists img {
     background: #c0e95b;
 }
 
+.videoShim {
+    margin: 0 auto;
+    background: #000;
+}
+
 .sources {
     display: none;
     font-size: 12px;

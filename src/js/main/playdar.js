@@ -389,19 +389,20 @@ var PLAYDAR = {
                     .width(width)
                     .height(height)
                     .show();
-                PLAYDAR.positionSM2Container(videoShim);
+                var position = videoShim.offset();
+                videoShim.width('100%');
+                PLAYDAR.positionSM2Container(position, width, height);
             }
         }
     },
-    positionSM2Container: function (videoShim) {
+    positionSM2Container: function (position, width, height) {
         if (PLAYDAR.sm2Container.css('visibility') == 'hidden') {
-            var position = videoShim.offset();
             var contentOffset = $('#content').offset();
             PLAYDAR.sm2Container
-                .width(videoShim.width())
-                .height(videoShim.height())
+                .width(width)
+                .height(height)
                 .css({
-                    top: position.top - contentOffset.top,
+                    top: position.top - contentOffset.top - 1,
                     left: position.left - contentOffset.left
                 });
             PLAYDAR.showSM2Container();
