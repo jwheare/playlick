@@ -366,7 +366,8 @@ Playlist.prototype = {
     },
     loadCopyright: function () {
         var escapedCopyright = $('<div>').html(this.current.copyright).text();
-        this.copyrightElem.html(UTIL.autoLink(escapedCopyright) || '');
+        var copyright = UTIL.autoLink(escapedCopyright);
+        this.copyrightElem.html(copyright ? '© ' + copyright : '');
     },
     loadSource: function () {
         if (this.current.source) {
