@@ -134,7 +134,7 @@ Playlist.prototype = {
                 this.albumsSidebarTitleElem.show();
                 this.albumsSidebarList.append(albumElements);
             }
-            if (typeof playlists !== 'undefined') {
+            if (playlists === undefined) {
                 this.fetchAllDone = true;
             }
         }
@@ -232,6 +232,9 @@ Playlist.prototype = {
         this.headerElem.show();
     },
     buildEditElem: function () {
+        if (!this.current.isEditable()) {
+            return false;
+        }
         var that = this;
         var editButton = $('<a href="#">')
             .append($('<img>')
@@ -309,6 +312,9 @@ Playlist.prototype = {
         return field;
     },
     buildEditForm: function () {
+        if (!this.current.isEditable()) {
+            return false;
+        }
         var that = this;
         this.editForm = $('<form id="playlistEditForm">').hide().submit(function (e) {
             e.preventDefault();
@@ -396,6 +402,12 @@ Playlist.prototype = {
                     PLAYDAR.updateLoadProgress.call(nowPlayingSound);
                 }
             });
+            // Enable/disable sortable
+            if (this.current.isEditable()) {
+                this.trackListElem.sortable('enable');
+            } else {
+                this.trackListElem.sortable('disable');
+            }
             // Resolve tracks with Playdar
             PLAYDAR.resolve_current_playlist();
             // Show SM2 if the current playing track is in this playlist

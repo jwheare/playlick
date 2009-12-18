@@ -20,7 +20,7 @@ function Track (doc) {
 };
 Track.prototype = {
     get_duration_string: function () {
-        if (typeof this.duration != 'undefined') {
+        if (this.duration) {
             return Playdar.Util.mmss(this.duration);
         }
         return '';

@@ -33,27 +33,37 @@
         return wrapper.html();
     };
     function playlistToHtml () {
+        // Wrap in a div so we can return its innerHTML as a string
+        var wrapper = $('<div>');
+        // Playing indicator
         var play_indicator = $('<a href="#" class="playlist_playing" title="Playing">');
+        wrapper.append(play_indicator);
+        // Delete button
         var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
-        var edit_link   = $('<a href="#" class="edit_playlist">').text(STRINGS.edit_playlist_text);
-        var name        = $('<a href="#" class="playlist">')
+        wrapper.append(delete_link);
+        // Edit button
+        if (this.isEditable()) {
+            var edit_link   = $('<a href="#" class="edit_playlist">').text(STRINGS.edit_playlist_text);
+            wrapper.append(edit_link);
+        }
+        // Title
+        var title = $('<a href="#" class="playlist">')
             .attr('title', this.toString())
             .append($('<span>').text(UTIL.truncateString(this.toString())));
+        // Album art
         if (this.isAlbum()) {
             var albumArt = IMPORTERS.LastFm.getAlbumArt(this.artist, this.album);
-            name.prepend($('<img width="24" height="24" class="art">').attr('src', albumArt));
+            title.prepend($('<img width="24" height="24" class="art">').attr('src', albumArt));
         }
-        var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
-            .append('<input type="text" name="name" class="playlist_name">')
-            .append('<input type="submit" value="save">');
-        // Wrap in a div so we can return its innerHTML as a string
-        return $('<div>')
-            .append(play_indicator)
-            .append(delete_link)
-            .append(edit_link)
-            .append(name)
-            .append(edit_form)
-            .html();
+        wrapper.append(title);
+        // Edit form
+        if (this.isEditable()) {
+            var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
+                .append('<input type="text" name="name" class="playlist_name">')
+                .append('<input type="submit" value="save">');
+            wrapper.append(edit_form);
+        }
+        return wrapper.html();
     };
     
     /* Apply to Models */

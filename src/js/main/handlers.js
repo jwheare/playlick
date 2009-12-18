@@ -7,6 +7,7 @@ CONTROLLERS.Playlist.trackListElem.sortable({
     opacity: 0.5,
     delay: 100,
     placeholder: 'placeholder',
+    forcePlaceholderSize: true,
     update: function (e, ui) {
         var tracks = $.map($('#playlist li'), function (playlist_item, i) {
             return $(playlist_item).data('playlist_track');

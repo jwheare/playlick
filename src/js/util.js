@@ -9,7 +9,9 @@ var UTIL = {
     },
     truncateString: function (name, length, truncation) {
         length = length || 30;
-        truncation = (typeof truncation == 'undefined') ? '…' : truncation;
+        if (truncation === undefined) {
+            truncation = '…';
+        }
         if (name.length > length) {
             return name.slice(0, length - truncation.length) + truncation;
         }

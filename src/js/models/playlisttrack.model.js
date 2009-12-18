@@ -7,7 +7,6 @@ function PlaylistTrack (playlist, track, options) {
     this.id = MODELS.next_playlist_track_id++;
     this.playlist = playlist;
     this.track = track;
-    this.set_track_duration(track.duration);
     
     this.options = options || {};
     

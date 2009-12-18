@@ -27,7 +27,7 @@ function Playlist (options) {
         }
     }
     this.date = this.options.date ? new Date(this.options.date) : new Date();
-    this.setOption('type');
+    this.setOption('type', 'playlist');
     this.setOption('artist');
     this.setOption('album');
     this.setOption('title');
@@ -46,8 +46,11 @@ function Playlist (options) {
 // Override this
 Playlist.DefaultOptions = {};
 Playlist.prototype = {
-    setOption: function (optionName) {
-        this[optionName] = this.options[optionName] || '';
+    setOption: function (optionName, defaultValue) {
+        if (defaultValue === undefined) {
+            defaultValue = '';
+        }
+        this[optionName] = this.options[optionName] || defaultValue;
     },
     addOptions: function (options) {
         $.extend(this.options, options);
@@ -81,6 +84,9 @@ Playlist.prototype = {
     },
     isSubscription: function () {
         return this.type == 'subscription' && this.subscription;
+    },
+    isEditable: function () {
+        return !this.isAlbum() && !this.isSubscription();
     },
     albumToString: function () {
         return this.artist + ' - ' + this.album;

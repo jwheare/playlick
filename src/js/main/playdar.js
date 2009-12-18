@@ -507,8 +507,8 @@ var PLAYDAR = {
             var loading = track_item.find('.loading');
             var loaded = this.bytesLoaded/this.bytesTotal * 100;
             loading.width(loaded + "%");
+            PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, loaded < 100);
         }
-        PLAYDAR.updateStreamDuration(this.sID, this.durationEstimate, loaded < 100);
     },
     updateStreamDuration: function (sid, duration, estimate) {
         var track_item = $('#' + sid).data('track_item');
