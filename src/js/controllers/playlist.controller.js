@@ -484,17 +484,24 @@ Playlist.prototype = {
         // Add callback and exception handler to the arguments
         args.push(function callback (newPlaylist) {
             // compare with saved playlist and update/warn for conflicts?
-            var diffs = 0;
-            for (var field in playlist.diff(newPlaylist)) {
-                diffs++;
-                console.info(playlist[field], newPlaylist[field]);
+            var diff = playlist.diffTracks(newPlaylist);
+            var added = [];
+            for (var field in diff) {
+                if (diff[field].change === true) {
+                    added.push(diff[field].track);
+                }
             }
-            if (!diffs) {
-                console.info('no updates');
+            if (added.length) {
+                console.log(playlist.toString(), playlist.isIncrementalSubscription());
+                UTIL.sortByMethod(added, 'get_position');
+                $.each(added, function (i, playlist_track) {
+                    console.info(playlist_track.toString());
+                });
             }
         });
         args.push(function exceptionHandler (exception) {
             // show a warning icon and message?
+            console.warn(exception);
             exception.diagnose();
         });
         IMPORTERS[sub.namespace][sub.method].apply(this, args);

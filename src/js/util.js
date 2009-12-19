@@ -53,5 +53,25 @@ var UTIL = {
             var text = match.replace(/^http:\/\//, '').replace(/\/$/, '');
             return '<a href="' + url + '">' + text + '</a>';
         });
+    },
+    
+    sortBy: function (list, property, callable, descending) {
+        list.sort(function (a, b) {
+            var aSort = callable ? a[property]() : a[property];
+            var bSort = callable ? b[property]() : b[property];
+            if (aSort > bSort) {
+                return descending ? -1 : 1;
+            }
+            if (aSort < bSort) {
+                return descending ? 1 : -1;
+            }
+            return 0;
+        });
+    },
+    sortByProperty: function (list, property, descending) {
+        UTIL.sortBy(list, property, false, descending);
+    },
+    sortByMethod: function (list, method, descending) {
+        UTIL.sortBy(list, method, true, descending);
     }
 };

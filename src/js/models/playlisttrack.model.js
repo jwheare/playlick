@@ -53,9 +53,12 @@ PlaylistTrack.prototype = {
     },
     get_doc: function () {
         var doc = {
-            position: this.position,
+            position: this.get_position(),
             track: this.track.get_doc()
         };
         return doc;
+    },
+    toString: function () {
+        return this.get_position() + ': ' + this.track.toString();
     }
 };

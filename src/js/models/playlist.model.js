@@ -85,6 +85,9 @@ Playlist.prototype = {
     isSubscription: function () {
         return this.type == 'subscription' && this.subscription;
     },
+    isIncrementalSubscription: function () {
+        return this.isSubscription() && this.subscription.incremental === true;
+    },
     isEditable: function () {
         return !this.isAlbum() && !this.isSubscription();
     },
@@ -104,24 +107,35 @@ Playlist.prototype = {
      * Fetch tracks from Couch
     **/
     fetchTracks: function () {
-        try {
-            var response = MODELS.couch.view("playlist/all", {
-                "key": this._id
-            });
-            MODELS.couch_up_handler('fetchTracks', response);
-            var row = response.rows[0];
-            var value = row.value;
-            // Load tracks
-            var playlist = this;
-            var elements = $.map(value.tracks, function (track_data, i) {
-                var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
-                // Build DOM element
-                return playlist_track.element.get();
-            });
-            return elements;
-        } catch (result) {
-            MODELS.couch_down_handler('fetchTracks', result);
+        if (!this.tracks.length) {
+            try {
+                var response = MODELS.couch.view("playlist/all", {
+                    "key": this._id
+                });
+                MODELS.couch_up_handler('fetchTracks', response);
+                var row = response.rows[0];
+                var value = row.value;
+                // Load tracks
+                var playlist = this;
+                var elements = $.map(value.tracks, function (track_data, i) {
+                    var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
+                    // Build DOM element
+                    return playlist_track.element.get();
+                });
+                return elements;
+            } catch (result) {
+                MODELS.couch_down_handler('fetchTracks', result);
+            }
         }
+    },
+    getTrackHash: function () {
+        this.fetchTracks();
+        var hash = {};
+        var track, key;
+        $.each(this.tracks, function (i, playlist_track) {
+            hash[playlist_track.track.getDiffKey()] = playlist_track;
+        });
+        return hash;
     },
     /**
      * Load tracks to the DOM, fetching from Couch if needed
@@ -339,42 +353,47 @@ Playlist.prototype = {
         return doc;
     },
     /**
-     * Coarse comparison of data with another playlist
-     * Returns an object containing differing fields
+     * Coarse comparison of track data with another playlist
+     * Returns an object containing differing tracks
     **/
-    diff: function (playlist) {
-        // Get the data
-        var thisDoc = this.get_doc();
-        var playlistDoc = playlist.get_doc();
-        // Store anything that differs in an object
-        var diff = {};
-        var field, i, arrayLen;
-        for (field in thisDoc) {
-            // Only care about single level arrays, if anything differs add the whole array
-            if ($.isArray(thisDoc[field])) {
-                arrayLen = thisDoc[field].length;
-                if (arrayLen !== playlistDoc[field].length) {
-                    // Lengths differ
-                    diff[field] = playlistDoc[field];
-                } else {
-                    // Check if any of the elements differ
-                    for (i = 0; i < arrayLen; i++) {
-                        if (JSON.stringify(thisDoc[field][i]) !== JSON.stringify(playlistDoc[field][i])) {
-                            diff[field] = playlistDoc[field];
-                            break;
-                        }
-                    }
+    diffTracks: function (playlist) {
+        var trackDiffs = {};
+        var anyChanges = false;
+        var thisTracks = this.getTrackHash();
+        var playlistTracks = playlist.getTrackHash();
+        var trackKey;
+        for (trackKey in thisTracks) {
+            var change;
+            if (!playlistTracks[trackKey]) {
+                // Added
+                change = false;
+            } else {
+                // Moved
+                change = thisTracks[trackKey].get_position() - playlistTracks[trackKey].get_position();
+                // Don't include non changers
+                if (change === 0) {
+                    continue;
                 }
-            } else if (JSON.stringify(thisDoc[field]) !== JSON.stringify(playlistDoc[field])) {
-                diff[field] = playlistDoc[field];
+            }
+            anyChanges = true;
+            trackDiffs[trackKey] = {
+                change: change,
+                track: thisTracks[trackKey].get_doc()
+            };
+        }
+        for (trackKey in playlistTracks) {
+            if (!thisTracks[trackKey]) {
+                // Removed
+                anyChanges = true;
+                trackDiffs[trackKey] = {
+                    change: true,
+                    track: playlistTracks[trackKey]
+                };
             }
         }
-        // Certain keys will always differ
-        delete diff._id;
-        delete diff._rev;
-        delete diff.date;
-        
-        return diff;
+        if (anyChanges) {
+            return trackDiffs;
+        }
     }
 };
 /**

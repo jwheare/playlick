@@ -99,7 +99,8 @@ LastFm.getUserPlaylist = function (data, callback, exceptionHandler) {
         subscription: {
             namespace: 'LastFm',
             method: 'getUserPlaylist',
-            arguments: [data]
+            arguments: [data],
+            incremental: false
         }
     };
     var image = $.grep(data.image, function (value, i) {
@@ -175,7 +176,8 @@ LastFm.lovedTracks = function (user, callback, exceptionHandler) {
             subscription: {
                 namespace: 'LastFm',
                 method: 'lovedTracks',
-                arguments: [user]
+                arguments: [user],
+                incremental: false
             }
         });
         // Load tracks

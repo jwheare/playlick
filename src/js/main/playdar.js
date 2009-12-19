@@ -55,15 +55,7 @@ var PLAYDAR = {
         var resultsTable = $('<table cellspacing="0"></table>');
         var foundPerfect = false;
         
-        response.results.sort(function (a, b) {
-            if (a.score > b.score) {
-                return -1;
-            }
-            if (a.score < b.score) {
-                return 1;
-            }
-            return 0;
-        });
+        UTIL.sortByProperty(response.results, 'score', true);
         $.each(response.results, function (i, result) {
             // Register sound
             Playdar.player.register_stream(result, {

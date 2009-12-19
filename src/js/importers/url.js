@@ -67,7 +67,8 @@ Url.url = function (source, callback, exceptionHandler) {
             subscription: {
                 namespace: 'Url',
                 method: 'url',
-                arguments: [source]
+                arguments: [source],
+                incremental: true
             }
         };
         if (jspf) {

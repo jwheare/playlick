@@ -53,9 +53,14 @@ Track.prototype = {
             duration: this.duration,
             size: this.size,
             mimetype: this.mimetype,
-            bitrate: this.bitrate,
-            type: this.type
+            bitrate: this.bitrate
         };
         return doc;
+    },
+    getDiffKey: function () {
+        return this.url || (this.artist + this.album + this.name);
+    },
+    diff: function (track) {
+        return this.getDiffKey() != track.getDiffKey();
     }
 };
