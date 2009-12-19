@@ -78,10 +78,6 @@ Playlist.prototype = {
     create: function () {
         // Cancel Playdar
         PLAYDAR.cancel_playdar_resolve();
-        // Unload current playlist
-        if (this.current) {
-            this.current.unload();
-        }
         // Set a new current playlist
         this.setCurrent();
         // Metadata
@@ -142,6 +138,10 @@ Playlist.prototype = {
     
     // Highlight the current playlist in the sidebar
     setCurrent: function (playlist) {
+        // Unload any current playlist
+        if (this.current && this.current != playlist) {
+            this.current.unload();
+        }
         var playlistItem;
         if (playlist) {
             this.current = playlist;
@@ -182,10 +182,6 @@ Playlist.prototype = {
         }
         // Cancel Playdar
         PLAYDAR.cancel_playdar_resolve();
-        // Unload the current playlist
-        if (this.current) {
-            this.current.unload();
-        }
         // Update the current playlist object
         this.setCurrent(playlist);
         // Hide add track details
@@ -197,7 +193,7 @@ Playlist.prototype = {
         this.loadTracks();
         // Show footer and add track form again
         this.showFooter();
-        if (!playlist.isAlbum()) {
+        if (playlist.isEditable()) {
             this.addTrackForm.show();
         }
     },
@@ -232,9 +228,6 @@ Playlist.prototype = {
         this.headerElem.show();
     },
     buildEditElem: function () {
-        if (!this.current.isEditable()) {
-            return false;
-        }
         var that = this;
         var editButton = $('<a href="#">')
             .append($('<img>')
@@ -312,9 +305,6 @@ Playlist.prototype = {
         return field;
     },
     buildEditForm: function () {
-        if (!this.current.isEditable()) {
-            return false;
-        }
         var that = this;
         this.editForm = $('<form id="playlistEditForm">').hide().submit(function (e) {
             e.preventDefault();

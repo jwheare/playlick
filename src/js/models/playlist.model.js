@@ -147,6 +147,7 @@ Playlist.prototype = {
         return elements;
     },
     unload: function () {
+        // Remove all tracks from the DOM
         $.each(this.tracks, function (i, playlist_track) {
             playlist_track.unload();
         });
@@ -316,7 +317,7 @@ Playlist.prototype = {
     },
     get_doc: function () {
         // Load tracks
-        this.load();
+        this.fetchTracks();
         var doc = $.extend(this.get_doc_ref(), {
             date: this.date.getTime(),
             published: this.published,

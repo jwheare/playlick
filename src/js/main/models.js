@@ -42,10 +42,8 @@
         var delete_link = $('<a href="#" class="delete_playlist" title="Delete playlist">').text('╳');
         wrapper.append(delete_link);
         // Edit button
-        if (this.isEditable()) {
-            var edit_link   = $('<a href="#" class="edit_playlist">').text(STRINGS.edit_playlist_text);
-            wrapper.append(edit_link);
-        }
+        var edit_link   = $('<a href="#" class="edit_playlist">').text(STRINGS.edit_playlist_text);
+        wrapper.append(edit_link);
         // Title
         var title = $('<a href="#" class="playlist">')
             .attr('title', this.toString())
@@ -57,12 +55,10 @@
         }
         wrapper.append(title);
         // Edit form
-        if (this.isEditable()) {
-            var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
-                .append('<input type="text" name="name" class="playlist_name">')
-                .append('<input type="submit" value="save">');
-            wrapper.append(edit_form);
-        }
+        var edit_form   = $('<form style="display: none;" class="edit_playlist_form">')
+            .append('<input type="text" name="name" class="playlist_name">')
+            .append('<input type="submit" value="save">');
+        wrapper.append(edit_form);
         return wrapper.html();
     };
     
