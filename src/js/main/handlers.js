@@ -26,7 +26,7 @@ CONTROLLERS.Playlist.trackListElem.click(function (e) {
         var tbody = target.closest('tbody.result');
         if (tbody.size()) {
             track_item.removeClass('open');
-            PLAYLICK.selectSource(playlist_track, tbody);
+            PLAYDAR.playSource(playlist_track, tbody);
         }
         
         // Remove track from playlist
@@ -47,11 +47,11 @@ CONTROLLERS.Playlist.trackListElem.click(function (e) {
             e.preventDefault();
             if (track_item.is('li.open')) {
                 track_item.removeClass('open');
-            } else if (track_item.is('li.perfectMatch') && playlist_track.track.playdar_sid) {
+            } else if (track_item.is('li.perfectMatch')) {
                 PLAYDAR.playTrack(playlist_track);
             } else if (track_item.is('li.match')) {
                 track_item.toggleClass('open');
-            } else if (playlist_track.track.playdar_qid) {
+            } else if (playlist_track.playdar_qid) {
                 PLAYDAR.recheck_track(playlist_track);
             } else {
                 PLAYDAR.resolve_track(playlist_track, true);

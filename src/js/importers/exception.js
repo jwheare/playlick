@@ -12,13 +12,17 @@ Exception.prototype = {
      * Log diagnostics to the console
     **/
     diagnose: function () {
+        if (!PLAYLICK.debug) {
+            return false;
+        }
         console.warn(this.toString());
-        if (this.diagnostics) {
-            if (typeof this.diagnostics == 'string') {
-                console.log(this.diagnostics);
-            } else {
-                console.dir(this.diagnostics);
-            }
+        if (!this.diagnostics) {
+            return;
+        }
+        if (typeof this.diagnostics == 'string') {
+            console.log(this.diagnostics);
+        } else {
+            console.dir(this.diagnostics);
         }
     }
 };

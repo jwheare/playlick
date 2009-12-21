@@ -110,6 +110,7 @@ Playlist.prototype = {
             var subscriptionElements = [];
             var that = this;
             var playlists = MODELS.Playlist.fetchAll(function callback (playlist) {
+                that.checkSubscription(playlist);
                 var element = playlist.element.get()[0];
                 if (playlist.isAlbum()) {
                     albumElements.push(element);
@@ -492,16 +493,26 @@ Playlist.prototype = {
                 }
             }
             if (added.length) {
-                console.log(playlist.toString(), playlist.isIncrementalSubscription());
-                UTIL.sortByMethod(added, 'get_position');
-                $.each(added, function (i, playlist_track) {
-                    console.info(playlist_track.toString());
-                });
+                // console.log(playlist.toString());
+                if (playlist.isIncrementalSubscription()) {
+                    // Prepend the new tracks
+                    UTIL.sortByMethod(added, 'get_position', true);
+                    $.each(added, function (i, playlist_track) {
+                        // console.info(playlist_track.toString());
+                        playlist.add_track(playlist_track.track, {
+                            unplayed: true
+                        }, true);
+                    });
+                    playlist.save();
+                } else {
+                    // TODO replace all tracks
+                }
+                // TODO message that shit
             }
         });
         args.push(function exceptionHandler (exception) {
             // show a warning icon and message?
-            console.warn(exception);
+            // console.log(playlist.toString());
             exception.diagnose();
         });
         IMPORTERS[sub.namespace][sub.method].apply(this, args);

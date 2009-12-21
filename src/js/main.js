@@ -62,62 +62,6 @@ var PLAYLICK = {
     },
     
     /**
-     * Playlist state
-    **/
-    
-    selectSource: function (playlist_track, tbody) {
-        // Check radio button
-        var radio = tbody.find('input[name=choice]');
-        radio.attr('checked', true);
-        // Highlight result
-        tbody.siblings().removeClass('choice');
-        tbody.addClass('choice');
-        // Update track with result data
-        var result = tbody.data('result');
-        PLAYLICK.update_track(playlist_track, result);
-        if (!Playdar.player.is_now_playing()) {
-            PLAYDAR.playTrack(playlist_track);
-        }
-        playlist_track.element.addClass('perfectMatch');
-    },
-    // Update a track's data and persist
-    update_track: function (playlist_track, result, batch) {
-        var track  = playlist_track.track;
-        // If the track name or artist changed, update it and persist
-        if (!UTIL.compareString(track.name, result.track)
-         || !UTIL.compareString(track.artist, result.artist)
-         || !UTIL.compareString(track.album, result.album)) {
-            track.name = result.track;
-            track.artist = result.artist;
-            track.album = result.album;
-            // Persist
-            if (batch) {
-                PLAYLICK.batch_save = true;
-            } else {
-                playlist_track.playlist.save();
-            }
-            // Update DOM
-            playlist_track.element.find('.fn')
-                .text(UTIL.truncateString(track.name))
-                .attr('title', track.name);
-            playlist_track.element.find('.contributor')
-                .text(UTIL.truncateString(track.artist))
-                .attr('title', track.artist);
-        }
-        // If the duration changed, update it
-        if (track.duration != result.duration) {
-            playlist_track.set_track_duration(result.duration);
-            playlist_track.element.find('.elapsed').text(track.get_duration_string());
-        }
-        // If the sid has changed, stop the stream if it's playing
-        if (track.playdar_sid && track.playdar_sid != result.sid) {
-            Playdar.player.stop_stream(track.playdar_sid);
-        }
-        track.playdar_sid = result.sid;
-        track.video = result.video;
-    },
-    
-    /**
      * Import
     **/
     importSetup: function (type) {

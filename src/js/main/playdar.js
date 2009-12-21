@@ -49,17 +49,34 @@ var PLAYDAR = {
     update_status: function (message) {
         $('#playdarStatus').html(message);
     },
+    // Load playdar resolution results
+    loadTrackResults: function (playlist_track, response) {
+        playlist_track.playdar_qid = response.qid;
+        playlist_track.playdar_response = response;
+        PLAYDAR.buildResultsTable(playlist_track, response);
+    },
     // Render playdar results table
-    buildResultsTable: function (response, listItem) {
+    buildResultsTable: function (playlist_track, response) {
+        var listItem = playlist_track.element;
+        listItem.removeClass('scanning');
+        if (!response.results.length) {
+            listItem.addClass('noMatch');
+            return false;
+        }
+        listItem.addClass('match');
         var resultsForm = $('<form>');
         var resultsTable = $('<table cellspacing="0"></table>');
         var foundPerfect = false;
         
         UTIL.sortByProperty(response.results, 'score', true);
         $.each(response.results, function (i, result) {
+            // Check mimetype
+            var mimetype = result.mimetype || '';
+            var video = mimetype.match(/^video/);
             // Register sound
             Playdar.player.register_stream(result, {
                 chained: true,
+                video: video,
                 onload: PLAYDAR.onResultLoad,
                 onmetadata: PLAYDAR.onResultMetadata,
                 onplay: PLAYDAR.onResultStart,
@@ -71,18 +88,12 @@ var PLAYDAR = {
                 whileloading: PLAYDAR.updateLoadProgress
             });
             // Build result table item
-            var tbodyClass = 'result';
             var scoreCell = $('<td class="score">');
             var choiceRadio = $('<input type="radio" name="choice">').val(result.sid);
-            if (result.score > 0.99) {
+            var perfectMatch = result.score > 0.99;
+            if (perfectMatch) {
                 // Perfect scores get a star and a highlight
                 scoreCell.text('★').addClass('perfect');
-                if (!foundPerfect) {
-                    // The first perfect score is checked and its tbody is given a highlight
-                    tbodyClass += ' choice';
-                    choiceRadio.attr('checked', true);
-                }
-                foundPerfect = true;
             } else if (result.score > 0) {
                 scoreCell.text(result.score.toFixed(3));
             } else {
@@ -98,28 +109,12 @@ var PLAYDAR = {
             nameCell.append($('<span>').text(result.track));
             nameCell.append('<br>' + artistAlbum);
             var trackRow = $('<tr class="track">')
-                .append($('<td class="choice">').append(choiceRadio))
+                .append($('<td class="choice">')
+                    .append(choiceRadio))
                 .append(nameCell);
-            var duration = '';
-            if (result.duration) {
-                duration = Playdar.Util.mmss(result.duration);
-            }
-            var size = '';
-            if (result.size) {
-                size = (result.size/1000000).toFixed(1) + 'MB';
-            }
-            var mimetype = '';
-            if (result.mimetype) {
-                mimetype = result.mimetype;
-                if (mimetype.match(/^video/)) {
-                    result.video = true;
-                    tbodyClass += ' video';
-                }
-            }
-            var bitrate = '';
-            if (result.bitrate) {
-                bitrate = result.bitrate + ' kbps';
-            }
+            var duration = result.duration ? Playdar.Util.mmss(result.duration) : '';
+            var size = result.size ? ((result.size/1000000).toFixed(1) + 'MB') : '';
+            var bitrate = result.bitrate ? (result.bitrate + ' kbps') : '';
             var source = result.source || '';
             var sourceCell = $('<td class="source">');
             if (result.url) {
@@ -141,40 +136,30 @@ var PLAYDAR = {
                 .append($('<td class="bitrate">').text(bitrate));
             var resultTbody = $('<tbody>')
                 .attr('id', 's_' + result.sid)
-                .addClass(tbodyClass)
                 .append(trackRow)
                 .append(infoRow)
                 .data('result', result)
-                .data('track_item', listItem);
-            resultsTable.append(resultTbody);
-        });
-        resultsForm.append(resultsTable);
-        return resultsForm;
-    },
-    // Load playdar resolution results
-    loadTrackResults: function (playlist_track, response) {
-        var listItem = playlist_track.element;
-        playlist_track.track.playdar_qid = response.qid;
-        listItem.removeClass('scanning');
-        if (response.results.length) {
-            playlist_track.track.playdar_response = response;
-            listItem.addClass('match');
-            var resultsTable = PLAYDAR.buildResultsTable(response, listItem);
-            var result = response.results[0];
-            if (result.score > 0.99) {
-                PLAYLICK.update_track(playlist_track, result, true);
-            }
-            var sources = listItem.children('.sources');
-            sources.html(resultsTable);
-            // Highlight the list item
-            if (playlist_track.track.playdar_sid) {
-                listItem.addClass('perfectMatch');
-            }
-            if (playlist_track.track.video) {
+                .data('track_item', listItem)
+                .addClass('result');
+            // Add video classes to the tbody and main track list item
+            if (video) {
+                resultTbody.addClass('video');
                 listItem.addClass('video');
             }
-        } else {
-            listItem.addClass('noMatch');
+            resultsTable.append(resultTbody);
+            // We need to save the perfect result till after it's been added
+            // to the DOM so we can call PLAYDAR.selectSource on it
+            if (perfectMatch && !foundPerfect) {
+                foundPerfect = resultTbody;
+            }
+        });
+        // Add to the DOM
+        resultsForm.append(resultsTable);
+        var sources = listItem.children('.sources');
+        sources.html(resultsForm);
+        // Select perfect result
+        if (foundPerfect) {
+            PLAYDAR.selectSource(playlist_track, foundPerfect);
         }
     },
     buildUrlResponse: function (playlist_track) {
@@ -207,16 +192,16 @@ var PLAYDAR = {
     },
     recheck_track: function (playlist_track) {
         if (Playdar.client && Playdar.client.isAvailable() && Playdar.client.is_authed()) {
-            if (playlist_track.track.playdar_qid) {
+            if (playlist_track.playdar_qid) {
                 playlist_track.element.addClass('scanning');
-                Playdar.client.recheck_results(playlist_track.track.playdar_qid);
+                Playdar.client.recheck_results(playlist_track.playdar_qid);
             }
         }
     },
     resolve_track: function (playlist_track, force) {
         var track = playlist_track.track;
-        if (!force && track.playdar_response) {
-            PLAYDAR.loadTrackResults(playlist_track, track.playdar_response);
+        if (!force && playlist_track.playdar_response) {
+            PLAYDAR.loadTrackResults(playlist_track, playlist_track.playdar_response);
         } else if (track.url) {
             PLAYDAR.loadTrackResults(playlist_track, PLAYDAR.buildUrlResponse(playlist_track));
         } else {
@@ -494,7 +479,7 @@ var PLAYDAR = {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item) {
             var playlist_track = track_item.data('playlist_track');
-            if (!playlist_track.track.video) {
+            if (!playlist_track.playdar_result.video) {
                 track_item.removeClass('loading');
             }
             var loading = track_item.find('.loading');
@@ -513,18 +498,14 @@ var PLAYDAR = {
                 progress.removeClass('estimate');
             }
             var playlist_track = track_item.data('playlist_track');
-            // Update the track duration
-            playlist_track.set_track_duration(Math.round(duration/1000));
         }
         return track_item;
     },
     playTrack: function (playlist_track) {
-        if (playlist_track && playlist_track.track.playdar_sid) {
-            var listItem = playlist_track.element;
-            listItem.effect('highlight', {
+        if (playlist_track && playlist_track.play()) {
+            playlist_track.element.effect('highlight', {
                 color: '#6ea31e'
             }, 100);
-            Playdar.player.play_stream(playlist_track.track.playdar_sid);
         }
     },
     playNextTrack: function (track_item) {
@@ -542,12 +523,40 @@ var PLAYDAR = {
             return true;
         }
         return false;
+    },    
+    selectSource: function (playlist_track, tbody) {
+        // Check radio button
+        var radio = tbody.find('input[name=choice]');
+        radio.attr('checked', true);
+        // Highlight result
+        tbody.siblings().removeClass('choice');
+        tbody.addClass('choice');
+        // Highlight track
+        playlist_track.element.addClass('perfectMatch');
+        // Update track with result data
+        var result = tbody.data('result');
+        // Update the duration, but don't persist
+        playlist_track.set_track_duration(result.duration);
+        playlist_track.element.find('.elapsed').text(playlist_track.track.get_duration_string());
+        // If the result changed, stop the stream if it's playing
+        if (playlist_track.playdar_result && (playlist_track.playdar_result.sid != result.sid)) {
+            playlist_track.stop();
+        }
+        // Set result
+        // Update the result
+        playlist_track.playdar_result = result;
+    },
+    playSource: function (playlist_track, trackSource) {
+        PLAYDAR.selectSource(playlist_track, trackSource);
+        if (!Playdar.player.is_now_playing()) {
+            PLAYDAR.playTrack(playlist_track);
+        }
     },
     playNextSource: function (trackSource) {
         var track_item = trackSource.data('track_item');
         var nextSource = trackSource.nextAll('tbody:not(.error):first');
         if (nextSource.size()) {
-            PLAYLICK.selectSource(track_item.data('playlist_track'), nextSource);
+            PLAYDAR.playSource(track_item.data('playlist_track'), nextSource);
             return true;
         }
         return false;
@@ -556,7 +565,7 @@ var PLAYDAR = {
         var track_item = trackSource.data('track_item');
         var previousSource = trackSource.prevAll('tbody:not(.error):first');
         if (previousSource.size()) {
-            PLAYLICK.selectSource(track_item.data('playlist_track'), previousSource);
+            PLAYDAR.playSource(track_item.data('playlist_track'), previousSource);
             return true;
         }
         return false;

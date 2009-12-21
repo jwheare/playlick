@@ -1,8 +1,6 @@
 IMPORTERS = {
     YQL_URL: "http://query.yahooapis.com/v1/public/yql?callback=?",
-    yqlSelectXML: function (url) {
-        return 'select * from xml where url="' + url + '"';
-    },
+    YQL_SELECT_XML: 'select * from xml where url=@url',
     /**
      * getJson(url, params, callback, exception[, exceptionHandler])
      * - url (String): URL to a JSON document
@@ -56,7 +54,8 @@ IMPORTERS = {
     **/
     getJsonFomXml: function (url, callback, exception, exceptionHandler) {
         IMPORTERS.getJson(IMPORTERS.YQL_URL, {
-            q: IMPORTERS.yqlSelectXML(url),
+            url: url,
+            q: IMPORTERS.YQL_SELECT_XML,
             format: 'json'
         }, function (json, requestUrl, requestParams) {
             if (!json.query || !json.query.results) {
@@ -71,13 +70,14 @@ IMPORTERS = {
             delay: 200,
             dataType: "jsonp",
             extraParams: {
-                q: function () {
+                url: function () {
                     var queryUrl = url;
                     if (params) {
                         queryUrl += '?' + Playdar.Util.toQueryString(params());
                     }
-                    return IMPORTERS.yqlSelectXML(queryUrl);
+                    return queryUrl;
                 },
+                q: IMPORTERS.YQL_SELECT_XML,
                 format: 'json'
             },
             cacheLength: 1,
@@ -289,7 +289,6 @@ IMPORTERS = {
     },
     defaultExceptionHandler: function (exception) {
         if (PLAYLICK.debug) {
-            console.warn(exception);
             exception.diagnose();
         }
     },

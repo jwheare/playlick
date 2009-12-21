@@ -13,10 +13,6 @@ function Track (doc) {
     this.size = doc.size;
     this.mimetype = doc.mimetype;
     this.bitrate = doc.bitrate;
-    
-    this.playdar_qid = null;
-    this.playdar_sid = null;
-    this.playdar_response = null;
 };
 Track.prototype = {
     get_duration_string: function () {
@@ -32,6 +28,7 @@ Track.prototype = {
         }
         return this.name + ' - ' + this.artist + duration;
     },
+    // TODO this is view layer stuff
     toHTML: function () {
         var duration = this.get_duration_string();
         if (duration) {

@@ -5,8 +5,8 @@
 function Playlist (options) {
     this.saved = false;
     this.persisted = false;
-    this.published = false;
     this.tracks = [];
+    this.unplayed = false;
     
     this.options = options || {};
     
@@ -41,7 +41,8 @@ function Playlist (options) {
     this.addOptions(Playlist.DefaultOptions);
     
     // Create the DOM element
-    this.set_element(this.options.dom_element);
+    // TODO this is view layer stuff
+    this.set_element();
 };
 // Override this
 Playlist.DefaultOptions = {};
@@ -58,9 +59,13 @@ Playlist.prototype = {
     /**
      * State management
     **/
-    add_track: function (track, options) {
+    add_track: function (track, options, prepend) {
         var playlist_track = new PlaylistTrack(this, track, options);
-        this.tracks.push(playlist_track);
+        if (prepend) {
+            this.tracks.unshift(playlist_track);
+        } else {
+            this.tracks.push(playlist_track);
+        }
         return playlist_track;
     },
     remove_track: function (playlist_track) {
@@ -117,6 +122,7 @@ Playlist.prototype = {
                 var value = row.value;
                 // Load tracks
                 var playlist = this;
+                // TODO this is view layer stuff
                 var elements = $.map(value.tracks, function (track_data, i) {
                     var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
                     // Build DOM element
@@ -139,6 +145,7 @@ Playlist.prototype = {
     },
     /**
      * Load tracks to the DOM, fetching from Couch if needed
+     * TODO this is view layer stuff
     **/
     load: function () {
         var elements;
@@ -153,6 +160,7 @@ Playlist.prototype = {
     },
     /**
      * Load and unload PlaylistTracks from the DOM
+     * TODO this is view layer stuffg
     **/
     loadDom: function () {
         var elements = $.map(this.tracks, function (playlist_track, i) {
@@ -162,6 +170,7 @@ Playlist.prototype = {
     },
     unload: function () {
         // Remove all tracks from the DOM
+        // TODO this is view layer stuff
         $.each(this.tracks, function (i, playlist_track) {
             playlist_track.unload();
         });
@@ -171,6 +180,7 @@ Playlist.prototype = {
     },
     /**
      * Build a DOMElement for the Playlist
+     * TODO this is view layer stuff
     **/
     set_element: function (element_name) {
         element_name = element_name || 'li';
@@ -178,11 +188,17 @@ Playlist.prototype = {
             .attr('id', this.get_dom_id())
             .data('playlist', this)
             .html(this.toHTML());
+        if (this.unplayed) {
+            this.element.addClass('unplayed');
+        }
+        return this.element;
     },
     get_dom_id: function () {
+        // TODO this is view layer stuff
         return "p_" + this.get_id();
     },
     toHTML: function () {
+        // TODO this is view layer stuff
         return this.toString();
     },
     /**
@@ -264,6 +280,7 @@ Playlist.prototype = {
     },
     onRemove: function () {
         // Remove from the DOM
+        // TODO this is view layer stuff
         this.element.remove();
         // onDelete Callback
         if (this.options.onDelete) {
@@ -287,20 +304,6 @@ Playlist.prototype = {
         if (!MODELS.couch_up && !this.persisted) {
             this.onRemove();
         }
-    },
-    publish: function () {
-        this.published = true;
-        // AUTOSAVE
-        this.save();
-    },
-    make_private: function () {
-        this.published = false;
-        // AUTOSAVE
-        this.save();
-    },
-    share: function (person) {
-        // TODO
-        // Fire off AJAX request to share Playlist with email address or user
     },
     /**
      * CouchDB Representation
@@ -332,9 +335,9 @@ Playlist.prototype = {
     get_doc: function () {
         // Load tracks
         this.fetchTracks();
+        var unplayed = false;
         var doc = $.extend(this.get_doc_ref(), {
             date: this.date.getTime(),
-            published: this.published,
             type: this.type,
             title: this.title,
             artist: this.artist,
@@ -347,9 +350,15 @@ Playlist.prototype = {
             source: this.source,
             subscription: this.subscription,
             tracks: $.map(this.tracks, function (playlist_track, i) {
+                if (playlist_track.unplayed) {
+                    unplayed = true;
+                }
                 return playlist_track.get_doc();
             })
         });
+        doc.unplayed = unplayed;
+        // TODO this is view layer stuff
+        this.element.toggleClass('unplayed', unplayed);
         return doc;
     },
     /**
@@ -394,6 +403,12 @@ Playlist.prototype = {
         if (anyChanges) {
             return trackDiffs;
         }
+    },
+    /**
+     * Playback
+    **/
+    hasUnplayed: function () {
+        return this.unplayed;
     }
 };
 /**

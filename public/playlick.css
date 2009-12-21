@@ -170,6 +170,9 @@ ul.playlists li a.playlist {
     text-decoration: none;
     background: #e8f9bb;
 }
+ul.playlists li.unplayed a.playlist {
+    background: #d2f380;
+}
 ul.playlists li a.create {
     background: #d2f380;
 }
@@ -623,6 +626,9 @@ ul#lastfm_playlists img {
 .trackList li.playing:hover,
 .trackList li.paused:hover {
     background-color: #a8d840;
+}
+.trackList li.unplayed {
+    background: #d2f380;
 }
 .trackList li.error {
     background: #FFAF59;
