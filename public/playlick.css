@@ -133,8 +133,13 @@ h1#title small {
     margin: 15px 0;
 }
 /* Playlists */
-h1#albumsTitle {
+h1#albumsTitle,
+h1#subscriptionsTitle,
+h1#synchedTitle {
     display: none;
+}
+#sidebar h1.progress {
+    background: url('track_scanning.gif') no-repeat 100% 50%;
 }
 p#loading_playlists {
     margin: 0;

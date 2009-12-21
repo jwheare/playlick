@@ -7,6 +7,8 @@ var PLAYDAR = {
             Playdar.client.go();
             // Check URL hash
             PLAYLICK.checkUrlHash();
+            // Load playlists
+            CONTROLLERS.Playlist.fetchAll();
         } else {
             PLAYDAR.update_status(STRINGS.loading_flash_error_text);
         }

@@ -9,8 +9,6 @@ var PLAYLICK = {
     init: function () {
         // Start a new playlist
         CONTROLLERS.Playlist.create();
-        // Load playlists
-        CONTROLLERS.Playlist.fetchAll();
         // Create appLauncher iframe
         PLAYLICK.createAppLauncherFrame();
     },

@@ -8,6 +8,8 @@ function Playlist () {
     this.albumsSidebarList = $('#albums');
     this.subscriptionsSidebarTitleElem = $('h1#subscriptionsTitle');
     this.subscriptionsSidebarList = $('#subscriptions');
+    this.synchedSidebarTitleElem = $('h1#synchedTitle');
+    this.synchedSidebarList = $('#synched');
     this.loadingPlaylistsElem = $('#loading_playlists');
     this.createTitleElem = $('#createPlaylist');
     this.headerElem = $('#playlistHeader');
@@ -91,6 +93,9 @@ Playlist.prototype = {
         if (playlist.isAlbum()) {
             this.albumsSidebarList.append(playlist.element);
             this.albumsSidebarTitleElem.show();
+        } else if (playlist.isSynched()) {
+            this.synchedSidebarList.append(playlist.element);
+            this.synchedSidebarTitleElem.show();
         } else if (playlist.isSubscription()) {
             this.subscriptionsSidebarList.append(playlist.element);
             this.subscriptionsSidebarTitleElem.show();
@@ -107,6 +112,7 @@ Playlist.prototype = {
         } else {
             var playlistElements = [];
             var albumElements = [];
+            var synchedElements = [];
             var subscriptionElements = [];
             var that = this;
             var playlists = MODELS.Playlist.fetchAll(function callback (playlist) {
@@ -114,6 +120,8 @@ Playlist.prototype = {
                 var element = playlist.element.get()[0];
                 if (playlist.isAlbum()) {
                     albumElements.push(element);
+                } else if (playlist.isSynched()) {
+                    synchedElements.push(element);
                 } else if (playlist.isSubscription()) {
                     subscriptionElements.push(element);
                 } else {
@@ -126,6 +134,10 @@ Playlist.prototype = {
             if (subscriptionElements.length) {
                 this.subscriptionsSidebarTitleElem.show();
                 this.subscriptionsSidebarList.append(subscriptionElements);
+            }
+            if (synchedElements.length) {
+                this.synchedSidebarTitleElem.show();
+                this.synchedSidebarList.append(synchedElements);
             }
             if (albumElements.length) {
                 this.albumsSidebarTitleElem.show();
@@ -474,6 +486,30 @@ Playlist.prototype = {
     },
     
     /* SUBSCRIPTIONS */
+    subscriptionQueue: 0,
+    synchedQueue: 0,
+    queueSync: function (playlist) {
+        if (playlist.isSynched()) {
+            this.synchedQueue++;
+            this.synchedSidebarTitleElem.addClass('progress');
+        } else {
+            this.subscriptionQueue++;
+            this.subscriptionsSidebarTitleElem.addClass('progress');
+        }
+    },
+    consumeSyncQueue: function (playlist) {
+        if (playlist.isSynched()) {
+            this.synchedQueue--;
+            if (!this.synchedQueue) {
+                this.synchedSidebarTitleElem.removeClass('progress');
+            }
+        } else {
+            this.subscriptionQueue--;
+            if (!this.subscriptionQueue) {
+                this.subscriptionsSidebarTitleElem.removeClass('progress');
+            }
+        }
+    },
     checkSubscription: function (playlist) {
         if (!playlist.isSubscription()) {
             // Not a subscription
@@ -483,6 +519,7 @@ Playlist.prototype = {
         // Make a copy of the args so we don't modify the original
         var args = sub.arguments.slice();
         // Add callback and exception handler to the arguments
+        var that = this;
         args.push(function callback (newPlaylist) {
             // compare with saved playlist and update/warn for conflicts?
             var diff = playlist.diffTracks(newPlaylist);
@@ -493,30 +530,35 @@ Playlist.prototype = {
                 }
             }
             if (added.length) {
-                // console.log(playlist.toString());
-                if (playlist.isIncrementalSubscription()) {
+                playlist.setLastSyncDate();
+                if (playlist.isSynched()) {
+                    playlist.reset_tracks(newPlaylist.tracks);
+                    playlist.reload();
+                } else {
                     // Prepend the new tracks
                     UTIL.sortByMethod(added, 'get_position', true);
                     $.each(added, function (i, playlist_track) {
-                        // console.info(playlist_track.toString());
                         playlist.add_track(playlist_track.track, {
                             unplayed: true
                         }, true);
                     });
                     playlist.save();
-                } else {
-                    // console.dir(newPlaylist.tracks);
-                    playlist.reset_tracks(newPlaylist.tracks);
-                    playlist.reload();
                 }
+                playlist.element.find('.playlist').effect('highlight', {
+                    color: '#6ea31e'
+                }, 100);
                 // TODO message that shit
             }
+            that.consumeSyncQueue(playlist);
         });
         args.push(function exceptionHandler (exception) {
             // show a warning icon and message?
-            // console.log(playlist.toString());
+            // console.warn(exception);
             exception.diagnose();
+            that.consumeSyncQueue(playlist);
         });
+        this.queueSync(playlist);
+        // console.log(playlist.toString(), playlist.lastSync ? playlist.lastSync.toLocaleString() : '');
         IMPORTERS[sub.namespace][sub.method].apply(this, args);
     },
     
@@ -544,6 +586,10 @@ Playlist.prototype = {
         if (playlist.isAlbum()) {
             if (!this.albumsSidebarList.find('li').size()) {
                 this.albumsSidebarTitleElem.hide();
+            }
+        } else if (playlist.isSynched()) {
+            if (!this.synchedSidebarList.find('li').size()) {
+                this.synchedSidebarTitleElem.hide();
             }
         } else if (playlist.isSubscription()) {
             if (!this.subscriptionsSidebarList.find('li').size()) {

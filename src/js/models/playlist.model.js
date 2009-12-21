@@ -6,7 +6,6 @@ function Playlist (options) {
     this.saved = false;
     this.persisted = false;
     this.tracks = [];
-    this.unplayed = false;
     
     this.options = options || {};
     
@@ -27,7 +26,9 @@ function Playlist (options) {
         }
     }
     this.date = this.options.date ? new Date(this.options.date) : new Date();
+    this.lastSync = this.options.lastSync ? new Date(this.options.lastSync) : '';
     this.setOption('type', 'playlist');
+    this.setOption('unplayed', false);
     this.setOption('artist');
     this.setOption('album');
     this.setOption('title');
@@ -90,8 +91,11 @@ Playlist.prototype = {
     isSubscription: function () {
         return this.type == 'subscription' && this.subscription;
     },
-    isIncrementalSubscription: function () {
-        return this.isSubscription() && this.subscription.incremental === true;
+    isSynched: function () {
+        return this.isSubscription() && this.subscription.synched === true;
+    },
+    setLastSyncDate: function () {
+        this.lastSync = new Date();
     },
     isEditable: function () {
         return !this.isAlbum() && !this.isSubscription();
@@ -124,7 +128,9 @@ Playlist.prototype = {
                 var playlist = this;
                 // TODO this is view layer stuff
                 var elements = $.map(value.tracks, function (track_data, i) {
-                    var playlist_track = playlist.add_track(new MODELS.Track(track_data.track));
+                    var playlist_track = playlist.add_track(new MODELS.Track(track_data.track), {
+                        unplayed: track_data.unplayed
+                    });
                     // Build DOM element
                     return playlist_track.element.get();
                 });
@@ -353,6 +359,7 @@ Playlist.prototype = {
             copyright: this.copyright,
             source: this.source,
             subscription: this.subscription,
+            lastSync: this.lastSync ? this.lastSync.getTime() : '',
             tracks: $.map(this.tracks, function (playlist_track, i) {
                 if (playlist_track.unplayed) {
                     unplayed = true;
