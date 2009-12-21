@@ -505,7 +505,9 @@ Playlist.prototype = {
                     });
                     playlist.save();
                 } else {
-                    // TODO replace all tracks
+                    // console.dir(newPlaylist.tracks);
+                    playlist.reset_tracks(newPlaylist.tracks);
+                    playlist.reload();
                 }
                 // TODO message that shit
             }

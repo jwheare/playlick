@@ -178,6 +178,10 @@ Playlist.prototype = {
             this.options.onUnload.call(this);
         }
     },
+    reload: function () {
+        this.unload();
+        this.load();
+    },
     /**
      * Build a DOMElement for the Playlist
      * TODO this is view layer stuff
