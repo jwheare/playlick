@@ -23,9 +23,11 @@ var PLAYLICK = {
     
     checkUrlHash: function () {
         var hash_parts = UTIL.getHashParts();
-        var url = hash_parts.url || hash_parts.xspf || hash_parts.podcast;
-        if (url) {
-            PLAYLICK.fetchUrl(url);
+        if (hash_parts.xspf) {
+            PLAYLICK.fetchUrl(hash_parts.xspf, 'xspf');
+        }
+        if (hash_parts.podcast) {
+            PLAYLICK.fetchUrl(hash_parts.podcast, 'podcast');
         }
         if (hash_parts.lastfm_playlists) {
             PLAYLICK.fetchLastFmUserPlaylists(hash_parts.lastfm_playlists);
@@ -71,16 +73,16 @@ var PLAYLICK = {
         $('#' + type + '_error').empty();
     },
     // Import a playlist from an XSPF or Podcast URL
-    fetchUrl: function (url) {
-        PLAYLICK.importSetup('url');
+    fetchUrl: function (url, type) {
+        PLAYLICK.importSetup(type);
         IMPORTERS.Url.url(
             url,
             function callback (playlist) {
                 // Update messages
                 $('p.messages').hide();
-                $('#url_title').text(playlist.toString());
-                $('#url_count').text(playlist.tracks.length);
-                $('#url_done').show();
+                $('#' + type + '_title').text(playlist.toString());
+                $('#' + type + '_count').text(playlist.tracks.length);
+                $('#' + type + '_done').show();
                 // Register playlist
                 CONTROLLERS.Playlist.register(playlist);
                 // Load playlist
@@ -88,15 +90,15 @@ var PLAYLICK = {
             },
             function exceptionHandler (exception) {
                 // Reset input
-                $('#url_input').val(url);
+                $('#' + type + '_input').val(url);
                 // Show error message
                 $('p.messages').hide();
                 var escapedUrl = $('<b>').text('URL: ' + url);
                 var errorMessage = $('<p>').text(exception.message);
                 errorMessage.append('<br>')
                              .append(escapedUrl);
-                $('#url_error').html(errorMessage.html());
-                $('#url_error').show();
+                $('#' + type + '_error').html(errorMessage.html());
+                $('#' + type + '_error').show();
             }
         );
     },

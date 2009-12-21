@@ -285,16 +285,19 @@ ul#importers li input {
     margin-right: 5px;
 }
 input.importer_input {
-    width: 200px;
+    width: 400px;
+    margin-right: 10px;
 }
 
 
 /* Last.fm battle */
 
 form#lastfm_battle_form input#lastfm_battle_input_you {
+    width: 175px;
     margin: 0 10px 0 0;
 }
 form#lastfm_battle_form input#lastfm_battle_input_they {
+    width: 175px;
     margin: 0 10px;
 }
 
@@ -819,10 +822,8 @@ p#shortcuts {
 **/
 
 .ac_results {
-    width: 253px !important;
-    padding: 0;
+    min-width: 253px;
     border: 1px solid #6ea31e;
-    border-top: 0;
     overflow: hidden;
     z-index: 99999;
     background: #fff;

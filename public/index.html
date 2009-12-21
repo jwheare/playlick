@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Playlick</title>
-        <meta name="description" content="Create playlists, and collect your favourites from around the web">
+        <meta name="description" content="Create, collect and curate your favourite playlists from around the web">
         <meta name="keywords" content="playlist, music, album, last.fm, podcast, playlick, playdar, github">
         <link rel="stylesheet" href="/playlick.css">
     </head>
@@ -26,7 +26,7 @@
                     <!-- <img src="/logo2.png" width="31" height="33" class="logo2"> -->
                     Play<span>lick</span>
                 </a>
-                <small>Create playlists, and collect your favourites from around the web</small>
+                <small>Create, collect and curate your favourite playlists from around the web</small>
             </h1>
             
             <div id="content">
@@ -45,12 +45,12 @@
                         <ul class="playlists" id="albums"></ul>
                     </div>
                     
-                    <h1 id="syncedTitle">Your synced playlists</h1>
+                    <h1 id="syncedTitle">Synchronised Playlists</h1>
                     <div class="sidebar_list">
                         <ul class="playlists" id="synced"></ul>
                     </div>
                     
-                    <h1 id="subscriptionsTitle">Your subscriptions</h1>
+                    <h1 id="subscriptionsTitle">Podcasts</h1>
                     <div class="sidebar_list">
                         <ul class="playlists" id="subscriptions"></ul>
                     </div>
@@ -125,8 +125,12 @@
                     </div>
                     
                     <div id="mainImporters">
+                        <h1>Add an Album to your collection</h1>
+                        
                         <form id="album_form">
-                            <h1><label for="album_import_input">Add an Album to your collection</label></h1>
+                            <p class="label">
+                                <label for="album_import_input">Search for an Album from Last.fm</label>
+                            </p>
                             
                             <p>
                                 <input type="text" name="album" id="album_import_input" class="importer_input" autocomplete="off" placeholder="Search for an album…">
@@ -137,6 +141,20 @@
                             <p class="messages" id="album_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading album…</p>
                             <p class="messages" id="album_done">Done! Album imported: <span id="album_name"></span></p>
                             <p class="messages" id="album_error"></p>
+                        </form>
+                        
+                        <form id="spotify_form">
+                            <p class="label">
+                                <label for="spotify_input">Use a Spotify URL</label>
+                            </p>
+                            <p>
+                                <img src="spotify_icon.gif" width="16" height="16" class="favicon">
+                                <input type="text" name="url" id="spotify_input" class="importer_input" placeholder="Paste a URL…">
+                                <input type="submit" id="url_button" value="Go">
+                            </p>
+                            <p class="messages" id="spotify_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
+                            <p class="messages" id="spotify_done">Done! Imported “<span id="spotify_title"></span>”</p>
+                            <p class="messages" id="spotify_error"></p>
                         </form>
                         
                         
@@ -159,11 +177,13 @@
                             <p class="messages" id="generate_error"></p>
                         </form>
                         
-                        <h1>Import playlists from elsewhere</h1>
+                        
+                        
+                        <h1>Synchronise playlists from the web</h1>
                         
                         <form id="lastfm_form">
                             <p class="label">
-                                <label for="lastfm_input">Import your Last.fm playlists and Loved Tracks</label>
+                                <label for="lastfm_input">Sync your Last.fm playlists and Loved Tracks</label>
                             </p>
                             <p>
                                 <img src="lastfm_icon.gif" width="16" height="16" class="favicon">
@@ -175,7 +195,6 @@
                             <p class="messages" id="lastfm_import_error"></p>
                             <p class="messages" id="lastfm_imported">Done!</p>
                         </form>
-                        
                         <form id="lastfm_playlists_form">
                             <p class="messages" id="lastfm_done">
                                 <small id="lastfm_playlists_count"></small>
@@ -194,32 +213,33 @@
                             <input type="submit" value="Import Playlists" class="submit">
                         </form>
                         
-                        <form id="spotify_form">
+                        <form id="xspf_form">
                             <p class="label">
-                                <label for="spotify_input">Add a Spotify Track/Album by URL</label>
-                            </p>
-                            <p>
-                                <img src="spotify_icon.gif" width="16" height="16" class="favicon">
-                                <input type="text" name="url" id="spotify_input" class="importer_input" placeholder="Paste a URL…">
-                                <input type="submit" id="url_button" value="Go">
-                            </p>
-                            <p class="messages" id="spotify_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
-                            <p class="messages" id="spotify_done">Done! Imported “<span id="spotify_title"></span>”</p>
-                            <p class="messages" id="spotify_error"></p>
-                        </form>
-                        
-                        <form id="url_form">
-                            <p class="label">
-                                <label for="url_input">Import an XSPF or Podcast</label>
+                                <label for="xspf_input">Sync with an XSPF file</label>
                             </p>
                             <p>
                                 <img src="podcast_icon.gif" width="16" height="16" class="favicon">
-                                <input type="text" name="url" id="url_input" class="importer_input" placeholder="Paste a URL…">
-                                <input type="submit" id="url_button" value="Go">
+                                <input type="text" name="url" id="xspf_input" class="importer_input" placeholder="Paste an XSPF URL…">
+                                <input type="submit" id="xspf_button" value="Go">
                             </p>
-                            <p class="messages" id="url_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
-                            <p class="messages" id="url_done">Done! Imported “<span id="url_title"></span>” (<span id="url_count"></span>)</p>
-                            <p class="messages" id="url_error"></p>
+                            <p class="messages" id="xspf_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
+                            <p class="messages" id="xspf_done">Done! Imported “<span id="xspf_title"></span>” (<span id="xspf_count"></span>)</p>
+                            <p class="messages" id="xspf_error"></p>
+                        </form>
+                        
+                        
+                        
+                        <h1><label for="podcast_input">Subscribe to a Podcast</label></h1>
+                        
+                        <form id="podcast_form">
+                            <p>
+                                <img src="podcast_icon.gif" width="16" height="16" class="favicon">
+                                <input type="text" name="url" id="podcast_input" class="importer_input" placeholder="Paste a Podcast URL…">
+                                <input type="submit" id="podcast_button" value="Go">
+                            </p>
+                            <p class="messages" id="podcast_loading"><img src="/track_scanning.gif" width="16" height="16"> Loading…</p>
+                            <p class="messages" id="podcast_done">Done! Imported “<span id="podcast_title"></span>” (<span id="podcast_count"></span>)</p>
+                            <p class="messages" id="podcast_error"></p>
                         </form>
                     </div>
                 </div>

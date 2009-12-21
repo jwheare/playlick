@@ -72,6 +72,7 @@ Url.url = function (source, callback, exceptionHandler) {
             }
         };
         if (jspf) {
+            metadata.subscription.synced = true;
             playlist = IMPORTERS.createPlaylistFromJspf(
                 source,
                 jspf,

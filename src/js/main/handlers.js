@@ -291,14 +291,23 @@ $('#album_form').submit(function (e) {
  * Spotify Add album autocomplete
 **/
 
-// XSPF/Podcast URL import form
-$('#url_form').submit(function (e) {
+// XSPF sync form
+$('#xspf_form').submit(function (e) {
     e.preventDefault();
     // Parse the form
     var params = UTIL.serializeForm(this);
     // Clear the input and refocus
-    $('#url_input').val('').focus().select();
-    PLAYLICK.fetchUrl(params.url);
+    $('#xspf_input').val('').focus().select();
+    PLAYLICK.fetchUrl(params.url, 'xspf');
+});
+// Podcast subscribe form
+$('#podcast_form').submit(function (e) {
+    e.preventDefault();
+    // Parse the form
+    var params = UTIL.serializeForm(this);
+    // Clear the input and refocus
+    $('#podcast_input').val('').focus().select();
+    PLAYLICK.fetchUrl(params.url, 'podcast');
 });
 
 // Spotify URL import form
