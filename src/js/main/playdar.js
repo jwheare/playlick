@@ -346,17 +346,11 @@ var PLAYDAR = {
         }
         return track_item;
     },
-    showSM2Container: function () {
-        PLAYDAR.sm2Container.css('visibility', 'visible');
-    },
-    hideSM2Container: function () {
-        PLAYDAR.sm2Container.css('visibility', 'hidden');
-    },
     positionVideo: function () {
         var track_item = $('#' + this.sID).data('track_item');
         if (track_item && this.width && this.height) {
             var videoShim = track_item.find('.videoShim');
-            if (videoShim.size()) {
+            if (videoShim.size() && !videoShim.is(':visible')) {
                 var width = this.width;
                 var height = this.height;
                 if (width > PLAYDAR.maxVideoWidth) {
@@ -375,17 +369,14 @@ var PLAYDAR = {
         }
     },
     positionSM2Container: function (position, width, height) {
-        if (PLAYDAR.sm2Container.css('visibility') == 'hidden') {
-            var contentOffset = $('#content').offset();
-            PLAYDAR.sm2Container
-                .width(width)
-                .height(height)
-                .css({
-                    top: position.top - contentOffset.top - 1,
-                    left: position.left - contentOffset.left
-                });
-            PLAYDAR.showSM2Container();
-        }
+        var contentOffset = $('#content').offset();
+        PLAYDAR.sm2Container
+            .width(width)
+            .height(height)
+            .css({
+                top: position.top - contentOffset.top - 1,
+                left: position.left - contentOffset.left
+            });
     },
     resetSM2Container: function () {
         CONTROLLERS.Playlist.trackListElem.find('.videoShim').hide();
@@ -396,7 +387,6 @@ var PLAYDAR = {
                 top: PLAYDAR.originalSM2Top,
                 left: PLAYDAR.originalSM2Left
             });
-        PLAYDAR.hideSM2Container();
     },
     resetResult: function () {
         this.width = this.height = null;

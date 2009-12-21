@@ -414,10 +414,6 @@ Playlist.prototype = {
             }
             // Resolve tracks with Playdar
             PLAYDAR.resolve_current_playlist();
-            // Show SM2 if the current playing track is in this playlist
-            if (this.playingTrack && this.playingTrack.playlist === this.current) {
-                PLAYDAR.showSM2Container();
-            }
         } else {
             this.tracksErrorElem.show();
         }
@@ -481,7 +477,6 @@ Playlist.prototype = {
     onSave: function (playlist) {
         if (playlist == this.current) {
             this.setCurrent(playlist);
-            PLAYDAR.showSM2Container();
         }
     },
     
@@ -564,7 +559,7 @@ Playlist.prototype = {
     
     /* UNLOAD */
     onUnload : function (playlist) {
-        PLAYDAR.hideSM2Container();
+        PLAYDAR.resetSM2Container();
     },
     
     /* DELETE */
