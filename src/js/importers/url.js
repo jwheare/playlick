@@ -68,7 +68,7 @@ Url.url = function (source, callback, exceptionHandler) {
                 namespace: 'Url',
                 method: 'url',
                 arguments: [source],
-                synched: false
+                synced: false
             }
         };
         if (jspf) {

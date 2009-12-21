@@ -8,8 +8,8 @@ function Playlist () {
     this.albumsSidebarList = $('#albums');
     this.subscriptionsSidebarTitleElem = $('h1#subscriptionsTitle');
     this.subscriptionsSidebarList = $('#subscriptions');
-    this.synchedSidebarTitleElem = $('h1#synchedTitle');
-    this.synchedSidebarList = $('#synched');
+    this.syncedSidebarTitleElem = $('h1#syncedTitle');
+    this.syncedSidebarList = $('#synced');
     this.loadingPlaylistsElem = $('#loading_playlists');
     this.createTitleElem = $('#createPlaylist');
     this.headerElem = $('#playlistHeader');
@@ -93,9 +93,9 @@ Playlist.prototype = {
         if (playlist.isAlbum()) {
             this.albumsSidebarList.append(playlist.element);
             this.albumsSidebarTitleElem.show();
-        } else if (playlist.isSynched()) {
-            this.synchedSidebarList.append(playlist.element);
-            this.synchedSidebarTitleElem.show();
+        } else if (playlist.isSynced()) {
+            this.syncedSidebarList.append(playlist.element);
+            this.syncedSidebarTitleElem.show();
         } else if (playlist.isSubscription()) {
             this.subscriptionsSidebarList.append(playlist.element);
             this.subscriptionsSidebarTitleElem.show();
@@ -112,7 +112,7 @@ Playlist.prototype = {
         } else {
             var playlistElements = [];
             var albumElements = [];
-            var synchedElements = [];
+            var syncedElements = [];
             var subscriptionElements = [];
             var that = this;
             var playlists = MODELS.Playlist.fetchAll(function callback (playlist) {
@@ -120,8 +120,8 @@ Playlist.prototype = {
                 var element = playlist.element.get()[0];
                 if (playlist.isAlbum()) {
                     albumElements.push(element);
-                } else if (playlist.isSynched()) {
-                    synchedElements.push(element);
+                } else if (playlist.isSynced()) {
+                    syncedElements.push(element);
                 } else if (playlist.isSubscription()) {
                     subscriptionElements.push(element);
                 } else {
@@ -135,9 +135,9 @@ Playlist.prototype = {
                 this.subscriptionsSidebarTitleElem.show();
                 this.subscriptionsSidebarList.append(subscriptionElements);
             }
-            if (synchedElements.length) {
-                this.synchedSidebarTitleElem.show();
-                this.synchedSidebarList.append(synchedElements);
+            if (syncedElements.length) {
+                this.syncedSidebarTitleElem.show();
+                this.syncedSidebarList.append(syncedElements);
             }
             if (albumElements.length) {
                 this.albumsSidebarTitleElem.show();
@@ -482,21 +482,21 @@ Playlist.prototype = {
     
     /* SUBSCRIPTIONS */
     subscriptionQueue: 0,
-    synchedQueue: 0,
+    syncedQueue: 0,
     queueSync: function (playlist) {
-        if (playlist.isSynched()) {
-            this.synchedQueue++;
-            this.synchedSidebarTitleElem.addClass('progress');
+        if (playlist.isSynced()) {
+            this.syncedQueue++;
+            this.syncedSidebarTitleElem.addClass('progress');
         } else {
             this.subscriptionQueue++;
             this.subscriptionsSidebarTitleElem.addClass('progress');
         }
     },
     consumeSyncQueue: function (playlist) {
-        if (playlist.isSynched()) {
-            this.synchedQueue--;
-            if (!this.synchedQueue) {
-                this.synchedSidebarTitleElem.removeClass('progress');
+        if (playlist.isSynced()) {
+            this.syncedQueue--;
+            if (!this.syncedQueue) {
+                this.syncedSidebarTitleElem.removeClass('progress');
             }
         } else {
             this.subscriptionQueue--;
@@ -526,7 +526,7 @@ Playlist.prototype = {
             }
             if (added.length) {
                 playlist.setLastSyncDate();
-                if (playlist.isSynched()) {
+                if (playlist.isSynced()) {
                     playlist.reset_tracks(newPlaylist.tracks);
                     playlist.reload();
                 } else {
@@ -582,9 +582,9 @@ Playlist.prototype = {
             if (!this.albumsSidebarList.find('li').size()) {
                 this.albumsSidebarTitleElem.hide();
             }
-        } else if (playlist.isSynched()) {
-            if (!this.synchedSidebarList.find('li').size()) {
-                this.synchedSidebarTitleElem.hide();
+        } else if (playlist.isSynced()) {
+            if (!this.syncedSidebarList.find('li').size()) {
+                this.syncedSidebarTitleElem.hide();
             }
         } else if (playlist.isSubscription()) {
             if (!this.subscriptionsSidebarList.find('li').size()) {

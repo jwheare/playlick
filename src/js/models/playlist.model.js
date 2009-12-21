@@ -91,8 +91,8 @@ Playlist.prototype = {
     isSubscription: function () {
         return this.type == 'subscription' && this.subscription;
     },
-    isSynched: function () {
-        return this.isSubscription() && this.subscription.synched === true;
+    isSynced: function () {
+        return this.isSubscription() && this.subscription.synced === true;
     },
     setLastSyncDate: function () {
         this.lastSync = new Date();

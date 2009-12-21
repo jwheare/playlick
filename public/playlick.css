@@ -135,7 +135,7 @@ h1#title small {
 /* Playlists */
 h1#albumsTitle,
 h1#subscriptionsTitle,
-h1#synchedTitle {
+h1#syncedTitle {
     display: none;
 }
 #sidebar h1.progress {
