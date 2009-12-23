@@ -175,7 +175,7 @@ IMPORTERS = {
         })[0];
         if (!string) {
             string = $.grep(fields, function (value, i) {
-                return value.content;
+                return value && value.content;
             })[0] || '';
             if (string) {
                 string = string.content;
@@ -248,7 +248,7 @@ IMPORTERS = {
             description = '';
         }
         var linkObject = $.grep(podcast.link, function (value, i) {
-            return value.rel == 'alternate';
+            return value && (value.rel == 'alternate');
         })[0];
         var link = linkObject ? linkObject.href : '';
         var playlist = new MODELS.Playlist({
@@ -272,7 +272,7 @@ IMPORTERS = {
             // e.g. <media:content url="blah.mp3" fileSize="46669578" type="audio/mpeg">
             var trackLinks = $.makeArray(data.link);
             var trackLink = $.grep(trackLinks, function (value, i) {
-                return value.rel && value.rel == 'enclosure';
+                return value && value.rel && (value.rel == 'enclosure');
             })[0];
             if (trackLink) {
                 trackDoc.url = trackLink.href;
