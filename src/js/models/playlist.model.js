@@ -236,7 +236,7 @@ Playlist.prototype = {
             + '}\n'
         + '    repeat with s in tracks_to_search\n'
         + '        set my_search_results to (search library playlist 1 for s only songs)\n'
-        + '        if (count of my_search_results) > 0 then\n
+        + '        if (count of my_search_results) > 0 then\n'
         + '            duplicate item 1 of my_search_results to new_playlist\n'
         + '        end if\n
         + '    end repeat\n'
