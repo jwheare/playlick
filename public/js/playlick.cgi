@@ -69,7 +69,7 @@ require "fileutils"
 
 def respond_with(options = {})
   options = { :code => 200, :content => "", :type => "text/plain" }.merge(options)
-  print "HTTP/1.0 #{options[:code]}\r\n"
+  # print "HTTP/1.0 #{options[:code]}\r\n"
   print "Content-Type: #{options[:type]}\r\n"
   print "Content-Length: #{options[:content].length}\r\n"
   print "\r\n#{options[:content]}"
