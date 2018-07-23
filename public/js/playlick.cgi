@@ -69,7 +69,7 @@ require "fileutils"
 
 def respond_with(options = {})
   options = { :code => 200, :content => "", :type => "text/plain" }.merge(options)
-  # print "HTTP/1.0 #{options[:code]}\r\n"
+  print "HTTP/1.0 #{options[:code]}\r\n"
   print "Content-Type: #{options[:type]}\r\n"
   print "Content-Length: #{options[:content].length}\r\n"
   print "\r\n#{options[:content]}"
@@ -120,8 +120,8 @@ begin
     :minify       => configuration[:minify]
   )
   
-  secretary.save_output_to(File.join(sprockets_root, configuration[:output_file])) if generate_output_file?
-  respond_with(:content => secretary.output, :type => "text/javascript")
+  secretary.concatenation.save_to(File.join(sprockets_root, configuration[:output_file])) if generate_output_file?
+  respond_with(:content => secretary.concatenation.to_s, :type => "text/javascript")
   
 rescue Exception => e
   respond_with(:code => 500, :content => "couldn't generate concatenated javascript: #{e}")
