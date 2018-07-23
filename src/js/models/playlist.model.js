@@ -234,8 +234,8 @@ Playlist.prototype = {
         + '    set tracks_to_search to {'
                + track_terms.join(',')
             + '}\n'
-        + '    set my_search_results to (search library playlist 1 for s only songs)\n'
         + '    repeat with s in tracks_to_search\n'
+        + '        set my_search_results to (search library playlist 1 for s only songs)\n'
         + '        duplicate item 1 of my_search_results to new_playlist\n'
         + '    end repeat\n'
         // + '    set tracks_to_search to {'
