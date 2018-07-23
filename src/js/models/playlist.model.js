@@ -221,20 +221,33 @@ Playlist.prototype = {
                 + 'track: "' + playlist_track.track.name.replace(/"/g, '\\"') + '"'
                 + '}';
         });
+        var track_terms = $.map(this.tracks, function (playlist_track, i) {
+            return '"'
+                + playlist_track.track.artist.replace(/"/g, '\\"') + ' '
+                + playlist_track.track.name.replace(/"/g, '\\"')
+                + '"';
+        });
         var applescript = 'set playlist_name to "' + this.toString() + '"\n'
         + 'tell application "iTunes"\n'
         + '    set new_playlist to (make playlist with properties {name:playlist_name})\n'
         + '    set l to source "Library"\n'
         + '    set tracks_to_search to {'
-               + track_records.join(',')
+               + track_terms.join(',')
             + '}\n'
-        + '    repeat with t in tracks_to_search\n'
-        + '        duplicate ('
-                   + 'every file track of l '
-                   + 'whose artist contains (artist of t) '
-                   + 'and name contains (track of t)'
-                + ') to new_playlist\n'
+        + '    set my_search_results to (search library playlist 1 for s only songs)\n'
+        + '    repeat with s in tracks_to_search\n'
+        + '        duplicate item 1 of my_search_results to new_playlist\n'
         + '    end repeat\n'
+        // + '    set tracks_to_search to {'
+        //        + track_records.join(',')
+        //     + '}\n'
+        // + '    repeat with t in tracks_to_search\n'
+        // + '        duplicate ('
+        //            + 'every file track of l '
+        //            + 'whose artist contains (artist of t) '
+        //            + 'and name contains (track of t)'
+        //         + ') to new_playlist\n'
+        // + '    end repeat\n'
         + '    reveal new_playlist\n'
         + '    activate\n'
         + 'end tell';
